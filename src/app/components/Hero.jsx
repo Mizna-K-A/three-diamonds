@@ -7,24 +7,24 @@ import { ChevronRight, ArrowRight } from 'lucide-react';
 export default function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-
+  
   const heroSlides = [
-    {
-      title: "Premium Commercial Spaces",
+    { 
+      title: "Premium Commercial Spaces", 
       subtitle: "Warehouses • Showrooms • Offices",
-      image: "/d1.jpg",
+      image: "/d11.webp",
       cta: "Explore Commercial Properties"
     },
-    {
-      title: "Luxury Residential Properties",
+    { 
+      title: "Luxury Residential Properties", 
       subtitle: "Villas • Apartments • Townhouses",
-      image: "/d2.jpg",
+      image: "/d2.webp",
       cta: "View Residential Listings"
     },
-    {
-      title: "Expert Property Management",
+    { 
+      title: "Expert Property Management", 
       subtitle: "Relax While We Handle Everything",
-      image: "/d3.jpg",
+      image: "/d3.webp",
       cta: "Learn About Our Services"
     },
   ];
@@ -38,15 +38,15 @@ export default function Hero() {
       });
     };
     preloadImages();
-
+    
     // Set loaded state after a short delay
     const timer = setTimeout(() => setIsLoaded(true), 100);
-
+    
     // Auto slide
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
-
+    
     return () => {
       clearTimeout(timer);
       clearInterval(interval);
@@ -68,19 +68,19 @@ export default function Hero() {
         {heroSlides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${currentImage === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              } ${isLoaded ? 'scale-100' : 'scale-110'}`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              currentImage === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            } ${isLoaded ? 'scale-100' : 'scale-110'}`}
             style={{
               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), url('${slide.image}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               transition: 'transform 1s ease-out, opacity 1s ease-out',
-              filter: 'grayscale(100%)', // This makes the images black and white
             }}
           />
         ))}
-
+        
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
@@ -92,21 +92,21 @@ export default function Hero() {
           {/* Text Content */}
           <div className="text-center text-white mb-12">
             <div className="inline-block mb-6">
-              {/* <span className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
+              <span className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
                 Three Diamonds Real Estate
-              </span> */}
+              </span>
               <div className="w-20 h-0.5 bg-white/50 mx-auto mt-2"></div>
             </div>
-
+            
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
-              <span className="block text-white">DISCOVER</span>
-              <span className="block text-white mt-2">DUBAI'S FINEST</span>
+              <span className="block text-white">DISCOVER DUBAI'S FINEST</span>
               <span className="block text-white mt-2">PROPERTIES</span>
             </h1>
-
+            
             <div className="h-24 md:h-20 mb-8">
-              <div className={`transition-all duration-500 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                }`}>
+              <div className={`transition-all duration-500 transform ${
+                isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
                 <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
                   {heroSlides[currentImage].subtitle}
                 </p>
@@ -115,8 +115,9 @@ export default function Hero() {
           </div>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}>
+          <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-300 ${
+            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+          }`}>
             <a
               href="#properties"
               className="group bg-white text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 shadow-2xl"
@@ -134,8 +135,9 @@ export default function Hero() {
           </div>
 
           {/* Featured Stats */}
-          <div className={`mt-16 mb-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}>
+          <div className={`mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto transition-all duration-700 delay-500 ${
+            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+          }`}>
             {[
               { value: '15+', label: 'Years Experience' },
               { value: '500+', label: 'Properties' },
@@ -152,7 +154,7 @@ export default function Hero() {
       </div>
 
       {/* Navigation Controls */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-6 mt-32">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-6">
         {/* Previous Button */}
         <button
           onClick={prevSlide}
@@ -165,15 +167,16 @@ export default function Hero() {
         </button>
 
         {/* Slide Indicators */}
-        <div className="flex gap-2 ">
+        <div className="flex gap-2">
           {heroSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImage(index)}
-              className={`transition-all duration-300 ${currentImage === index
-                  ? 'w-10 bg-white'
+              className={`transition-all duration-300 ${
+                currentImage === index 
+                  ? 'w-10 bg-white' 
                   : 'w-3 bg-white/50 hover:bg-white/80'
-                } h-1 rounded-full`}
+              } h-1 rounded-full`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -190,6 +193,16 @@ export default function Hero() {
           </svg>
         </button>
       </div>
+
+      {/* Scroll Indicator */}
+      {/* <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce hidden md:block">
+        <div className="text-center">
+          <div className="text-xs text-white/60 mb-2">Scroll Down</div>
+          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+            <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
+          </div>
+        </div>
+      </div> */}
 
       {/* Diamond Pattern Overlay */}
       <div className="absolute inset-0 pointer-events-none">

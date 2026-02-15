@@ -1,7 +1,8 @@
 // components/Services.jsx
 'use client';
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 // Container for staggered children
 const container = {
@@ -33,7 +34,7 @@ const subtitleVariant = {
 
 // 3D Flip card animation
 const cardVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     rotateY: -90,
     transformPerspective: 1000,
@@ -43,7 +44,7 @@ const cardVariant = {
     opacity: 1,
     rotateY: 0,
     scale: 1,
-    transition: { 
+    transition: {
       duration: 0.8,
       ease: [0.22, 1, 0.36, 1]
     }
@@ -52,7 +53,7 @@ const cardVariant = {
 
 // Image/Icon animation - scale and rotate
 const imageVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     scale: 0,
     rotate: -180
@@ -61,7 +62,7 @@ const imageVariant = {
     opacity: 1,
     scale: 1,
     rotate: 0,
-    transition: { 
+    transition: {
       type: "spring",
       stiffness: 200,
       damping: 15,
@@ -82,14 +83,14 @@ const listContainer = {
 };
 
 const listItemVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     x: -20
   },
   show: {
     opacity: 1,
     x: 0,
-    transition: { 
+    transition: {
       duration: 0.5,
       ease: "easeOut"
     }
@@ -98,14 +99,14 @@ const listItemVariant = {
 
 // Dot animation
 const dotVariant = {
-  hidden: { 
+  hidden: {
     scale: 0,
     opacity: 0
   },
   show: {
     scale: 1,
     opacity: 1,
-    transition: { 
+    transition: {
       type: "spring",
       stiffness: 500,
       damping: 20
@@ -116,8 +117,8 @@ const dotVariant = {
 // Background glow animation - now in grayscale
 const glowVariant = {
   hidden: { opacity: 0, scale: 0.8 },
-  show: { 
-    opacity: 0.15, 
+  show: {
+    opacity: 0.15,
     scale: 1,
     transition: { duration: 1, ease: "easeOut" }
   },
@@ -125,6 +126,18 @@ const glowVariant = {
 };
 
 export default function Services() {
+  // Refs for parallax effect
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"]
+  });
+
+  // Parallax transform values
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.05, 1.1]);
+
   const services = [
     {
       title: 'COMMERCIAL LEASING',
@@ -145,7 +158,7 @@ export default function Services() {
     {
       title: 'BUSINESS SOLUTIONS',
       icon: '💼',
-       gradient: 'from-gray-800 to-black',
+      gradient: 'from-gray-800 to-black',
       accentColor: 'border-gray-400',
       hoverColor: 'hover:border-gray-300',
       items: [
@@ -169,12 +182,39 @@ export default function Services() {
   ];
 
   return (
-    <section id="services" className="py-20 bg-black text-white">
-      <div className="container mx-auto px-4 md:px-6">
+    <section
+      id="services"
+      ref={sectionRef}
+      className="py-20 bg-black text-white relative overflow-hidden"
+    >
+      {/* Parallax Background Image */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{
+          y,
+          opacity,
+          scale
+        }}
+      >
+        <div
+          className="w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/latest-d2.jpg)',
+            backgroundAttachment: 'fixed',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover'
+          }}
+        />
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/80" />
+      </motion.div>
+
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
         <motion.div
           className="text-center mb-16"
         >
-          <motion.div 
+          <motion.div
             className="inline-block mb-4"
             variants={titleVariant}
             initial="hidden"
@@ -184,8 +224,8 @@ export default function Services() {
             <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Our Expertise</span>
             <div className="w-16 h-0.5 bg-gray-500 mt-2 mx-auto"></div>
           </motion.div>
-          
-          <motion.h2 
+
+          <motion.h2
             variants={titleVariant}
             initial="hidden"
             whileInView="show"
@@ -194,8 +234,8 @@ export default function Services() {
           >
             OUR SERVICES
           </motion.h2>
-          
-          <motion.p 
+
+          <motion.p
             variants={subtitleVariant}
             initial="hidden"
             whileInView="show"
@@ -205,8 +245,8 @@ export default function Services() {
             Comprehensive real estate solutions tailored to your specific needs in Dubai's dynamic market
           </motion.p>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           variants={container}
           initial="hidden"
           whileInView="show"
@@ -215,10 +255,10 @@ export default function Services() {
           style={{ perspective: "1000px" }}
         >
           {services.map((service, index) => (
-            <motion.div 
+            <motion.div
               key={service.title}
               variants={cardVariant}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
                 rotateY: 5,
                 borderColor: '#9CA3AF', // gray-400
@@ -228,10 +268,10 @@ export default function Services() {
               style={{
                 transformStyle: "preserve-3d",
               }}
-              className={`relative border-2 border-gray-800 rounded-2xl p-8 bg-gradient-to-br ${service.gradient} overflow-hidden group ${service.hoverColor}`}
+              className={`relative border-2 border-gray-800 rounded-2xl p-8 bg-gradient-to-br from-gray-800/90 to-black/90 backdrop-blur-sm overflow-hidden group ${service.hoverColor}`}
             >
               {/* Background Glow - now white */}
-              <motion.div 
+              <motion.div
                 variants={glowVariant}
                 initial="hidden"
                 whileInView="show"
@@ -240,13 +280,13 @@ export default function Services() {
               />
 
               {/* Icon/Image Section - grayscale effect */}
-              <motion.div 
+              <motion.div
                 variants={imageVariant}
                 className="flex justify-center mb-6 relative z-10"
               >
-                <motion.div 
-                  className="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-700 to-black border-2 border-gray-500 flex items-center justify-center text-4xl shadow-2xl grayscale"
-                  whileHover={{ 
+                <motion.div
+                  className="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-700 to-black border-2 border-gray-500 flex items-center justify-center text-4xl shadow-2xl grayscale backdrop-blur-sm"
+                  whileHover={{
                     rotate: 360,
                     scale: 1.1,
                     borderColor: '#D1D5DB', // gray-300
@@ -257,7 +297,7 @@ export default function Services() {
                 </motion.div>
               </motion.div>
 
-              <motion.h3 
+              <motion.h3
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false }}
@@ -266,8 +306,8 @@ export default function Services() {
               >
                 {service.title}
               </motion.h3>
-              
-              <motion.ul 
+
+              <motion.ul
                 variants={listContainer}
                 initial="hidden"
                 whileInView="show"
@@ -275,13 +315,13 @@ export default function Services() {
                 className="space-y-3 relative z-10"
               >
                 {service.items.map((item, idx) => (
-                  <motion.li 
-                    key={idx} 
+                  <motion.li
+                    key={idx}
                     variants={listItemVariant}
                     whileHover={{ x: 10, transition: { duration: 0.2 } }}
                     className="flex items-center text-gray-300 group/item"
                   >
-                    <motion.div 
+                    <motion.div
                       variants={dotVariant}
                       whileHover={{ scale: 1.5, backgroundColor: '#9CA3AF' }}
                       className="w-2 h-2 rounded-full mr-3 flex-shrink-0 bg-gray-500"
@@ -292,7 +332,7 @@ export default function Services() {
               </motion.ul>
 
               {/* Learn More Link */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: false }}
@@ -305,10 +345,10 @@ export default function Services() {
                   className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   <span>Learn More</span>
-                  <motion.svg 
+                  <motion.svg
                     className="w-4 h-4 ml-2"
-                    fill="none" 
-                    stroke="currentColor" 
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
@@ -322,12 +362,12 @@ export default function Services() {
         </motion.div>
 
         {/* Stats Bar - monochrome */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-20 bg-gradient-to-r from-gray-900 to-black rounded-2xl p-8 text-center border border-gray-800"
+          className="mt-20 bg-gradient-to-r from-gray-900/90 to-black/90 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-800"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -336,7 +376,7 @@ export default function Services() {
               { value: '24/7', label: 'Support Available', color: 'text-gray-300' },
               { value: '15+', label: 'Years Experience', color: 'text-gray-300' },
             ].map((stat, index) => (
-              <motion.div 
+              <motion.div
                 key={stat.label}
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
@@ -352,7 +392,7 @@ export default function Services() {
         </motion.div>
 
         {/* CTA Section - monochrome */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: false }}
@@ -360,14 +400,14 @@ export default function Services() {
           className="mt-12 text-center"
         >
           <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-            Whether you're looking to lease, buy, sell, or manage properties in Dubai, 
+            Whether you're looking to lease, buy, sell, or manage properties in Dubai,
             our expert team is here to provide personalized solutions that exceed expectations.
           </p>
           <motion.a
             href="#contact"
             whileHover={{ scale: 1.05, backgroundColor: '#374151', color: 'white' }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-2 bg-gray-800 text-gray-200 px-8 py-4 rounded-lg font-bold hover:bg-gray-700 transition-all duration-300 shadow-lg border border-gray-600"
+            className="inline-flex items-center gap-2 bg-gray-800/90 backdrop-blur-sm text-gray-200 px-8 py-4 rounded-lg font-bold hover:bg-gray-700 transition-all duration-300 shadow-lg border border-gray-600"
           >
             <span>Start Your Real Estate Journey</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -86,7 +86,7 @@ export default function About() {
           <motion.div variants={fadeLeft}>
             <motion.h2 
               variants={fadeUp}
-              className="text-3xl md:text-4xl font-bold mb-6"
+              className="text-3xl md:text-4xl font-bold mb-6 text-black"
             >
               HOW WE BEGAN
             </motion.h2>

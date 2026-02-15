@@ -1,9 +1,9 @@
-// components/Header.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Wrench } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,11 +18,11 @@ export default function Header() {
   }, []);
 
   const navItems = [
-    { label: 'Home', href: '#home' },
-    { label: 'About', href: '#about' },
+    { label: 'Home', href: '/' },
+    { label: 'About', href: '/about' },
     { label: 'Services', href: '#services' },
-    { label: 'Portfolio', href: '#portfolio' },
-    { label: 'Properties', href: '#properties' },
+    { label: 'Properties', href: '/properties' },
+    { label: 'Technical Services', href: '/technical-services' },
     { label: 'Contact', href: '#contact' },
   ];
 
@@ -33,9 +33,8 @@ export default function Header() {
       <nav className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#home" className="flex items-center">
+          <Link href="/" className="flex items-center">
             {isScrolled ? (
-              // Use the icon-only diamond logo when scrolled (smaller)
               <Image
                 src="/threediamond.png"
                 alt="Three Diamonds Real Estate"
@@ -44,7 +43,6 @@ export default function Header() {
                 className="object-contain"
               />
             ) : (
-              // Use the full logo with text when at top (larger)
               <Image
                 src="/logo-diamond.png"
                 alt="Three Diamonds Real Estate"
@@ -53,18 +51,18 @@ export default function Header() {
                 className="object-contain"
               />
             )}
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
                 href={item.href}
-                className="font-medium text-white hover:text-gray-300 transition-colors duration-300"
+                className="font-medium text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-1"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -84,14 +82,14 @@ export default function Header() {
           }`}>
             <div className="flex flex-col space-y-4 p-4">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.label}
                   href={item.href}
-                  className="font-medium py-2 text-white hover:text-gray-300 transition-colors duration-300"
+                  className="font-medium py-2 text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>

@@ -1,7 +1,8 @@
 // components/Portfolio.jsx
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 
 export default function Portfolio() {
   const portfolioItems = [
@@ -24,6 +25,18 @@ export default function Portfolio() {
       highlights: ['Swimming Pool', 'Private Garden', 'Maid Room', 'Garage', 'Smart Home Features']
     }
   ];
+
+  // Refs for parallax effect
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"]
+  });
+
+  // Parallax transform values
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.2]);
 
   // Animation variants
   const containerVariants = {
@@ -57,7 +70,6 @@ export default function Portfolio() {
     hover: {
       y: -10,
       scale: 1.02,
-      // boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8)",
       transition: {
         type: "spring",
         stiffness: 400,
@@ -117,33 +129,6 @@ export default function Portfolio() {
     }
   };
 
-  // Vehicle indicator style blinking
-  const indicatorBlink = {
-    blink: {
-      opacity: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        repeatDelay: 2,
-        times: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-        ease: "linear"
-      }
-    }
-  };
-
-  // Three-phase blink (like three diamonds blinking)
-  const threePhaseBlink = {
-    blink: {
-      opacity: [0, 1, 0, 1, 0, 1, 0],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        times: [0, 0.2, 0.4, 0.6, 0.8, 1, 1],
-        ease: "steps(1)"
-      }
-    }
-  };
-
   // Simple on/off blink
   const simpleBlink = {
     blink: {
@@ -152,27 +137,41 @@ export default function Portfolio() {
         duration: 2,
         repeat: Infinity,
         times: [0, 0.25, 0.5, 0.75, 1],
-        ease: "steps(1)"
-      }
-    }
-  };
-
-  // Sequential diamond blink (each word blinks separately)
-  const sequentialBlink = {
-    blink: {
-      opacity: [1, 0, 1, 0, 1],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        times: [0, 0.2, 0.4, 0.6, 0.8],
-        ease: "steps(1)"
+        ease: "linear"
       }
     }
   };
 
   return (
-    <section id="portfolio" className="section-padding bg-black text-white p-6">
-      <div className="container-custom">
+    <section 
+      id="portfolio" 
+      ref={sectionRef}
+      className="section-padding bg-black text-white p-6 relative overflow-hidden"
+    >
+      {/* Parallax Background Image */}
+      <motion.div 
+        className="absolute inset-0 z-0"
+        style={{
+          y,
+          opacity,
+          scale
+        }}
+      >
+        <div 
+          className="w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/d1.webp)',
+            backgroundAttachment: 'fixed',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover'
+          }}
+        />
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/70" />
+      </motion.div>
+
+      <div className="container-custom relative z-10">
         <motion.div 
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
@@ -198,7 +197,6 @@ export default function Portfolio() {
           
           {/* Vehicle Indicator Style Blinking Title */}
           <div className="mb-6">
-            {/* Option 1: Classic indicator blink */}
             <motion.h2 
               className="text-4xl md:text-5xl font-bold mb-6 text-gray-100"
               variants={simpleBlink}
@@ -206,34 +204,6 @@ export default function Portfolio() {
             >
               WHY THREE DIAMONDS?
             </motion.h2>
-            
-            {/* Option 2: Three-phase blink (like three diamonds) - Uncomment to use */}
-            {/* <motion.h2 
-              className="text-4xl md:text-5xl font-bold mb-6 text-gray-100"
-              variants={threePhaseBlink}
-              animate="blink"
-            >
-              WHY THREE DIAMONDS?
-            </motion.h2> */}
-            
-            {/* Option 3: Sequential blink for each word - Uncomment to use */}
-            {/* <div className="flex flex-wrap justify-center gap-2">
-              {["WHY", "THREE", "DIAMONDS?"].map((word, index) => (
-                <motion.span
-                  key={word}
-                  className="text-4xl md:text-5xl font-bold text-gray-100"
-                  variants={sequentialBlink}
-                  animate="blink"
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: index * 0.3
-                  }}
-                >
-                  {word}{index < 2 ? " " : ""}
-                </motion.span>
-              ))}
-            </div> */}
           </div>
           
           <motion.p 
@@ -257,7 +227,7 @@ export default function Portfolio() {
           {portfolioItems.map((item, index) => (
             <motion.div
               key={item.title}
-              className="bg-gray-300 rounded-xl p-8 hover:bg-gray-500 transition-all duration-300  hover:border-gray-500"
+              className="bg-gray-300/90 backdrop-blur-sm rounded-xl p-8 hover:bg-gray-500/90 transition-all duration-300 hover:border-gray-500"
               variants={itemVariants}
               whileHover="hover"
               custom={index}
@@ -327,7 +297,7 @@ export default function Portfolio() {
         </motion.div>
 
         <motion.div 
-          className="bg-gradient-to-r from-gray-400 to-black rounded-2xl p-8 md:p-12 text-center border border-gray-800"
+          className="bg-gradient-to-r from-gray-400/90 to-black/90 backdrop-blur-sm rounded-2xl p-8 md:p-12 text-center border border-gray-800"
           variants={quoteVariants}
           initial="hidden"
           whileInView="visible"

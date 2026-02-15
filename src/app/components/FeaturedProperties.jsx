@@ -4,6 +4,8 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import Link from 'next/link';
+
 
 export default function FeaturedProperties() {
   const sectionRef = useRef(null);
@@ -303,24 +305,25 @@ export default function FeaturedProperties() {
 
         {/* Animated CTA Button */}
         <motion.div
-          className="text-center mt-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, delay: 1.5 }}
-        >
-          <motion.a
-            href="#portfolio"
-            className="btn-outline px-8 py-3 inline-block"
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-            }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            View All Properties
-          </motion.a>
-        </motion.div>
+                  className="text-center mt-12"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.6, delay: 1.5 }}
+                >
+                  <Link href="/properties" passHref>
+                    <motion.a
+                      className="btn-outline px-8 py-3 inline-block"
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      View All Properties
+                    </motion.a>
+                  </Link>
+                </motion.div>
       </div>
     </section>
   );
