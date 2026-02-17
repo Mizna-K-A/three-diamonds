@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Wrench } from 'lucide-react';
+import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [isPropertiesDropdownOpen, setIsPropertiesDropdownOpen] = useState(false);
+  const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
+  const [isMobilePropertiesOpen, setIsMobilePropertiesOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,11 +24,44 @@ export default function Header() {
   const navItems = [
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
-    { label: 'Services', href: '#services' },
-    { label: 'Properties', href: '/properties' },
-    { label: 'Technical Services', href: '/technical-services' },
-    { label: 'Contact', href: '#contact' },
+    { 
+      label: 'Services', 
+      href: '#services',
+      hasDropdown: true,
+      dropdownItems: [
+        { label: 'All Services', href: '#services' },
+        { label: 'Technical Services', href: '/technical-services', icon: Wrench },
+        { label: 'Property Management', href: '#property-management' },
+        { label: 'Consultation', href: '#consultation' },
+      ]
+    },
+    { 
+      label: 'Properties', 
+      href: '/properties',
+      hasDropdown: true,
+      dropdownItems: [
+        { label: 'All Properties', href: '/properties', icon: Home },
+        { label: 'Residential', href: '/properties/residential', icon: Home },
+        { label: 'Commercial', href: '/properties/commercial', icon: Building },
+        { label: 'Industrial', href: '/properties/industrial', icon: Warehouse },
+        { label: 'Luxury Estates', href: '/properties/luxury', icon: Hotel },
+        { label: 'New Developments', href: '/properties/new-developments' },
+      ]
+    },
+    // { label: 'Contact', href: '#contact' },
   ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.services-dropdown') && !event.target.closest('.properties-dropdown')) {
+        setIsServicesDropdownOpen(false);
+        setIsPropertiesDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${
@@ -56,13 +93,85 @@ export default function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="font-medium text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-1"
+              <div 
+                key={item.label} 
+                className={`relative ${
+                  item.label === 'Services' ? 'services-dropdown' : 
+                  item.label === 'Properties' ? 'properties-dropdown' : ''
+                }`}
               >
-                {item.label}
-              </Link>
+                {item.hasDropdown ? (
+                  <>
+                    <button
+                      className="font-medium text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-1"
+                      onClick={() => {
+                        if (item.label === 'Services') {
+                          setIsServicesDropdownOpen(!isServicesDropdownOpen);
+                          setIsPropertiesDropdownOpen(false);
+                        } else if (item.label === 'Properties') {
+                          setIsPropertiesDropdownOpen(!isPropertiesDropdownOpen);
+                          setIsServicesDropdownOpen(false);
+                        }
+                      }}
+                      onMouseEnter={() => {
+                        if (item.label === 'Services') {
+                          setIsServicesDropdownOpen(true);
+                          setIsPropertiesDropdownOpen(false);
+                        } else if (item.label === 'Properties') {
+                          setIsPropertiesDropdownOpen(true);
+                          setIsServicesDropdownOpen(false);
+                        }
+                      }}
+                    >
+                      {item.label}
+                      <ChevronDown size={16} className={`transition-transform duration-300 ${
+                        (item.label === 'Services' && isServicesDropdownOpen) || 
+                        (item.label === 'Properties' && isPropertiesDropdownOpen) ? 'rotate-180' : ''
+                      }`} />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {((item.label === 'Services' && isServicesDropdownOpen) || 
+                      (item.label === 'Properties' && isPropertiesDropdownOpen)) && (
+                      <div 
+                        className="absolute top-full left-0 mt-2 w-64 bg-black/95 backdrop-blur-sm rounded-lg shadow-xl py-2 border border-gray-800"
+                        onMouseLeave={() => {
+                          if (item.label === 'Services') {
+                            setIsServicesDropdownOpen(false);
+                          } else if (item.label === 'Properties') {
+                            setIsPropertiesDropdownOpen(false);
+                          }
+                        }}
+                      >
+                        {item.dropdownItems.map((dropdownItem) => (
+                          <Link
+                            key={dropdownItem.label}
+                            href={dropdownItem.href}
+                            className="block px-4 py-3 text-white hover:bg-gray-800 transition-colors duration-300 flex items-center gap-3"
+                            onClick={() => {
+                              if (item.label === 'Services') {
+                                setIsServicesDropdownOpen(false);
+                              } else if (item.label === 'Properties') {
+                                setIsPropertiesDropdownOpen(false);
+                              }
+                            }}
+                          >
+                            {dropdownItem.icon && <dropdownItem.icon size={18} />}
+                            {dropdownItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="font-medium text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-1"
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
             ))}
           </div>
 
@@ -82,14 +191,63 @@ export default function Header() {
           }`}>
             <div className="flex flex-col space-y-4 p-4">
               {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="font-medium py-2 text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                <div key={item.label}>
+                  {item.hasDropdown ? (
+                    <>
+                      <button
+                        className="font-medium py-2 text-white hover:text-gray-300 transition-colors duration-300 flex items-center justify-between w-full"
+                        onClick={() => {
+                          if (item.label === 'Services') {
+                            setIsMobileServicesOpen(!isMobileServicesOpen);
+                            setIsMobilePropertiesOpen(false);
+                          } else if (item.label === 'Properties') {
+                            setIsMobilePropertiesOpen(!isMobilePropertiesOpen);
+                            setIsMobileServicesOpen(false);
+                          }
+                        }}
+                      >
+                        {item.label}
+                        <ChevronDown size={16} className={`transition-transform duration-300 ${
+                          (item.label === 'Services' && isMobileServicesOpen) || 
+                          (item.label === 'Properties' && isMobilePropertiesOpen) ? 'rotate-180' : ''
+                        }`} />
+                      </button>
+                      
+                      {/* Mobile Dropdown */}
+                      {((item.label === 'Services' && isMobileServicesOpen) || 
+                        (item.label === 'Properties' && isMobilePropertiesOpen)) && (
+                        <div className="ml-4 mt-2 space-y-2 border-l-2 border-gray-700 pl-4">
+                          {item.dropdownItems.map((dropdownItem) => (
+                            <Link
+                              key={dropdownItem.label}
+                              href={dropdownItem.href}
+                              className="block py-2 text-white hover:text-gray-300 transition-colors duration-300 flex items-center gap-2"
+                              onClick={() => {
+                                setIsMenuOpen(false);
+                                if (item.label === 'Services') {
+                                  setIsMobileServicesOpen(false);
+                                } else if (item.label === 'Properties') {
+                                  setIsMobilePropertiesOpen(false);
+                                }
+                              }}
+                            >
+                              {dropdownItem.icon && <dropdownItem.icon size={16} />}
+                              {dropdownItem.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className="block font-medium py-2 text-white hover:text-gray-300 transition-colors duration-300"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
               ))}
             </div>
           </div>
