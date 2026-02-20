@@ -1,7 +1,8 @@
+// components/Header.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel } from 'lucide-react';
+import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -26,13 +27,16 @@ export default function Header() {
     { label: 'About', href: '/about' },
     { 
       label: 'Services', 
-      href: '#services',
+      href: '/services',
       hasDropdown: true,
       dropdownItems: [
-        { label: 'All Services', href: '#services' },
-        { label: 'Technical Services', href: '/technical-services', icon: Wrench },
-        { label: 'Property Management', href: '#property-management' },
-        { label: 'Consultation', href: '#consultation' },
+        { label: 'All Services', href: '/services', icon: ClipboardCheck },
+        { label: 'Property Management', href: '/services/property-management', icon: Building2 },
+        { label: 'Maintenance of Property', href: '/services/maintenance', icon: Wrench },
+        { label: 'Research and Consultancy', href: '/services/research-consultancy', icon: Search },
+        { label: 'Capital Markets', href: '/services/capital-markets', icon: TrendingUp },
+        { label: 'Tenant Representation', href: '/services/tenant-representation', icon: Users },
+        { label: 'Landlord Agency Leasing', href: '/services/landlord-agency', icon: Key },
       ]
     },
     { 
@@ -41,14 +45,14 @@ export default function Header() {
       hasDropdown: true,
       dropdownItems: [
         { label: 'All Properties', href: '/properties', icon: Home },
-        { label: 'Residential', href: '/properties/residential', icon: Home },
-        { label: 'Commercial', href: '/properties/commercial', icon: Building },
-        { label: 'Industrial', href: '/properties/industrial', icon: Warehouse },
-        { label: 'Luxury Estates', href: '/properties/luxury', icon: Hotel },
-        { label: 'New Developments', href: '/properties/new-developments' },
+        { label: 'Residential', href: '/properties?type=residential', icon: Home },
+        { label: 'Commercial', href: '/properties?type=commercial', icon: Building },
+        { label: 'Industrial', href: '/properties?type=industrial', icon: Warehouse },
+        { label: 'Luxury Estates', href: '/properties?type=luxury', icon: Hotel },
+        { label: 'New Developments', href: '/properties?type=new-developments', icon: Building2 },
       ]
     },
-    // { label: 'Contact', href: '#contact' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   // Close dropdown when clicking outside
