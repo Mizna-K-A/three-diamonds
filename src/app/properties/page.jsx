@@ -62,102 +62,102 @@ export default function PropertiesPage() {
       price: 'AED 8.2M',
       image: '🏡'
     },
-    {
-      id: 3,
-      title: 'BUSINESS BAY OFFICES',
-      type: 'Commercial',
-      category: 'Commercial',
-      location: 'Business Bay',
-      description: 'Modern office spaces in Dubai\'s central business district.',
-      specs: ['Flexible Leases', 'Meeting Rooms', 'Parking', 'High-Speed Internet'],
-      badge: 'Prime',
-      price: 'AED 1.8M',
-      image: '🏢'
-    },
-    {
-      id: 4,
-      title: 'AL QUOZ STUDIOS',
-      type: 'Creative Spaces',
-      category: 'Commercial',
-      location: 'Al Quoz',
-      description: 'Creative studios and photography spaces for artists and designers.',
-      specs: ['Natural Light', 'High Ceilings', 'Storage', 'Event Space'],
-      badge: 'Creative',
-      price: 'AED 950K',
-      image: '🎨'
-    },
-    {
-      id: 5,
-      title: 'PALM JUMEIRAH VILLA',
-      type: 'Luxury Residential',
-      category: 'Luxury',
-      location: 'Palm Jumeirah',
-      description: 'Exclusive beachfront villa with private beach access.',
-      specs: ['7 Bedrooms', 'Private Pool', 'Beach Access', 'Home Cinema'],
-      badge: 'Luxury',
-      price: 'AED 25M',
-      image: '🏖️'
-    },
-    {
-      id: 6,
-      title: 'DIFC OFFICE TOWER',
-      type: 'Grade A Office',
-      category: 'Commercial',
-      location: 'DIFC',
-      description: 'Premium office space in the heart of Dubai\'s financial district.',
-      specs: ['Floor-to-ceiling windows', 'VAV AC', '24/7 Access', 'Valet Parking'],
-      badge: 'Premium',
-      price: 'AED 3.2M',
-      image: '🏛️'
-    },
-    {
-      id: 7,
-      title: 'DUBAI CREEK TOWER',
-      type: 'Residential Apartment',
-      category: 'Residential',
-      location: 'Dubai Creek Harbour',
-      description: 'Luxury apartments with iconic skyline views.',
-      specs: ['1-3 Bedrooms', 'Balcony', 'Smart Home', 'Pool & Gym'],
-      badge: 'New Launch',
-      price: 'AED 1.2M',
-      image: '🌊'
-    },
-    {
-      id: 8,
-      title: 'AL SERKAL AVENUE',
-      type: 'Retail Space',
-      category: 'Retail',
-      location: 'Al Quoz',
-      description: 'Prime retail spaces in a vibrant art and design district.',
-      specs: ['Glass Frontage', 'High Footfall', 'Parking', 'Storage'],
-      badge: 'Prime Location',
-      price: 'AED 750K',
-      image: '🛍️'
-    },
-    {
-      id: 9,
-      title: 'INDUSTRIAL PARK',
-      type: 'Industrial Unit',
-      category: 'Industrial',
-      location: 'Dubai Industrial City',
-      description: 'Modern industrial units with easy access to major transport routes.',
-      specs: ['20,000 sq.ft.', 'Loading Bay', 'Office Space', 'Staff Accommodation'],
-      badge: 'Industrial',
-      price: 'AED 3.5M',
-      image: '🏭'
-    },
-    {
-      id: 10,
-      title: 'EMIRATES HILLS MANSION',
-      type: 'Luxury Villa',
-      category: 'Luxury',
-      location: 'Emirates Hills',
-      description: 'Exclusive mansion with golf course views and premium finishes.',
-      specs: ['8 Bedrooms', 'Private Pool', 'Home Theater', 'Spa'],
-      badge: 'Ultra Luxury',
-      price: 'AED 45M',
-      image: '👑'
-    }
+    // {
+    //   id: 3,
+    //   title: 'BUSINESS BAY OFFICES',
+    //   type: 'Commercial',
+    //   category: 'Commercial',
+    //   location: 'Business Bay',
+    //   description: 'Modern office spaces in Dubai\'s central business district.',
+    //   specs: ['Flexible Leases', 'Meeting Rooms', 'Parking', 'High-Speed Internet'],
+    //   badge: 'Prime',
+    //   price: 'AED 1.8M',
+    //   image: '🏢'
+    // },
+    // {
+    //   id: 4,
+    //   title: 'AL QUOZ STUDIOS',
+    //   type: 'Creative Spaces',
+    //   category: 'Commercial',
+    //   location: 'Al Quoz',
+    //   description: 'Creative studios and photography spaces for artists and designers.',
+    //   specs: ['Natural Light', 'High Ceilings', 'Storage', 'Event Space'],
+    //   badge: 'Creative',
+    //   price: 'AED 950K',
+    //   image: '🎨'
+    // },
+    // {
+    //   id: 5,
+    //   title: 'PALM JUMEIRAH VILLA',
+    //   type: 'Luxury Residential',
+    //   category: 'Luxury',
+    //   location: 'Palm Jumeirah',
+    //   description: 'Exclusive beachfront villa with private beach access.',
+    //   specs: ['7 Bedrooms', 'Private Pool', 'Beach Access', 'Home Cinema'],
+    //   badge: 'Luxury',
+    //   price: 'AED 25M',
+    //   image: '🏖️'
+    // },
+    // {
+    //   id: 6,
+    //   title: 'DIFC OFFICE TOWER',
+    //   type: 'Grade A Office',
+    //   category: 'Commercial',
+    //   location: 'DIFC',
+    //   description: 'Premium office space in the heart of Dubai\'s financial district.',
+    //   specs: ['Floor-to-ceiling windows', 'VAV AC', '24/7 Access', 'Valet Parking'],
+    //   badge: 'Premium',
+    //   price: 'AED 3.2M',
+    //   image: '🏛️'
+    // },
+    // {
+    //   id: 7,
+    //   title: 'DUBAI CREEK TOWER',
+    //   type: 'Residential Apartment',
+    //   category: 'Residential',
+    //   location: 'Dubai Creek Harbour',
+    //   description: 'Luxury apartments with iconic skyline views.',
+    //   specs: ['1-3 Bedrooms', 'Balcony', 'Smart Home', 'Pool & Gym'],
+    //   badge: 'New Launch',
+    //   price: 'AED 1.2M',
+    //   image: '🌊'
+    // },
+    // {
+    //   id: 8,
+    //   title: 'AL SERKAL AVENUE',
+    //   type: 'Retail Space',
+    //   category: 'Retail',
+    //   location: 'Al Quoz',
+    //   description: 'Prime retail spaces in a vibrant art and design district.',
+    //   specs: ['Glass Frontage', 'High Footfall', 'Parking', 'Storage'],
+    //   badge: 'Prime Location',
+    //   price: 'AED 750K',
+    //   image: '🛍️'
+    // },
+    // {
+    //   id: 9,
+    //   title: 'INDUSTRIAL PARK',
+    //   type: 'Industrial Unit',
+    //   category: 'Industrial',
+    //   location: 'Dubai Industrial City',
+    //   description: 'Modern industrial units with easy access to major transport routes.',
+    //   specs: ['20,000 sq.ft.', 'Loading Bay', 'Office Space', 'Staff Accommodation'],
+    //   badge: 'Industrial',
+    //   price: 'AED 3.5M',
+    //   image: '🏭'
+    // },
+    // {
+    //   id: 10,
+    //   title: 'EMIRATES HILLS MANSION',
+    //   type: 'Luxury Villa',
+    //   category: 'Luxury',
+    //   location: 'Emirates Hills',
+    //   description: 'Exclusive mansion with golf course views and premium finishes.',
+    //   specs: ['8 Bedrooms', 'Private Pool', 'Home Theater', 'Spa'],
+    //   badge: 'Ultra Luxury',
+    //   price: 'AED 45M',
+    //   image: '👑'
+    // }
   ];
 
   const categories = ['All', 'Residential', 'Commercial', 'Industrial', 'Retail', 'Luxury'];
