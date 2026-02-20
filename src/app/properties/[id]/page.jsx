@@ -106,12 +106,25 @@ const propertiesData = {
       maintenance: 'AED 15/sq.ft. annually',
       handover: 'Q4 2024'
     },
-    image: '/images/property2.jpg',
-    gallery: [
-      '/images/property2-1.jpg',
-      '/images/property2-2.jpg',
-      '/images/property2-3.jpg', 
-      '/images/property2-4.jpg'
+    image: '/p1.jpg',
+   gallery: [
+      '/p1.jpg',
+      '/p2.jpg', 
+      '/p3.jpg',
+      '/p1.jpg',
+      '/p2.jpg', 
+      '/p3.jpg',
+      '/p4.jpg',
+      '/p1.jpg',
+      '/p1.jpg',
+      '/p2.jpg', 
+      '/p3.jpg',
+      '/p1.jpg',
+      '/p2.jpg', 
+      '/p3.jpg',
+      '/p4.jpg',
+      '/p1.jpg',
+      '/p2.jpg'
     ],
     amenities: [
       'Community Pool',
@@ -133,7 +146,7 @@ const propertiesData = {
       name: 'Mohammed Al Rashid',
       phone: '+971 50 987 6543',
       email: 'mohammed.alrashid@example.com',
-      image: '/images/agent2.jpg'
+      image: '/avatar.jpg'
     },
     coordinates: {
       lat: 25.0657,
