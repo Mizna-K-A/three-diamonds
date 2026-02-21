@@ -199,7 +199,7 @@ export default function Services() {
         <div
           className="w-full h-full bg-cover bg-center"
           style={{
-            backgroundImage: 'url(/latest-d2.jpg)',
+            backgroundImage: 'url(/latest-d2.webp)',
             backgroundAttachment: 'fixed',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',

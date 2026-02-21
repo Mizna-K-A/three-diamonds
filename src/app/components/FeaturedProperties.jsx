@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function FeaturedProperties() {
   const sectionRef = useRef(null);
@@ -18,7 +19,9 @@ export default function FeaturedProperties() {
       location: 'Al Quoz Industrial Area 3',
       description: 'Premium warehouse spaces for health centers, boutiques, galleries, and luxury showrooms.',
       specs: ['50,000 sq.ft.', '24/7 Security', 'Customizable Spaces', 'Prime Location'],
-      badge: 'Featured'
+      badge: 'Featured',
+      image: '/p1.jpg',
+      alt: 'Goshi Warehouses City - Commercial complex in Al Quoz'
     },
     {
       id: 2,
@@ -27,7 +30,9 @@ export default function FeaturedProperties() {
       location: 'Dubai Hills Estate',
       description: 'Luxury villas with premium amenities and breathtaking views.',
       specs: ['4-6 Bedrooms', 'Private Pool', 'Garden', 'Maid Room'],
-      badge: 'New'
+      badge: 'New',
+      image: '/p2.jpg',
+      alt: 'Dubai Hills Villas - Luxury residential villas'
     },
     {
       id: 3,
@@ -36,7 +41,9 @@ export default function FeaturedProperties() {
       location: 'Business Bay',
       description: 'Modern office spaces in Dubai\'s central business district.',
       specs: ['Flexible Leases', 'Meeting Rooms', 'Parking', 'High-Speed Internet'],
-      badge: 'Prime'
+      badge: 'Prime',
+      image: '/p3.jpg',
+      alt: 'Business Bay Offices - Modern commercial spaces'
     },
     {
       id: 4,
@@ -45,7 +52,9 @@ export default function FeaturedProperties() {
       location: 'Al Quoz',
       description: 'Creative studios and photography spaces for artists and designers.',
       specs: ['Natural Light', 'High Ceilings', 'Storage', 'Event Space'],
-      badge: 'Creative'
+      badge: 'Creative',
+      image: '/p4.jpg',
+      alt: 'Al Quoz Studios - Creative spaces for artists'
     }
   ];
 
@@ -194,14 +203,18 @@ export default function FeaturedProperties() {
               }}
             >
               {/* Property Image */}
-              <div className="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
-                <motion.div
-                  className="absolute inset-0 flex items-center justify-center"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <div className="text-4xl">🏢</div>
-                </motion.div>
+              <div className="relative h-48 overflow-hidden">
+                <Image
+                  src={property.image}
+                  alt={property.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  priority={index < 2} // Load first two images with priority
+                />
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
                 <motion.div
                   className="absolute top-4 left-4"
@@ -302,7 +315,7 @@ export default function FeaturedProperties() {
           ))}
         </motion.div>
 
-        {/* Animated CTA Button - FIXED for Next.js 13+ */}
+        {/* Animated CTA Button */}
         <motion.div
           className="text-center mt-12"
           initial={{ opacity: 0, y: 30 }}
@@ -321,7 +334,7 @@ export default function FeaturedProperties() {
               transition={{ duration: 0.2 }}
               className="inline-block"
             >
-              View All Properties
+              View All Properties -{'>'}
             </motion.span>
           </Link>
         </motion.div>

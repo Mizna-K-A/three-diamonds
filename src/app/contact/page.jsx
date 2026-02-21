@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { 
   Phone, Mail, MapPin, Globe, Facebook, MessageSquare, 
@@ -112,6 +112,44 @@ const listItem = {
   }
 };
 
+// Modal Animation Variants
+const modalOverlay = {
+  hidden: { opacity: 0 },
+  show: { 
+    opacity: 1,
+    transition: { duration: 0.3 }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.2 }
+  }
+};
+
+const modalContent = {
+  hidden: { 
+    opacity: 0,
+    scale: 0.8,
+    y: 20
+  },
+  show: { 
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { 
+      type: "spring",
+      damping: 25,
+      stiffness: 300,
+      duration: 0.4
+    }
+  },
+  exit: { 
+    opacity: 0,
+    scale: 0.8,
+    y: 20,
+    transition: { duration: 0.2 }
+  }
+};
+
 // Toast Component
 const Toast = ({ message, type, onClose }) => {
   const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
@@ -133,6 +171,163 @@ const Toast = ({ message, type, onClose }) => {
   );
 };
 
+// Brochure Modal Component
+const BrochureModal = ({ isOpen, onClose, onSubmit, isDownloading }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: ""
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Overlay */}
+          <motion.div
+            variants={modalOverlay}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+            onClick={onClose}
+          />
+          
+          {/* Modal */}
+          <motion.div
+            variants={modalContent}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50"
+          >
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-gray-700 shadow-2xl">
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Icon */}
+              <motion.div
+                animate={{ 
+                  y: [0, -10, 0],
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-6 mx-auto"
+              >
+                <Download className="w-10 h-10 text-white" />
+              </motion.div>
+
+              <h3 className="text-2xl font-bold text-center mb-2 text-white">Download Brochure</h3>
+              <p className="text-gray-400 text-center mb-8">
+                Please fill in your details to receive our comprehensive property brochure.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">Full Name *</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 px-4 pl-12 text-white placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-colors duration-300"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">Email Address *</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 px-4 pl-12 text-white placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-colors duration-300"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">Phone Number *</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 px-4 pl-12 text-white placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-colors duration-300"
+                      placeholder="+971 50 123 4567"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isDownloading}
+                  className={`w-full bg-gray-800 text-white py-4 px-6 rounded-lg font-medium border border-gray-700 hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2 group mt-6 ${
+                    isDownloading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isDownloading ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Download className="w-5 h-5" />
+                      </motion.div>
+                      DOWNLOADING...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform duration-300" />
+                      DOWNLOAD BROCHURE
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <p className="text-xs text-gray-500 text-center mt-4">
+                We respect your privacy. Your information will never be shared.
+              </p>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
@@ -149,7 +344,8 @@ export default function Contact() {
     message: ""
   });
 
-  const [brochureRequested, setBrochureRequested] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [toast, setToast] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const thumbnailRef = useRef(null);
@@ -189,8 +385,18 @@ export default function Contact() {
     }, 5000);
   };
 
-  const handleBrochureDownload = () => {
-    setBrochureRequested(true);
+  const handleBrochureClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalSubmit = (modalFormData) => {
+    // Validate form data
+    if (!modalFormData.name || !modalFormData.email || !modalFormData.phone) {
+      showToast("Please fill in all fields", 'error');
+      return;
+    }
+
+    setIsDownloading(true);
     
     // Simulate download preparation
     setTimeout(() => {
@@ -203,7 +409,8 @@ export default function Contact() {
       link.click();
       document.body.removeChild(link);
       
-      setBrochureRequested(false);
+      setIsDownloading(false);
+      setIsModalOpen(false);
       showToast("Brochure downloaded successfully!", 'success');
     }, 1500);
   };
@@ -224,6 +431,14 @@ export default function Contact() {
           onClose={() => setToast(null)} 
         />
       )}
+      
+      {/* Brochure Modal */}
+      <BrochureModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        isDownloading={isDownloading}
+      />
       
       {/* Hero Section with Animated Background */}
       <motion.section 
@@ -562,31 +777,14 @@ export default function Contact() {
                 </p>
 
                 <motion.button
-                  onClick={handleBrochureDownload}
-                  disabled={brochureRequested}
+                  onClick={handleBrochureClick}
                   variants={buttonHover}
                   whileHover="hover"
                   whileTap="tap"
-                  className={`w-full bg-gray-800 text-white py-4 px-6 rounded-lg font-medium border border-gray-700 hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2 group ${
-                    brochureRequested ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className="w-full bg-gray-800 text-white py-4 px-6 rounded-lg font-medium border border-gray-700 hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2 group"
                 >
-                  {brochureRequested ? (
-                    <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Download className="w-5 h-5" />
-                      </motion.div>
-                      PREPARING DOWNLOAD...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform duration-300" />
-                      DOWNLOAD BROCHURE
-                    </>
-                  )}
+                  <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform duration-300" />
+                  DOWNLOAD BROCHURE
                 </motion.button>
 
                 <motion.div 

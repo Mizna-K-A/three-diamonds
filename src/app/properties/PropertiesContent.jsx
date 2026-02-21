@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Mail, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 
 export default function PropertiesContent() {
   const searchParams = useSearchParams();
@@ -45,7 +46,7 @@ export default function PropertiesContent() {
       specs: ['50,000 sq.ft.', '24/7 Security', 'Customizable Spaces', 'Prime Location'],
       badge: 'Featured',
       price: 'AED 2.5M',
-      image: '🏢'
+      image: '/p1.jpg'
     },
     {
       id: 2,
@@ -57,7 +58,7 @@ export default function PropertiesContent() {
       specs: ['4-6 Bedrooms', 'Private Pool', 'Garden', 'Maid Room'],
       badge: 'New',
       price: 'AED 8.2M',
-      image: '🏡'
+      image: '/p2.jpg'
     }
   ];
 
@@ -134,7 +135,7 @@ export default function PropertiesContent() {
   return (
     <>
       {/* Header is imported in the page wrapper, not here */}
-      
+
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.1),transparent_50%)]" />
@@ -159,7 +160,7 @@ export default function PropertiesContent() {
 
       <div className='p-10'>
         {/* Filters Section */}
-        <section className="py-8 border-t border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-20 p-5">
+        <section className="py-8 border-t border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm top-0 z-20 p-5">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               {/* Category Filters */}
@@ -229,23 +230,24 @@ export default function PropertiesContent() {
                   >
                     {/* Image Section */}
                     <div className="relative h-48 bg-gradient-to-br from-gray-700 to-gray-900 overflow-hidden">
-                      <motion.div
-                        className="absolute inset-0 flex items-center justify-center text-6xl"
-                        whileHover={{ scale: 1.2, rotate: 5 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {property.image}
-                      </motion.div>
+                      <Image
+                        src={property.image}
+                        alt={property.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={property.id <= 2} // Only prioritize first 2 images
+                      />
 
                       {/* Badge */}
-                      <div className="absolute top-4 left-4">
+                      <div className="absolute top-4 left-4 z-10">
                         <span className="bg-gray-900 text-gray-100 px-3 py-1 text-xs font-bold rounded-full border border-gray-600">
                           {property.badge}
                         </span>
                       </div>
 
                       {/* Price Tag */}
-                      <div className="absolute top-4 right-4">
+                      <div className="absolute top-4 right-4 z-10">
                         <span className="bg-black text-white px-3 py-1 text-sm font-bold rounded-full">
                           {property.price}
                         </span>
@@ -253,7 +255,7 @@ export default function PropertiesContent() {
 
                       {/* Hover Overlay */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-5"
                       />
                     </div>
 
@@ -303,7 +305,7 @@ export default function PropertiesContent() {
                           whileTap={{ scale: 0.98 }}
                           title="Send Email"
                         >
-                          <Mail/>
+                          <Mail />
                         </motion.a>
 
                         {/* WhatsApp Button */}

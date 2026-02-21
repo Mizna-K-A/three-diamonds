@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 // Title animations
 const titleVariant = {
@@ -165,14 +166,18 @@ export default function Team() {
       role: 'FOUNDER & MANAGING DIRECTOR',
       experience: '15+ Years',
       description: 'With over 15 years transforming UAE\'s real estate landscape, Kumar launched Three Diamonds in 2021 with a mission to deliver exceptional service and propel the company to top 10 position in Dubai.',
-      specialties: ['Commercial Real Estate', 'Business Strategy', 'Client Relations', 'Market Analysis']
+      specialties: ['Commercial Real Estate', 'Business Strategy', 'Client Relations', 'Market Analysis'],
+      image: '/founder.png',
+      alt: 'Mr. Sajikumar - Founder & Managing Director of Three Diamonds'
     },
     {
       name: 'MRS. INDULEKHA',
       role: 'CO-FOUNDER & MANAGING PARTNER',
       experience: '17+ Years',
       description: 'Embodies the Dubai dream with 17 years of experience. Her journey from property consultant to leadership roles in prestigious firms like Al Ghurair fuels Three Diamonds\' strategic vision.',
-      specialties: ['Residential Properties', 'Leasing', 'Development', 'Team Leadership']
+      specialties: ['Residential Properties', 'Leasing', 'Development', 'Team Leadership'],
+      image: '/co-founder.png',
+      alt: 'Mrs. Indulekha - Co-Founder & Managing Partner of Three Diamonds'
     }
   ];
 
@@ -233,16 +238,29 @@ export default function Team() {
               className="bg-gray-50 rounded-2xl p-8"
             >
               <div className="flex flex-col md:flex-row gap-6">
-                {/* AVATAR */}
+                {/* AVATAR - with actual image */}
                 <div className="flex-shrink-0">
                   <motion.div 
                     variants={avatarVariant}
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: false, amount: 0.5 }}
-                    className="w-32 h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center"
+                    className="relative w-32 h-32 rounded-full overflow-hidden"
                   >
-                    <div className="text-4xl">👤</div>
+                    <Image
+                      src={member.image}
+                      alt={member.alt}
+                      fill
+                      // sizes="(max-width: 768px) 128px, 128px"
+                      className="object-cover"
+                      priority={index === 0} // Load first image with priority
+                    />
+                    
+                    {/* Optional overlay on hover */}
+                    <motion.div 
+                      className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors duration-300"
+                      whileHover={{ backgroundColor: "rgba(0,0,0,0.1)" }}
+                    />
                   </motion.div>
                 </div>
 
@@ -265,7 +283,7 @@ export default function Team() {
                       initial="hidden"
                       whileInView="show"
                       viewport={{ once: false, amount: 0.5 }}
-                      className="bg-black text-white px-3 py-1 text-sm rounded-full"
+                      className="bg-black text-white px-3 py-1 text-sm rounded-full whitespace-nowrap"
                     >
                       {member.experience}
                     </motion.span>
