@@ -331,7 +331,7 @@ export default function Portfolio() {
             >
               <motion.a 
                 href="#contact"
-                className="btn-primary bg-gray-800 text-white hover:bg-gray-700 inline-flex items-center gap-2 border border-gray-600"
+                className="btn-primary text-white inline-flex items-center gap-2"
                 variants={buttonVariants}
                 whileHover="hover"
                 whileTap="tap"

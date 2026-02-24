@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 
@@ -10,6 +10,7 @@ export default function PropertiesContent() {
   const searchParams = useSearchParams();
   const [selectedType, setSelectedType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
   // Read type from URL on initial load and when URL changes
   useEffect(() => {
@@ -227,7 +228,7 @@ export default function PropertiesContent() {
                       transition: { duration: 0.2 }
                     }}
                     className="group relative bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-gray-500 transition-all duration-300"
-                  >
+                    onClick={() => router.push(`/properties/${property.id}`)}                  >
                     {/* Image Section */}
                     <div className="relative h-48 bg-gradient-to-br from-gray-700 to-gray-900 overflow-hidden">
                       <Image

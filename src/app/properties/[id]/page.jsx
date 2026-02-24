@@ -36,10 +36,17 @@ const propertiesData = {
     image: '/p1.jpg',
     gallery: [
       '/p1.jpg',
-      '/p2.jpg', 
+      '/p2.jpg',
       '/p3.jpg',
       '/p1.jpg',
-      '/p2.jpg', 
+      '/p2.jpg',
+      '/p3.jpg',
+      '/p4.jpg',
+      '/p1.jpg',
+      '/p2.jpg',
+      '/p3.jpg',
+      '/p1.jpg',
+      '/p2.jpg',
       '/p3.jpg',
       '/p4.jpg',
     ],
@@ -96,12 +103,12 @@ const propertiesData = {
       handover: 'Q4 2024'
     },
     image: '/p1.jpg',
-   gallery: [
+    gallery: [
       '/p1.jpg',
-      '/p2.jpg', 
+      '/p2.jpg',
       '/p3.jpg',
       '/p1.jpg',
-      '/p2.jpg', 
+      '/p2.jpg',
       '/p3.jpg',
     ],
     amenities: [
@@ -142,7 +149,7 @@ export default function PropertyDetailsPage() {
   const [showBrochureModal, setShowBrochureModal] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const thumbnailRef = useRef(null);
-  
+
   const [viewingFormData, setViewingFormData] = useState({
     name: '',
     email: '',
@@ -157,9 +164,9 @@ export default function PropertyDetailsPage() {
     email: '',
     phone: ''
   });
-  
+
   const property = propertiesData[params.id];
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -251,7 +258,7 @@ export default function PropertyDetailsPage() {
           <div className="container mx-auto px-4 pt-32 pb-20 text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Property Not Found</h1>
             <p className="text-gray-400 mb-8">The property you're looking for doesn't exist or has been removed.</p>
-            <Link 
+            <Link
               href="/properties"
               className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-200 transition-colors"
             >
@@ -275,7 +282,7 @@ export default function PropertyDetailsPage() {
         {/* Hero Section - Adjusted padding for mobile */}
         <section className="relative pt-24 md:pt-28 pb-8 md:pb-12 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.1),transparent_50%)]" />
-          
+
           {/* Back Button - Mobile friendly */}
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <motion.button
@@ -284,10 +291,10 @@ export default function PropertyDetailsPage() {
               whileHover={{ x: -5 }}
               whileTap={{ scale: 0.95 }}
             >
-              <svg 
-                className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2 transform group-hover:-translate-x-1 transition-transform" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2 transform group-hover:-translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -350,9 +357,9 @@ export default function PropertyDetailsPage() {
                     <span className="text-6xl md:text-9xl">🏢</span>
                   </div>
                 )}
-                
+
                 {/* Navigation Arrows - Visible on all devices but positioned for touch */}
-                <button 
+                <button
                   onClick={() => setSelectedImage(prev => (prev > 0 ? prev - 1 : property.gallery.length - 1))}
                   className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/70 rounded-full flex items-center justify-center text-white transition-all hover:bg-black/90 backdrop-blur-sm"
                   aria-label="Previous image"
@@ -361,7 +368,7 @@ export default function PropertyDetailsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                <button 
+                <button
                   onClick={() => setSelectedImage(prev => (prev < property.gallery.length - 1 ? prev + 1 : 0))}
                   className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/70 rounded-full flex items-center justify-center text-white transition-all hover:bg-black/90 backdrop-blur-sm"
                   aria-label="Next image"
@@ -378,7 +385,7 @@ export default function PropertyDetailsPage() {
               </motion.div>
 
               {/* Thumbnail Gallery - Horizontal scroll on mobile */}
-              <motion.div 
+              <motion.div
                 className="relative mb-6 md:mb-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -409,9 +416,9 @@ export default function PropertyDetailsPage() {
                 )}
 
                 {/* Thumbnails - Horizontal scroll on mobile, grid on desktop */}
-                <div 
+                <div
                   ref={thumbnailRef}
-                  className="flex md:grid md:grid-cols-4 gap-2 overflow-x-auto md:overflow-x-visible scrollbar-hide pb-2"
+                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
                   style={{
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
@@ -421,11 +428,10 @@ export default function PropertyDetailsPage() {
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-full md:aspect-square rounded-lg overflow-hidden transition-all ${
-                        selectedImage === index 
-                          ? 'ring-2 ring-white scale-95 opacity-100' 
+                      className={`relative flex-shrink-0 w-20 h-20 md:w-28 md:h-28 rounded-lg overflow-hidden transition-all ${selectedImage === index
+                          ? 'ring-2 ring-white scale-95 opacity-100'
                           : 'opacity-70 hover:opacity-100'
-                      }`}
+                        }`}
                       aria-label={`View image ${index + 1}`}
                     >
                       <Image
@@ -446,9 +452,8 @@ export default function PropertyDetailsPage() {
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`w-1.5 h-1.5 rounded-full transition-all ${
-                          selectedImage === index ? 'bg-white w-3' : 'bg-gray-600'
-                        }`}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${selectedImage === index ? 'bg-white w-3' : 'bg-gray-600'
+                          }`}
                         aria-label={`Go to image ${index + 1}`}
                       />
                     ))}
@@ -467,9 +472,8 @@ export default function PropertyDetailsPage() {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-3 md:px-4 py-2 capitalize font-medium text-sm md:text-base transition-colors relative whitespace-nowrap ${
-                        activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'
-                      }`}
+                      className={`px-3 md:px-4 py-2 capitalize font-medium text-sm md:text-base transition-colors relative whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+                        }`}
                     >
                       {tab}
                       {activeTab === tab && (
@@ -623,7 +627,7 @@ export default function PropertyDetailsPage() {
                       <span className="text-blue-400">📅</span>
                       Schedule a Viewing
                     </h3>
-                    
+
                     {/* Tour Options */}
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-3 md:gap-4 mb-3">
@@ -637,7 +641,7 @@ export default function PropertyDetailsPage() {
                         </label>
                       </div>
                     </div>
-                    
+
                     {/* Date Selection */}
                     <div className="mb-4">
                       <p className="text-xs text-gray-400 mb-2">PICK A DATE</p>
@@ -647,11 +651,10 @@ export default function PropertyDetailsPage() {
                             key={index}
                             type="button"
                             onClick={() => setViewingFormData(prev => ({ ...prev, date: `${date.day} ${date.date}` }))}
-                            className={`p-1 text-center rounded-lg transition-all text-xs ${
-                              viewingFormData.date === `${date.day} ${date.date}`
+                            className={`p-1 text-center rounded-lg transition-all text-xs ${viewingFormData.date === `${date.day} ${date.date}`
                                 ? 'bg-white text-black'
                                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                            }`}
+                              }`}
                           >
                             <div className="text-[10px] md:text-xs">{date.day}</div>
                             <div className="font-semibold text-[10px] md:text-xs">{date.date}</div>
@@ -754,7 +757,7 @@ export default function PropertyDetailsPage() {
         {/* Location Map Section - Responsive */}
         <section className="relative py-10 md:py-16 border-t border-gray-800">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.05),transparent_70%)]" />
-          
+
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -788,7 +791,7 @@ export default function PropertyDetailsPage() {
                     </div>
                   </div>
                 )}
-                
+
                 <iframe
                   src={property.mapEmbedUrl}
                   width="100%"
@@ -831,7 +834,7 @@ export default function PropertyDetailsPage() {
                     Property Location
                   </h3>
                   <p className="text-xs text-gray-300 mb-2 md:mb-3">{property.location}</p>
-                  
+
                   <div className="space-y-1 md:space-y-2">
                     <p className="text-[10px] md:text-xs text-gray-400">Nearby Places:</p>
                     {property.nearby.slice(0, 2).map((place, index) => (
@@ -856,7 +859,7 @@ export default function PropertyDetailsPage() {
                     {property.coordinates ? `${property.coordinates.lat.toFixed(4)}° N, ${property.coordinates.lng.toFixed(4)}° E` : 'Location available'}
                   </span>
                 </div>
-                
+
                 <motion.a
                   href={`https://www.google.com/maps/search/?api=1&query=${property.coordinates.lat},${property.coordinates.lng}`}
                   target="_blank"
@@ -908,7 +911,7 @@ export default function PropertyDetailsPage() {
               onClick={() => setShowBrochureModal(false)}
               className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
             />
-            
+
             {/* Modal - Full width on mobile */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -946,7 +949,7 @@ export default function PropertyDetailsPage() {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs md:text-sm text-gray-400 mb-1">Email</label>
                     <input
@@ -959,7 +962,7 @@ export default function PropertyDetailsPage() {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs md:text-sm text-gray-400 mb-1">Phone</label>
                     <input
