@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key } from 'lucide-react';
+import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key, Computer } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -124,6 +124,7 @@ export default function Header() {
         { label: 'Capital Markets', href: '/services/capital-markets', icon: TrendingUp },
         { label: 'Tenant Representation', href: '/services/tenant-representation', icon: Users },
         { label: 'Landlord Agency', href: '/services/landlord-agency', icon: Key },
+        { label: 'Techinical Services', href: '/services/technical-service', icon: Computer },
       ]
     },
     {

@@ -18,7 +18,7 @@ export default function Hero() {
     { 
       title: "Luxury Residential Properties", 
       subtitle: "Villas • Apartments • Townhouses",
-      image: "/d2.webp",
+      image: "/d2.jpg",
       cta: "View Residential Listings"
     },
     { 

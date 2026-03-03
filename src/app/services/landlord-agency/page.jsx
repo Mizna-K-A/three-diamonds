@@ -220,7 +220,7 @@ export default function LandlordAgencyPage() {
                   transition={{ duration: 1.05, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <Parallax speed={0.11} className="absolute inset-0 w-full h-[115%] -top-[7%]">
-                    <Image src="/real-estate-5.jpg" alt="Property" fill priority className="object-cover" />
+                    <Image src="/landloard-pics/landlord-6.jpg" alt="Property" fill priority className="object-cover" />
                   </Parallax>
                   <div className="absolute inset-0 bg-gradient-to-t from-[#060709]/55 via-transparent to-transparent" />
                   <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#060709]/10" />
@@ -233,7 +233,7 @@ export default function LandlordAgencyPage() {
                   animate={{ opacity: 1, x: 0, y: 0 }}
                   transition={{ duration: 0.95, delay: 0.52, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <Image src="/real-estate-2.jpg" alt="Leasing" fill className="object-cover" />
+                  <Image src="/landloard-pics/landlord-8.jpg" alt="Leasing" fill className="object-cover" />
                   <div className="absolute inset-0 bg-[#060709]/20" />
                 </motion.div>
 
@@ -351,7 +351,7 @@ export default function LandlordAgencyPage() {
                 <Reveal variants={fadeRight} className="row-span-2">
                   <div className="relative h-[480px] rounded-3xl overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.8)]">
                     <Parallax speed={0.09} className="absolute inset-0 w-full h-[115%] -top-[7%]">
-                      <Image src="/real-estate-4.jpg" alt="Property" fill className="object-cover" />
+                      <Image src="/landloard-pics/landlord-4.jpg" alt="Property" fill className="object-cover" />
                     </Parallax>
                     <div className="absolute inset-0 bg-gradient-to-t from-[#060709]/55 to-transparent" />
                     {/* Floating badge inside */}
@@ -370,7 +370,7 @@ export default function LandlordAgencyPage() {
                 {/* Top right image */}
                 <Reveal variants={slideDown} custom={0.15}>
                   <div className="relative h-[228px] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] border-[3px] border-[#060709]">
-                    <Image src="/real-estate-3.jpg" alt="Lease" fill className="object-cover" />
+                    <Image src="/landloard-pics/landlord-3.jpg" alt="Lease" fill className="object-cover" />
                     <div className="absolute inset-0 bg-[#060709]/20" />
                   </div>
                 </Reveal>
@@ -378,7 +378,7 @@ export default function LandlordAgencyPage() {
                 {/* Bottom right image with chip */}
                 <Reveal variants={fadeRight} custom={0.28}>
                   <div className="relative h-[228px] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] border-[3px] border-[#060709]">
-                    <Image src="/real-estate-6.jpg" alt="Tenants" fill className="object-cover" />
+                    <Image src="/landloard-pics/landlord-7.jpg" alt="Tenants" fill className="object-cover" />
                     <div className="absolute inset-0 bg-[#060709]/30" />
                     <motion.div
                       className="absolute top-4 right-4 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full"
@@ -429,7 +429,7 @@ export default function LandlordAgencyPage() {
               whileHover={{ scale: 1.015, transition: { duration: 0.4 } }}
             >
               <Parallax speed={0.1} className="absolute inset-0 w-full h-[115%] -top-[7%]">
-                <Image src="/real-estate.jpg" alt="Leasing" fill className="object-cover" />
+                <Image src="/landloard-pics/landlord-1.jpg" alt="Leasing" fill className="object-cover" />
               </Parallax>
               <div className="absolute inset-0 bg-gradient-to-t from-[#060709]/88 via-[#060709]/25 to-transparent" />
               <motion.div
@@ -592,7 +592,7 @@ export default function LandlordAgencyPage() {
               {/* Top image */}
               <Reveal variants={fadeRight} className="relative rounded-3xl overflow-hidden min-h-[200px]">
                 <Parallax speed={0.08} className="absolute inset-0 w-full h-[115%] -top-[7%]">
-                  <Image src="/real-estate-2.jpg" alt="" fill className="object-cover" />
+                  <Image src="/landloard-pics/landlord-2.jpg" alt="" fill className="object-cover" />
                 </Parallax>
                 <div className="absolute inset-0 bg-[#060709]/30" />
                 {/* Floating chip */}
@@ -609,7 +609,7 @@ export default function LandlordAgencyPage() {
               {/* Bottom image */}
               <Reveal variants={fadeRight} custom={0.18} className="relative rounded-3xl overflow-hidden min-h-[200px]">
                 <Parallax speed={0.08} className="absolute inset-0 w-full h-[115%] -top-[7%]">
-                  <Image src="/real-estate-5.jpg" alt="" fill className="object-cover" />
+                  <Image src="/landloard-pics/landlord-5.jpg" alt="" fill className="object-cover" />
                 </Parallax>
                 <div className="absolute inset-0 bg-[#060709]/35" />
                 <motion.div

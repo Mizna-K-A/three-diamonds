@@ -8,6 +8,12 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'Three Diamonds Real Estate',
   description: 'Dubai\'s Trusted Real Estate Partner',
+   icons: {
+    icon: '/threediamond.png',
+    // You can also add additional icon formats:
+    // shortcut: '/threediamond.png',
+    // apple: '/apple-icon.png',
+  },
 }
 
 export default function RootLayout({ children }) {

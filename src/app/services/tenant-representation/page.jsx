@@ -296,12 +296,12 @@ export default function TenantRepresentationPage() {
                 className="text-4xl md:text-[2.8rem] font-black leading-[1.04] tracking-[-0.025em] text-white mb-7">
                 We Advocate Exclusively for Tenants
               </motion.h2>
-              <motion.p variants={si} className="text-[13px] text-white/38 leading-[1.95] mb-5">
+              <motion.p variants={si} className="text-[17px] text-white/80 leading-[1.95] mb-5">
                 Our tenant representation services ensure you get the best possible space at the most
                 favorable terms. We leverage market knowledge and negotiation expertise to secure
                 optimal lease agreements on your behalf.
               </motion.p>
-              <motion.p variants={si} className="text-[13px] text-white/38 leading-[1.95] mb-10">
+              <motion.p variants={si} className="text-[17px] text-white/80 leading-[1.95] mb-10">
                 From initial space search to lease signing and beyond, we guide you through every step
                 of the process, protecting your interests and maximizing value at every turn.
               </motion.p>
@@ -545,7 +545,7 @@ export default function TenantRepresentationPage() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ scale: 1.05, rotate: 0, transition: { duration: 0.3 } }}
           >
-            <Image src="/tenentrepresentation-pics/tenent-6.jpg" alt="" fill className="object-cover" />
+            <Image src="/tenentrepresentation-pics/tenent-10.jpg" alt="" fill className="object-cover" />
             <div className="absolute inset-0 bg-[#060708]/25" />
           </motion.div>
 
@@ -557,7 +557,7 @@ export default function TenantRepresentationPage() {
             transition={{ duration: 0.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ scale: 1.05, rotate: 0, transition: { duration: 0.3 } }}
           >
-            <Image src="/tenentrepresentation-pics/tenent-4.jpg" alt="" fill className="object-cover" />
+            <Image src="/tenentrepresentation-pics/tenent-11.jpg" alt="" fill className="object-cover" />
             <div className="absolute inset-0 bg-[#060708]/25" />
           </motion.div>
 
