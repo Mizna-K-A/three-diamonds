@@ -27,7 +27,8 @@ async function getTags() {
       parentId: tag.parentId?._id?.toString() || null,
       parentName: tag.parentId?.name || null,
       parentLabel: tag.parentId?.label || null,
-      metadata: tag.metadata ? Object.fromEntries(tag.metadata) : {},
+      // Fix: Handle metadata correctly - it's stored as a plain object, not a Map
+      metadata: tag.metadata || {},
       createdAt: tag.createdAt?.toISOString(),
       updatedAt: tag.updatedAt?.toISOString(),
     }));
@@ -106,6 +107,7 @@ async function createTag(formData) {
         ...tag.toObject(),
         _id: tag._id.toString(),
         id: tag._id.toString(),
+        metadata: metadata, // Already an object
       }
     };
   } catch (error) {
@@ -188,6 +190,7 @@ async function updateTag(id, formData) {
         ...tag.toObject(),
         _id: tag._id.toString(),
         id: tag._id.toString(),
+        metadata: metadata, // Already an object
       }
     };
   } catch (error) {

@@ -1,19 +1,175 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Plus,
   Search,
   Edit,
   Trash2,
   Building2,
+  ChevronDown,
+  X,
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
-export default function PropertyTypesClient({ 
+// Known non-icon exports to exclude
+const EXCLUDED = new Set(['createLucideIcon', 'default', 'icons']);
+
+// Lucide icons always have a displayName set (e.g. "Home", "Building2")
+// This is the most reliable way to distinguish them from utility exports
+const ALL_ICONS = Object.entries(LucideIcons).filter(([name, Component]) => {
+  if (EXCLUDED.has(name)) return false;
+  if (!/^[A-Z]/.test(name)) return false;
+  if (!Component) return false;
+  // All lucide icons have displayName matching their export name
+  return Component.displayName === name || typeof Component.render === 'function' || typeof Component === 'function';
+});
+
+// Debug: log to console so you can verify in your browser
+if (typeof window !== 'undefined') {
+  console.log('[IconPicker] Loaded icons count:', ALL_ICONS.length, ALL_ICONS.slice(0, 5).map(([n]) => n));
+}
+
+function SafeIcon({ Component, size, className }) {
+  try {
+    return <Component size={size} className={className} />;
+  } catch {
+    return null;
+  }
+}
+
+function IconPickerDropdown({ value, onChange, disabled }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const dropdownRef = useRef(null);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return ALL_ICONS.slice(0, 80);
+    const q = search.toLowerCase();
+    return ALL_ICONS.filter(([name]) => name.toLowerCase().includes(q)).slice(0, 80);
+  }, [search]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const SelectedIcon = value && LucideIcons[value] ? LucideIcons[value] : null;
+
+  const handleSelect = (name) => {
+    onChange(name);
+    setOpen(false);
+    setSearch('');
+  };
+
+  const handleClear = (e) => {
+    e.stopPropagation();
+    onChange('');
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
+        className="w-full flex items-center gap-2 px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600 hover:border-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span className="flex items-center gap-2 flex-1 min-w-0">
+          {SelectedIcon ? (
+            <>
+              <SelectedIcon size={16} className="text-gray-300 shrink-0" />
+              <span className="text-sm text-gray-300 truncate">{value}</span>
+            </>
+          ) : (
+            <span className="text-sm text-gray-600">Select an icon...</span>
+          )}
+        </span>
+        <span className="flex items-center gap-1 shrink-0">
+          {value && (
+            <span
+              onClick={handleClear}
+              className="p-0.5 rounded hover:bg-gray-700 cursor-pointer"
+            >
+              <X size={12} className="text-gray-500" />
+            </span>
+          )}
+          <ChevronDown
+            size={14}
+            className={`text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`}
+          />
+        </span>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-[#111111] border border-gray-800 rounded-xl shadow-2xl shadow-black/60 overflow-hidden">
+          {/* Search */}
+          <div className="p-2 border-b border-gray-800">
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search icons..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-gray-600"
+              />
+            </div>
+          </div>
+
+          {/* Icon grid */}
+          <div className="p-2 grid grid-cols-8 gap-1 max-h-52 overflow-y-auto scrollbar-thin">
+            {filtered.length === 0 && (
+              <div className="col-span-8 text-center py-6 text-gray-600 text-sm">
+                No icons found
+              </div>
+            )}
+            {filtered.map(([name, IconComp]) => (
+              <button
+                key={name}
+                type="button"
+                title={name}
+                onClick={() => handleSelect(name)}
+                className={`
+                  flex items-center justify-center p-2 rounded-lg transition-colors
+                  ${value === name
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  }
+                `}
+              >
+                <SafeIcon Component={IconComp} size={16} />
+              </button>
+            ))}
+          </div>
+
+          {/* Footer hint */}
+          <div className="px-3 py-1.5 border-t border-gray-800 text-xs text-gray-600">
+            {search.trim()
+              ? `Showing ${filtered.length} result${filtered.length !== 1 ? 's' : ''}`
+              : `Showing 80 of ${ALL_ICONS.length} icons — search to filter`}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PropertyTypesClient({
   initialPropertyTypes,
   createPropertyType,
   updatePropertyType,
-  deletePropertyType 
+  deletePropertyType,
 }) {
   const [propertyTypes, setPropertyTypes] = useState(initialPropertyTypes || []);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,15 +183,10 @@ export default function PropertyTypesClient({
     icon: '',
   });
 
-  // Filter property types based on search
-  const filteredTypes = propertyTypes.filter(type => {
+  const filteredTypes = propertyTypes.filter((type) => {
     if (!type) return false;
-    
-    const searchLower = searchTerm.toLowerCase();
-    const nameMatch = type.name?.toLowerCase().includes(searchLower);
-    const descriptionMatch = type.description?.toLowerCase().includes(searchLower);
-    
-    return nameMatch || descriptionMatch;
+    const q = searchTerm.toLowerCase();
+    return type.name?.toLowerCase().includes(q) || type.description?.toLowerCase().includes(q);
   });
 
   const handleOpenModal = (type) => {
@@ -49,12 +200,7 @@ export default function PropertyTypesClient({
       });
     } else {
       setEditingType(null);
-      setFormData({
-        name: '',
-        slug: '',
-        description: '',
-        icon: '',
-      });
+      setFormData({ name: '', slug: '', description: '', icon: '' });
     }
     setIsModalOpen(true);
   };
@@ -62,46 +208,35 @@ export default function PropertyTypesClient({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingType(null);
-    setFormData({
-      name: '',
-      slug: '',
-      description: '',
-      icon: '',
-    });
+    setFormData({ name: '', slug: '', description: '', icon: '' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      const formDataObj = new FormData();
-      formDataObj.append('name', formData.name);
-      formDataObj.append('slug', formData.slug);
-      formDataObj.append('description', formData.description);
-      formDataObj.append('icon', formData.icon);
-      
+      const fd = new FormData();
+      fd.append('name', formData.name);
+      fd.append('slug', formData.slug);
+      fd.append('description', formData.description);
+      fd.append('icon', formData.icon);
+
       let result;
-      
       if (editingType) {
-        result = await updatePropertyType(editingType._id, formDataObj);
+        result = await updatePropertyType(editingType._id, fd);
       } else {
-        result = await createPropertyType(formDataObj);
+        result = await createPropertyType(fd);
       }
-      
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      
-      // Update local state
+
+      if (result.error) throw new Error(result.error);
+
       if (editingType) {
-        setPropertyTypes(types =>
-          types.map(t => t._id === editingType._id ? result.data : t)
+        setPropertyTypes((types) =>
+          types.map((t) => (t._id === editingType._id ? result.data : t))
         );
       } else {
-        setPropertyTypes(types => [...types, result.data]);
+        setPropertyTypes((types) => [...types, result.data]);
       }
-      
       handleCloseModal();
     } catch (error) {
       console.error('Error saving property type:', error);
@@ -112,28 +247,23 @@ export default function PropertyTypesClient({
   };
 
   const handleDelete = async (id) => {
-    const typeToDelete = propertyTypes.find(t => t._id === id);
-    
+    const typeToDelete = propertyTypes.find((t) => t._id === id);
     if (typeToDelete?.propertyCount > 0) {
-      if (!confirm(`This property type has ${typeToDelete.propertyCount} properties. Deleting it will remove the type from these properties. Continue?`)) {
+      if (
+        !confirm(
+          `This property type has ${typeToDelete.propertyCount} properties. Deleting it will remove the type from these properties. Continue?`
+        )
+      )
         return;
-      }
     } else {
       if (!confirm('Are you sure you want to delete this property type?')) return;
     }
-    
+
     setIsLoading(true);
-    
     try {
       const result = await deletePropertyType(id);
-      
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      
-      // Update local state
-      setPropertyTypes(types => types.filter(t => t._id !== id));
-      
+      if (result.error) throw new Error(result.error);
+      setPropertyTypes((types) => types.filter((t) => t._id !== id));
     } catch (error) {
       console.error('Error deleting property type:', error);
       alert(error.message);
@@ -142,20 +272,15 @@ export default function PropertyTypesClient({
     }
   };
 
-  const generateSlug = (name) => {
-    return name
+  const generateSlug = (name) =>
+    name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-  };
 
   const handleNameChange = (e) => {
     const name = e.target.value;
-    setFormData({
-      ...formData,
-      name,
-      slug: generateSlug(name),
-    });
+    setFormData({ ...formData, name, slug: generateSlug(name) });
   };
 
   return (
@@ -164,7 +289,7 @@ export default function PropertyTypesClient({
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[#111111] p-4 rounded-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
           </div>
         </div>
       )}
@@ -202,71 +327,60 @@ export default function PropertyTypesClient({
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-800">
-              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Slug
-              </th>
-              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Description
-              </th>
-              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Properties
-              </th>
-              <th className="text-right py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Properties</th>
+              <th className="text-right py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
-            {filteredTypes.map((type) => (
-              <tr key={type._id} className="hover:bg-gray-800/20 transition-colors">
-                <td className="py-4 px-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
-                      {type.icon ? (
-                        <span className="text-gray-400">{type.icon}</span>
-                      ) : (
-                        <Building2 size={16} className="text-gray-500" />
-                      )}
+            {filteredTypes.map((type) => {
+              const IconComp = type.icon && LucideIcons[type.icon] ? LucideIcons[type.icon] : null;
+              return (
+                <tr key={type._id} className="hover:bg-gray-800/20 transition-colors">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
+                        {IconComp ? (
+                          <IconComp size={16} className="text-gray-400" />
+                        ) : (
+                          <Building2 size={16} className="text-gray-500" />
+                        )}
+                      </div>
+                      <span className="text-white font-medium">{type.name || 'Unnamed'}</span>
                     </div>
-                    <span className="text-white font-medium">{type.name || 'Unnamed'}</span>
-                  </div>
-                </td>
-                <td className="py-4 px-6">
-                  <span className="text-sm text-gray-400">{type.slug || '—'}</span>
-                </td>
-                <td className="py-4 px-6">
-                  <span className="text-sm text-gray-400 line-clamp-1">
-                    {type.description || '—'}
-                  </span>
-                </td>
-                <td className="py-4 px-6">
-                  <span className="text-sm text-gray-400">
-                    {type.propertyCount || 0} properties
-                  </span>
-                </td>
-                <td className="py-4 px-6">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => handleOpenModal(type)}
-                      disabled={isLoading}
-                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(type._id)}
-                      disabled={isLoading}
-                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm text-gray-400">{type.slug || '—'}</span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm text-gray-400 line-clamp-1">{type.description || '—'}</span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-sm text-gray-400">{type.propertyCount || 0} properties</span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleOpenModal(type)}
+                        disabled={isLoading}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(type._id)}
+                        disabled={isLoading}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -287,12 +401,10 @@ export default function PropertyTypesClient({
                 {editingType ? 'Edit Property Type' : 'Add Property Type'}
               </h2>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Name
-                </label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Name</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -304,9 +416,7 @@ export default function PropertyTypesClient({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Slug
-                </label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Slug</label>
                 <input
                   type="text"
                   value={formData.slug}
@@ -318,9 +428,7 @@ export default function PropertyTypesClient({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -331,15 +439,10 @@ export default function PropertyTypesClient({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Icon (emoji or icon name)
-                </label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-gray-400 mb-2">Icon</label>
+                <IconPickerDropdown
                   value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-700"
-                  placeholder="e.g., 🏠 or Building2"
+                  onChange={(name) => setFormData({ ...formData, icon: name })}
                   disabled={isLoading}
                 />
               </div>
@@ -358,7 +461,7 @@ export default function PropertyTypesClient({
                   disabled={isLoading}
                   className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {isLoading ? 'Saving...' : (editingType ? 'Update' : 'Create')}
+                  {isLoading ? 'Saving...' : editingType ? 'Update' : 'Create'}
                 </button>
               </div>
             </form>

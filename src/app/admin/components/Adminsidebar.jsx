@@ -20,13 +20,10 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: Home },
-  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Properties', href: '/admin/properties', icon: Home }, // Add this
   { name: 'Property Types', href: '/admin/property-types', icon: Building2 },
   { name: 'Property Statuses', href: '/admin/property-statuses', icon: Tag },
-  { name: 'Property Tags', href: '/admin/tags', icon: Tags }, // Add this
-  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'Reports', href: '/admin/reports', icon: FileText },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Property Tags', href: '/admin/tags', icon: Tags },
 ];
 
 export const Sidebar = ({ mobileOpen, onMobileClose }) => {
