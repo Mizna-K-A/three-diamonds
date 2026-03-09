@@ -132,7 +132,7 @@ export async function getServerSideProps(context) {
   if (!token) {
     return {
       redirect: {
-        destination: '/admin/login',
+        destination: '/login',
         permanent: false,
       },
     };
@@ -152,7 +152,7 @@ export async function getServerSideProps(context) {
 
     return {
       redirect: {
-        destination: '/admin/login',
+        destination: '/login',
         permanent: false,
       },
     };

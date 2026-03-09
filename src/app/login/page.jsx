@@ -16,16 +16,30 @@ const AdminLoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        setError('');
+        setError("");
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            if (email === 'admin@example.com' && password === 'admin123') {
-                router.push('/admin/dashboard');
-            } else {
-                setError('Invalid admin credentials. Please try again.');
+
+            const res = await fetch("/api/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",   // ⭐ important for cookies
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (!data.success) {
+                setError(data.message);
+                return;
             }
-        } catch (err) {
-            setError('An error occurred. Please try again.');
+
+            router.push("/admin");   // redirect after login
+
+        } catch (error) {
+            setError("Login failed");
         } finally {
             setIsLoading(false);
         }
@@ -177,31 +191,11 @@ const AdminLoginPage = () => {
                         </div>
 
                         {/* Remember me & Forgot */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
-                                <div
-                                    onClick={() => setRememberMe(!rememberMe)}
-                                    style={{
-                                        width: '18px', height: '18px',
-                                        border: `1px solid ${rememberMe ? '#fff' : '#333'}`,
-                                        borderRadius: '4px',
-                                        background: rememberMe ? '#fff' : 'transparent',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
-                                    }}
-                                >
-                                    {rememberMe && (
-                                        <svg width="11" height="11" fill="none" stroke="#000" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    )}
-                                </div>
-                                <span style={{ fontSize: '13px', color: '#666' }}>Remember me</span>
-                            </label>
+                        {/* <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
                             <button type="button" style={{ fontSize: '13px', color: '#666', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', textDecorationColor: '#333', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
                                 Forgot password?
                             </button>
-                        </div>
+                        </div> */}
 
                         {/* Submit */}
                         <button
@@ -233,39 +227,10 @@ const AdminLoginPage = () => {
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                                     </svg>
-                                    Access Dashboard
+                                    Login
                                 </>
                             )}
                         </button>
-
-                        {/* Security badges */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-                            {[
-                                { label: '2FA', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-                                { label: 'Security Key', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.013-1.72.269L7.5 19.5 4.5 16.5l3.068-3.501c.256-.561.366-1.157.27-1.72A6 6 0 1115.75 8.25z" /> },
-                                { label: 'Encrypted', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /> },
-                            ].map(({ label, icon }) => (
-                                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 8px', background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', gap: '5px' }}>
-                                    <svg width="16" height="16" fill="none" stroke="#666" viewBox="0 0 24 24">{icon}</svg>
-                                    <span style={{ fontSize: '11px', color: '#555' }}>{label}</span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Security notice */}
-                        <div style={{ padding: '12px 14px', background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '8px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                            <svg width="15" height="15" fill="none" stroke="#444" viewBox="0 0 24 24" style={{ flexShrink: 0, marginTop: '1px' }}>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                            </svg>
-                            <div>
-                                <p style={{ fontSize: '13px', color: '#666', fontWeight: '500', margin: '0 0 3px 0' }}>Secure Area</p>
-                                <p style={{ fontSize: '11px', color: '#444', margin: 0, lineHeight: '1.5' }}>All access attempts are logged and monitored. Unauthorized access is prohibited.</p>
-                            </div>
-                        </div>
-
-                        <p style={{ textAlign: 'center', fontSize: '11px', color: '#333', marginTop: '18px', marginBottom: 0 }}>
-                            Admin Portal v3.0 · Enterprise Security
-                        </p>
                     </form>
                 </div>
             </div>

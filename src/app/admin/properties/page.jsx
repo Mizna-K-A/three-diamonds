@@ -5,7 +5,7 @@ import PropertiesClient from './PropertiesClient';
 import PropertyType from '../../../../lib/models/PropertyType';
 import Tag from '../../../../lib/models/Tag';
 
-async function getProperties() {
+export async function getProperties() {
   try {
     await connectDB();
     

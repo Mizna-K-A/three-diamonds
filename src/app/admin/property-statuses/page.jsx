@@ -3,7 +3,7 @@ import PropertyStatus from '../../../../lib/models/PropertyStatus';
 import connectDB from '../../../../lib/mongodb';
 import PropertyStatusClient from './PropertyStatusClient';
 
-async function getPropertyStatuses() {
+export async function getPropertyStatuses() {
     try {
         await connectDB();
 

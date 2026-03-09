@@ -36,10 +36,11 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
     setMounted(true);
   }, []);
 
-  const handleLogout = () => {
-    router.push('/login');
-  };
 
+const handleLogout = async () => {
+  await fetch("/api/admin/logout", { method: "POST" });
+  router.push("/login");
+};
   const isActive = (href) => pathname === href;
 
   if (!mounted) {

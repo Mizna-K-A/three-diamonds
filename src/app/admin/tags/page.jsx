@@ -11,7 +11,7 @@ const CATEGORY_OPTIONS = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-async function getTags() {
+export async function getTags() {
   try {
     await connectDB();
     

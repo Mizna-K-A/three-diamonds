@@ -1,189 +1,256 @@
 // app/properties/[id]/page.jsx
-"use client";
-
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import Header from '../../components/Header';
+import { notFound } from 'next/navigation';
+import {
+  ArrowLeft,
+  BedDouble,
+  Bath,
+  Maximize2,
+  MapPin,
+  CalendarDays,
+  RefreshCw,
+  Clock,
+  Star,
+  Globe,
+  Phone,
+  Mail,
+  User,
+  ExternalLink,
+  Building,
+  Check,
+  Eye,
+  EyeOff,
+  DollarSign,
+  Tag,
+  Grid,
+  Users,
+  Calendar,
+  AlertCircle,
+  Info,
+} from 'lucide-react';
+import ImageGallery from './ImageGallery';
+import connectDB from '../../../../lib/mongodb';
+import Property from '../../../../lib/models/Property';
 
-const propertiesData = {
-  1: {
-    id: 1,
-    title: 'GOSHI WAREHOUSES CITY',
-    type: 'Commercial Complex',
-    category: 'Commercial',
-    location: 'Al Quoz Industrial Area 3',
-    description: 'Premium warehouse spaces for health centers, boutiques, galleries, and luxury showrooms.',
-    fullDescription: 'GOSHI WAREHOUSES CITY represents a new standard in industrial-commercial spaces, offering versatile warehouse units designed for modern businesses. Located in the heart of Al Quoz Industrial Area 3, these spaces are perfect for health centers, boutique stores, art galleries, and luxury showrooms seeking a unique industrial aesthetic combined with premium amenities.',
-    specs: ['50,000 sq.ft.', '24/7 Security', 'Customizable Spaces', 'Prime Location'],
-    features: [
-      'High-speed internet connectivity',
-      'Loading docks with levelers',
-      '24/7 CCTV surveillance',
-      'On-site maintenance team',
-      'Electricity backup generator',
-      'Ample parking space'
-    ],
-    badge: 'Featured',
-    price: 'AED 2.5M',
-    priceDetails: {
-      paymentPlan: '70/30 payment plan available',
-      maintenance: 'AED 25/sq.ft. annually',
-      handover: 'Ready to move'
-    },
-    image: '/p1.jpg',
-    gallery: [
-      '/p1.jpg',
-      '/p2.jpg',
-      '/p3.jpg',
-      '/p1.jpg',
-      '/p2.jpg',
-      '/p3.jpg',
-      '/p4.jpg',
-      '/p1.jpg',
-      '/p2.jpg',
-      '/p3.jpg',
-      '/p1.jpg',
-      '/p2.jpg',
-      '/p3.jpg',
-      '/p4.jpg',
-    ],
-    amenities: [
-      'Security Guard',
-      'CCTV Surveillance',
-      'Fire Alarm System',
-      'Loading Docks',
-      'Visitor Parking',
-      'Elevators',
-      'Waste Disposal',
-      'Maintenance Staff'
-    ],
-    nearby: [
-      'Sheikh Zayed Road (5 mins)',
-      'Dubai Mall (15 mins)',
-      'Al Maktoum International Airport (25 mins)',
-      'Jebel Ali Port (20 mins)'
-    ],
-    agent: {
-      name: 'Sarah Johnson',
-      phone: '+971 50 123 4567',
-      email: 'sarah.johnson@example.com',
-      image: '/avatar.jpg'
-    },
-    coordinates: {
-      lat: 25.1345,
-      lng: 55.2356
-    },
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3610.1781845735043!2d55.2334!3d25.1345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDA4JzA0LjIiTiA1NcKwMTQnMDEuMCJF!5e0!3m2!1sen!2sae!4v1234567890!5m2!1sen!2sae'
-  },
-  2: {
-    id: 2,
-    title: 'DUBAI HILLS VILLAS',
-    type: 'Residential',
-    category: 'Residential',
-    location: 'Dubai Hills Estate',
-    description: 'Luxury villas with premium amenities and breathtaking views.',
-    fullDescription: 'Experience unparalleled luxury living in these stunning villas located in the prestigious Dubai Hills Estate. Each villa is meticulously designed with contemporary architecture, featuring spacious layouts, premium finishes, and breathtaking views of the golf course and Dubai skyline.',
-    specs: ['4-6 Bedrooms', 'Private Pool', 'Garden', 'Maid Room'],
-    features: [
-      'Smart home automation',
-      'Private elevator option',
-      'Landscaped garden',
-      'Covered parking for 4 cars',
-      'Staff quarters',
-      'Driver room'
-    ],
-    badge: 'New',
-    price: 'AED 8.2M',
-    priceDetails: {
-      paymentPlan: '60/40 payment plan',
-      maintenance: 'AED 15/sq.ft. annually',
-      handover: 'Q4 2024'
-    },
-    image: '/p1.jpg',
-    gallery: [
-      '/p1.jpg',
-      '/p2.jpg',
-      '/p3.jpg',
-      '/p1.jpg',
-      '/p2.jpg',
-      '/p3.jpg',
-    ],
-    amenities: [
-      'Community Pool',
-      'Children Play Area',
-      'Parks & Gardens',
-      'Golf Course Access',
-      'Clubhouse',
-      'Gym & Spa',
-      'Tennis Courts',
-      'Running Tracks'
-    ],
-    nearby: [
-      'Dubai Hills Mall (2 mins)',
-      'Downtown Dubai (15 mins)',
-      'Dubai Marina (20 mins)',
-      'Al Maktoum International Airport (30 mins)'
-    ],
-    agent: {
-      name: 'Mohammed Al Rashid',
-      phone: '+971 50 987 6543',
-      email: 'mohammed.alrashid@example.com',
-      image: '/avatar.jpg'
-    },
-    coordinates: {
-      lat: 25.0657,
-      lng: 55.1713
-    },
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3612.7892345678!2d55.1689!3d25.0657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDAzJzU2LjUiTiA1NcKwMTAnMTYuNyJF!5e0!3m2!1sen!2sae!4v1234567890!5m2!1sen!2sae'
+// ─── Data fetching ────────────────────────────────────────────────────────────
+
+async function getProperty(id) {
+  try {
+    await connectDB();
+
+    const property = await Property.findById(id)
+      .populate('statusId', 'name label color icon')
+      .populate('propertyTypeId', 'name slug icon')
+      .populate('tagIds', 'name label color icon category')
+      .populate('purposeTagId', 'name label color icon')
+      .lean();
+
+    if (!property) return null;
+
+    return {
+      ...property,
+      _id: property._id.toString(),
+      id: property._id.toString(),
+      status: property.statusId
+        ? { ...property.statusId, _id: property.statusId._id.toString() }
+        : null,
+      propertyType: property.propertyTypeId
+        ? { ...property.propertyTypeId, _id: property.propertyTypeId._id.toString() }
+        : null,
+      tags: property.tagIds?.map((tag) => ({ ...tag, _id: tag._id.toString() })) || [],
+      purposeTag: property.purposeTagId
+        ? { ...property.purposeTagId, _id: property.purposeTagId._id.toString() }
+        : null,
+      images: (property.images || []).map((image, index) => {
+        const imageUrl = image.webp?.medium?.url || 
+                        image.webp?.small?.url || 
+                        image.webp?.thumbnail?.url || 
+                        image.webp?.original?.url || 
+                        null;
+
+        return {
+          ...image,
+          _id: image._id?.toString() || `img-${index}`,
+          url: imageUrl,
+          thumbnailUrl: image.webp?.thumbnail?.url || imageUrl,
+          isPrimary: image.isPrimary || false,
+          caption: image.caption || '',
+          alt: image.alt || image.caption || 'Property image',
+          original: image.original,
+          webp: image.webp,
+        };
+      }),
+      features: (property.features || []).map(feature => {
+        if (typeof feature === 'object') {
+          return feature.value || feature.name || JSON.stringify(feature);
+        }
+        return feature;
+      }),
+      amenities: property.amenities || [],
+      nearby: property.nearby || [],
+      agent: property.agent || {
+        name: property.agentName || 'Property Agent',
+        phone: property.agentPhone || '+971 50 123 4567',
+        email: property.agentEmail || 'agent@example.com',
+        image: property.agentImage || null
+      },
+      specs: property.specs || [],
+      priceDetails: {
+        paymentPlan: property.paymentPlan || '70/30 payment plan available',
+        maintenance: property.maintenanceFee || 'AED 25/sq.ft. annually',
+        handover: property.handoverDate || 'Ready to move'
+      },
+      createdAt: property.createdAt?.toISOString().split('T')[0],
+      updatedAt: property.updatedAt?.toISOString().split('T')[0],
+      expiresAt: property.expiresAt?.toISOString().split('T')[0] ?? null,
+    };
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    return null;
   }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const formatPrice = (price) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'AED',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price).replace('AED', 'AED ');
+
+// Icon mapping helper
+const getIconComponent = (iconName, defaultIcon = Info) => {
+  if (!iconName) return defaultIcon;
+  
+  const iconMap = {
+    'home': Building,
+    'building': Building,
+    'apartment': Building,
+    'house': Building,
+    'star': Star,
+    'tag': Tag,
+    'grid': Grid,
+    'users': Users,
+    'calendar': Calendar,
+    'clock': Clock,
+    'map-pin': MapPin,
+    'dollar-sign': DollarSign,
+    'check': Check,
+    'eye': Eye,
+    'eye-off': EyeOff,
+    'alert-circle': AlertCircle,
+    'info': Info,
+    'bed-double': BedDouble,
+    'bath': Bath,
+    'maximize-2': Maximize2,
+    'phone': Phone,
+    'mail': Mail,
+    'user': User,
+    'globe': Globe,
+  };
+  
+  return iconMap[iconName.toLowerCase()] || defaultIcon;
 };
 
-export default function PropertyDetailsPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [showBrochureModal, setShowBrochureModal] = useState(false);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const thumbnailRef = useRef(null);
+// Extract coordinates from Google Maps URL
+const extractCoordinatesFromMapLink = (mapLink) => {
+  if (!mapLink) return null;
+  
+  const atCoordinatesRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+  const atMatch = mapLink.match(atCoordinatesRegex);
+  if (atMatch) {
+    return {
+      lat: parseFloat(atMatch[1]),
+      lng: parseFloat(atMatch[2]),
+    };
+  }
+  
+  const qCoordinatesRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+  const qMatch = mapLink.match(qCoordinatesRegex);
+  if (qMatch) {
+    return {
+      lat: parseFloat(qMatch[1]),
+      lng: parseFloat(qMatch[2]),
+    };
+  }
+  
+  return null;
+};
 
-  const [viewingFormData, setViewingFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-    date: '',
-    time: ''
-  });
-
-  const [brochureFormData, setBrochureFormData] = useState({
-    name: '',
-    email: '',
-    phone: ''
-  });
-
-  const property = propertiesData[params.id];
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  useEffect(() => {
-    if (thumbnailRef.current && property?.gallery.length > 4) {
-      const thumbnailElements = thumbnailRef.current.children;
-      if (thumbnailElements[selectedImage]) {
-        thumbnailElements[selectedImage].scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center'
-        });
-      }
+// Generate embed URL for iframe
+const getEmbedMapUrl = (mapLink) => {
+  if (!mapLink) return null;
+  
+  if (mapLink.includes('google.com/maps')) {
+    const coordinates = extractCoordinatesFromMapLink(mapLink);
+    if (coordinates) {
+      return `https://www.google.com/maps/embed/v1/place?key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${coordinates.lat},${coordinates.lng}`;
     }
-  }, [selectedImage, property?.gallery.length]);
+    
+    const placeMatch = mapLink.match(/place\/([^/]+)/);
+    if (placeMatch) {
+      return `https://www.google.com/maps/embed/v1/place?key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${placeMatch[1]}`;
+    }
+  }
+  
+  return mapLink;
+};
 
+// ─── Server-safe sub-components ───────────────────────────────────────────────
+
+function StatusBadge({ status }) {
+  if (!status) return null;
+  
+  const IconComponent = status.icon ? getIconComponent(status.icon) : null;
+  
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+      style={{
+        backgroundColor: `${status.color}20`,
+        color: status.color,
+      }}
+    >
+      {IconComponent && <IconComponent size={12} />}
+      {status.label || status.name}
+    </span>
+  );
+}
+
+function TagPill({ tag }) {
+  if (!tag) return null;
+  
+  const IconComponent = tag.icon ? getIconComponent(tag.icon) : null;
+  
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
+      style={{
+        backgroundColor: `${tag.color}15`,
+        color: tag.color,
+      }}
+    >
+      {IconComponent && <IconComponent size={12} />}
+      {tag.label || tag.name}
+    </span>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default async function PropertyDetailsPage({ params }) {
+  const { id } = await params;
+  const property = await getProperty(id);
+
+  if (!property) notFound();
+
+  const pricePerSqft = property.area ? Math.round(property.price / property.area).toLocaleString() : null;
+  const coordinates = property.mapLink ? extractCoordinatesFromMapLink(property.mapLink) : null;
+  const embedMapUrl = property.mapLink ? getEmbedMapUrl(property.mapLink) : null;
+
+  // Available dates for viewing (you can make this dynamic)
   const availableDates = [
     { day: 'THU', date: '19 FEB' },
     { day: 'FRI', date: '20 FEB' },
@@ -194,825 +261,569 @@ export default function PropertyDetailsPage() {
 
   const availableTimes = ['10:00 AM', '11:00 AM', '12:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
 
-  const handleViewingInputChange = (e) => {
-    const { name, value } = e.target;
-    setViewingFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <Link 
+            href="/properties" 
+            className="inline-flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-800 hover:bg-gray-900 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to Properties
+          </Link>
+          
+          <div className="flex-1 min-w-0">
+            <h1 className="text-white font-semibold text-base truncate">
+              {property.title}
+            </h1>
+            <p className="text-gray-500 text-xs mt-0.5">
+              ID: {property._id}
+            </p>
+          </div>
 
-  const handleBrochureInputChange = (e) => {
-    const { name, value } = e.target;
-    setBrochureFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleViewingSubmit = (e) => {
-    e.preventDefault();
-    alert('Thank you! Your viewing has been scheduled. The agent will contact you shortly.');
-    setViewingFormData({
-      name: '',
-      email: '',
-      phone: '',
-      message: '',
-      date: '',
-      time: ''
-    });
-  };
-
-  const handleBrochureSubmit = (e) => {
-    e.preventDefault();
-    alert('Thank you! The brochure has been sent to your email.');
-    setShowBrochureModal(false);
-    setBrochureFormData({
-      name: '',
-      email: '',
-      phone: ''
-    });
-  };
-
-  const scrollThumbnails = (direction) => {
-    if (thumbnailRef.current) {
-      const scrollAmount = 200;
-      thumbnailRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const openDirections = () => {
-    if (property?.coordinates) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${property.coordinates.lat},${property.coordinates.lng}`, '_blank');
-    }
-  };
-
-  if (!property) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100">
-          <div className="container mx-auto px-4 pt-32 pb-20 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Property Not Found</h1>
-            <p className="text-gray-400 mb-8">The property you're looking for doesn't exist or has been removed.</p>
+          <div className="flex items-center gap-2">
             <Link
-              href="/properties"
-              className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              href={`/admin/properties/${property._id}/edit`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Properties
+              Edit
             </Link>
           </div>
-        </main>
-      </>
-    );
-  }
+        </div>
+      </header>
 
-  const tabs = ['overview', 'features', 'amenities', 'location'];
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8">
+          
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 order-1 space-y-6">
 
-  return (
-    <>
-      <Header />
-      <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100">
-        {/* Hero Section - Adjusted padding for mobile */}
-        <section className="relative pt-24 md:pt-28 pb-8 md:pb-12 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.1),transparent_50%)]" />
-
-          {/* Back Button - Mobile friendly */}
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <motion.button
-              onClick={() => router.back()}
-              className="group mb-4 md:mb-6 inline-flex items-center px-3 md:px-4 py-1.5 md:py-2 bg-gray-800/50 backdrop-blur-sm rounded-lg text-sm md:text-base text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-300 border border-gray-700/50"
-              whileHover={{ x: -5 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg
-                className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2 transform group-hover:-translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Back</span>
-            </motion.button>
-
-            {/* Property Title - Responsive text sizes */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex flex-wrap items-center gap-2 mb-3 md:mb-4">
-                <span className="px-2.5 md:px-3 py-1 bg-gray-800 text-gray-300 text-xs md:text-sm rounded-full border border-gray-700">
-                  {property.category}
-                </span>
-                <span className="px-2.5 md:px-3 py-1 bg-black text-white text-xs md:text-sm rounded-full border border-gray-600">
-                  {property.badge}
-                </span>
+            {/* Image Gallery */}
+            {property.images?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                <ImageGallery images={property.images} title={property.title} />
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-gray-100 to-gray-400 bg-clip-text text-transparent leading-tight">
-                {property.title}
-              </h1>
-              <div className="flex items-start md:items-center text-sm md:text-lg text-gray-400">
-                <svg className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2 mt-0.5 md:mt-0 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="break-words">{property.location}</span>
+            )}
+
+            {/* Price & Status */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                <div>
+                  <div className="text-3xl font-bold text-white">
+                    {formatPrice(property.price)}
+                  </div>
+                  {pricePerSqft && (
+                    <div className="text-sm text-gray-400 mt-1">
+                      <DollarSign size={12} className="inline mr-0.5" />
+                      {pricePerSqft}/sq ft
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {property.purposeTag && <TagPill tag={property.purposeTag} />}
+                  <StatusBadge status={property.status} />
+                  {property.isFeatured && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-500">
+                      <Star size={12} />
+                      Featured
+                    </span>
+                  )}
+                </div>
               </div>
-            </motion.div>
-          </div>
-        </section>
 
-        {/* Main Content - FIXED: Proper stacking on mobile */}
-        <div className="container mx-auto px-4 md:px-6 pb-12 md:pb-20">
-          {/* Mobile: Stack vertically, Desktop: 2/3 - 1/3 grid */}
-          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8">
-            {/* Left Column - Image Gallery & Details - Full width on mobile */}
-            <div className="lg:col-span-2 order-1">
-              {/* Main Image */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl md:rounded-2xl overflow-hidden mb-3 md:mb-4 aspect-video relative group"
-              >
-                {property.gallery[selectedImage] ? (
-                  <Image
-                    src={property.gallery[selectedImage]}
-                    alt={`${property.title} - Image ${selectedImage + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 66vw"
-                    priority
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-6xl md:text-9xl">🏢</span>
+              <p className="text-gray-300 text-sm mb-4">{property.description}</p>
+
+              {/* Key Stats */}
+              <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-gray-800">
+                <div>
+                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                    <BedDouble size={16} />
+                    Bedrooms
                   </div>
-                )}
-
-                {/* Navigation Arrows - Visible on all devices but positioned for touch */}
-                <button
-                  onClick={() => setSelectedImage(prev => (prev > 0 ? prev - 1 : property.gallery.length - 1))}
-                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/70 rounded-full flex items-center justify-center text-white transition-all hover:bg-black/90 backdrop-blur-sm"
-                  aria-label="Previous image"
-                >
-                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setSelectedImage(prev => (prev < property.gallery.length - 1 ? prev + 1 : 0))}
-                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-black/70 rounded-full flex items-center justify-center text-white transition-all hover:bg-black/90 backdrop-blur-sm"
-                  aria-label="Next image"
-                >
-                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-
-                {/* Image Counter */}
-                <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 bg-black/70 backdrop-blur-sm px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm">
-                  {selectedImage + 1} / {property.gallery.length}
-                </div>
-              </motion.div>
-
-              {/* Thumbnail Gallery - Horizontal scroll on mobile */}
-              <motion.div
-                className="relative mb-6 md:mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                {/* Scroll Buttons - Hidden on mobile, show on desktop */}
-                {property.gallery.length > 4 && (
-                  <>
-                    <button
-                      onClick={() => scrollThumbnails('left')}
-                      className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-black/70 rounded-full items-center justify-center text-white hover:bg-black/90 transition-all backdrop-blur-sm -ml-3"
-                      aria-label="Scroll thumbnails left"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => scrollThumbnails('right')}
-                      className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-black/70 rounded-full items-center justify-center text-white hover:bg-black/90 transition-all backdrop-blur-sm -mr-3"
-                      aria-label="Scroll thumbnails right"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </>
-                )}
-
-                {/* Thumbnails - Horizontal scroll on mobile, grid on desktop */}
-                <div
-                  ref={thumbnailRef}
-                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
-                  style={{
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
-                  }}
-                >
-                  {property.gallery.map((img, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`relative flex-shrink-0 w-20 h-20 md:w-28 md:h-28 rounded-lg overflow-hidden transition-all ${selectedImage === index
-                          ? 'ring-2 ring-white scale-95 opacity-100'
-                          : 'opacity-70 hover:opacity-100'
-                        }`}
-                      aria-label={`View image ${index + 1}`}
-                    >
-                      <Image
-                        src={img}
-                        alt={`${property.title} - Thumbnail ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, (max-width: 1024px) 120px, 160px"
-                      />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Scroll indicator dots for mobile */}
-                {property.gallery.length > 4 && (
-                  <div className="flex md:hidden justify-center gap-1 mt-2">
-                    {property.gallery.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImage(index)}
-                        className={`w-1.5 h-1.5 rounded-full transition-all ${selectedImage === index ? 'bg-white w-3' : 'bg-gray-600'
-                          }`}
-                        aria-label={`Go to image ${index + 1}`}
-                      />
-                    ))}
+                  <div className="text-2xl font-semibold text-white">
+                    {property.bedrooms ?? '0'}
                   </div>
-                )}
-              </motion.div>
-
-              {/* Tabs - Horizontal scroll on mobile */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <div className="flex gap-1 md:gap-4 border-b border-gray-800 mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
-                  {tabs.map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-3 md:px-4 py-2 capitalize font-medium text-sm md:text-base transition-colors relative whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'
-                        }`}
-                    >
-                      {tab}
-                      {activeTab === tab && (
-                        <motion.div
-                          layoutId="activeTab"
-                          className="absolute bottom-0 left-0 right-0 h-0.5 bg-white"
-                        />
-                      )}
-                    </button>
-                  ))}
                 </div>
-
-                <div className="bg-gray-800/30 rounded-lg md:rounded-xl p-4 md:p-6">
-                  {activeTab === 'overview' && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Property Overview</h3>
-                      <p className="text-sm md:text-base text-gray-300 leading-relaxed mb-4 md:mb-6">
-                        {property.fullDescription}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2 md:gap-4">
-                        <div className="bg-gray-800/50 p-3 md:p-4 rounded-lg">
-                          <span className="text-xs md:text-sm text-gray-400">Property Type</span>
-                          <p className="text-sm md:text-base text-white font-semibold">{property.type}</p>
-                        </div>
-                        <div className="bg-gray-800/50 p-3 md:p-4 rounded-lg">
-                          <span className="text-xs md:text-sm text-gray-400">Price</span>
-                          <p className="text-sm md:text-base text-white font-semibold">{property.price}</p>
-                        </div>
-                        <div className="bg-gray-800/50 p-3 md:p-4 rounded-lg">
-                          <span className="text-xs md:text-sm text-gray-400">Handover</span>
-                          <p className="text-sm md:text-base text-white font-semibold">{property.priceDetails.handover}</p>
-                        </div>
-                        <div className="bg-gray-800/50 p-3 md:p-4 rounded-lg">
-                          <span className="text-xs md:text-sm text-gray-400">Payment Plan</span>
-                          <p className="text-sm md:text-base text-white font-semibold">{property.priceDetails.paymentPlan}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'features' && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Key Features</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-                        {property.features.map((feature, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="text-green-400 text-base md:text-xl flex-shrink-0">✓</span>
-                            <span className="text-sm md:text-base text-gray-300">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'amenities' && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Amenities</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-                        {property.amenities.map((amenity, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="text-blue-400 text-base md:text-xl flex-shrink-0">•</span>
-                            <span className="text-sm md:text-base text-gray-300">{amenity}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'location' && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Nearby Locations</h3>
-                      <div className="space-y-2 md:space-y-3">
-                        {property.nearby.map((place, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <span className="text-base md:text-lg text-gray-400">📍</span>
-                            <span className="text-sm md:text-base text-gray-300">{place}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
+                <div>
+                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                    <Bath size={16} />
+                    Bathrooms
+                  </div>
+                  <div className="text-2xl font-semibold text-white">
+                    {property.bathrooms ?? '0'}
+                  </div>
                 </div>
-              </motion.div>
-            </div>
-
-            {/* Right Column - Contact & Info - Moves to top on mobile */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-1 order-2 lg:order-2"
-            >
-              {/* Price Card - Full width on mobile */}
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg md:rounded-xl p-4 md:p-6 mb-4 md:mb-6">
-                <div className="text-center mb-4 md:mb-6">
-                  <span className="text-2xl md:text-3xl font-bold text-white">{property.price}</span>
-                  <p className="text-xs md:text-sm text-gray-400 mt-1">{property.priceDetails.paymentPlan}</p>
+                <div>
+                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                    <Maximize2 size={16} />
+                    Area
+                  </div>
+                  <div className="text-2xl font-semibold text-white">
+                    {property.area?.toLocaleString() ?? '0'}
+                    <span className="text-sm font-normal text-gray-500 ml-1">ft²</span>
+                  </div>
                 </div>
+              </div>
 
-                {/* Agent Info */}
-                <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6 p-3 md:p-4 bg-gray-800/80 rounded-lg md:rounded-xl">
-                  <div className="relative w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
-                    {property.agent.image ? (
-                      <Image
-                        src={property.agent.image}
-                        alt={property.agent.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-2xl md:text-3xl">
-                        👤
+              {/* Location */}
+              {(property.address || property.city) && (
+                <div className="flex items-start gap-3 pt-4">
+                  <MapPin size={18} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    {property.address && (
+                      <div className="text-white font-medium">
+                        {property.address}
                       </div>
                     )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs md:text-sm text-gray-400">Listing Agent</p>
-                    <p className="text-sm md:text-base font-semibold truncate">{property.agent.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <a href={`tel:${property.agent.phone}`} className="text-xs md:text-sm text-gray-400 hover:text-white transition-colors">
-                        📞 Call
-                      </a>
-                      <span className="text-gray-600">|</span>
-                      <a href={`mailto:${property.agent.email}`} className="text-xs md:text-sm text-gray-400 hover:text-white transition-colors truncate">
-                        ✉️ Email
-                      </a>
+                    <div className="text-sm text-gray-400">
+                      {[property.city, property.state, property.zipCode].filter(Boolean).join(', ')}
                     </div>
                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* Viewing Form - Always visible */}
-                <div className="mb-4 md:mb-6">
-                  <div className="bg-gray-800/80 rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-700">
-                    <h3 className="text-sm md:text-base font-semibold mb-3 flex items-center gap-2">
-                      <span className="text-blue-400">📅</span>
-                      Schedule a Viewing
-                    </h3>
+            {/* Full Description */}
+            {property.fullDescription && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Detailed Description
+                </h2>
+                <p className="text-gray-300 leading-relaxed">
+                  {property.fullDescription}
+                </p>
+              </div>
+            )}
 
-                    {/* Tour Options */}
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-3 md:gap-4 mb-3">
-                        <label className="flex items-center gap-1.5">
-                          <input type="radio" name="tourType" value="in-person" className="text-blue-500" defaultChecked />
-                          <span className="text-xs md:text-sm text-white">In Person</span>
-                        </label>
-                        <label className="flex items-center gap-1.5">
-                          <input type="radio" name="tourType" value="video" />
-                          <span className="text-xs md:text-sm text-white">Video Chat</span>
-                        </label>
-                      </div>
+            {/* Features */}
+            {property.features?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Key Features
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {property.features.map((feature, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <Check size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-300">{feature}</span>
                     </div>
-
-                    {/* Date Selection */}
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-400 mb-2">PICK A DATE</p>
-                      <div className="grid grid-cols-5 gap-1">
-                        {availableDates.map((date, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => setViewingFormData(prev => ({ ...prev, date: `${date.day} ${date.date}` }))}
-                            className={`p-1 text-center rounded-lg transition-all text-xs ${viewingFormData.date === `${date.day} ${date.date}`
-                                ? 'bg-white text-black'
-                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                              }`}
-                          >
-                            <div className="text-[10px] md:text-xs">{date.day}</div>
-                            <div className="font-semibold text-[10px] md:text-xs">{date.date}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Time Selection */}
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-400 mb-2">PICK A TIME</p>
-                      <select
-                        name="time"
-                        value={viewingFormData.time}
-                        onChange={handleViewingInputChange}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-xs md:text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                      >
-                        <option value="">Select time</option>
-                        {availableTimes.map(time => (
-                          <option key={time} value={time}>{time}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Contact Info */}
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Name"
-                      value={viewingFormData.name}
-                      onChange={handleViewingInputChange}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-xs md:text-sm text-white placeholder-gray-400 mb-2 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      required
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Email"
-                      value={viewingFormData.email}
-                      onChange={handleViewingInputChange}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-xs md:text-sm text-white placeholder-gray-400 mb-2 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      required
-                    />
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="Phone"
-                      value={viewingFormData.phone}
-                      onChange={handleViewingInputChange}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-xs md:text-sm text-white placeholder-gray-400 mb-3 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      required
-                    />
-                    <textarea
-                      name="message"
-                      placeholder="Message to agent"
-                      value={viewingFormData.message}
-                      onChange={handleViewingInputChange}
-                      rows="2"
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-xs md:text-sm text-white placeholder-gray-400 mb-3 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
-                    />
-
-                    <button
-                      onClick={handleViewingSubmit}
-                      className="w-full bg-blue-600 text-white py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-medium hover:bg-blue-700 transition-colors"
-                    >
-                      Book Appointment
-                    </button>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-2 md:space-y-3">
-                  <motion.button
-                    className="w-full bg-white text-black px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-200 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowBrochureModal(true)}
-                  >
-                    Download Brochure
-                  </motion.button>
-                </div>
-
-                {/* Specs */}
-                <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-700">
-                  <h4 className="text-sm md:text-base font-semibold mb-2 md:mb-3">Property Specs</h4>
-                  <div className="space-y-1.5 md:space-y-2">
-                    {property.specs.map((spec, index) => (
-                      <div key={index} className="flex justify-between text-xs md:text-sm">
-                        <span className="text-gray-400">{spec.split(':')[0]}</span>
-                        <span className="text-white font-medium">{spec.split(':')[1] || spec}</span>
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
-            </motion.div>
-          </div>
-        </div>
+            )}
 
-        {/* Location Map Section - Responsive */}
-        <section className="relative py-10 md:py-16 border-t border-gray-800">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.05),transparent_70%)]" />
-
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="text-center mb-6 md:mb-10"
-            >
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-gray-100 to-gray-400 bg-clip-text text-transparent">
-                Location
-              </h2>
-              <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto px-4">
-                {property.location}
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-gray-800/30 backdrop-blur-sm rounded-xl md:rounded-2xl overflow-hidden border border-gray-700/50"
-            >
-              {/* Map Container */}
-              <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] group">
-                {!mapLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-800/50 backdrop-blur-sm z-10">
-                    <div className="text-center px-4">
-                      <div className="w-8 h-8 md:w-10 md:h-12 border-4 border-gray-600 border-t-white rounded-full animate-spin mx-auto mb-3 md:mb-4"></div>
-                      <p className="text-xs md:text-sm text-gray-400">Loading map...</p>
+            {/* Amenities */}
+            {property.amenities?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Amenities
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {property.amenities.map((amenity, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <span className="text-blue-400 text-lg flex-shrink-0">•</span>
+                      <span className="text-sm text-gray-300">{amenity}</span>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Nearby Places */}
+            {property.nearby?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Nearby Locations
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {property.nearby.map((place, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <span className="text-gray-400 text-lg">📍</span>
+                      <span className="text-sm text-gray-300">{place}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {property.tags?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Tags
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {property.tags.map((tag) => (
+                    <TagPill key={tag._id} tag={tag} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Map */}
+            {property.mapLink && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={18} className="text-blue-500" />
+                    <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                      Location Map
+                    </h2>
+                  </div>
+                  <a
+                    href={property.mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Open in Maps
+                  </a>
+                </div>
+
+                {embedMapUrl && (
+                  <div className="relative w-full h-64 rounded-lg overflow-hidden border border-gray-700">
+                    <iframe
+                      src={embedMapUrl}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`Map location for ${property.title}`}
+                      className="absolute inset-0"
+                    />
                   </div>
                 )}
 
-                <iframe
-                  src={property.mapEmbedUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  onLoad={() => setMapLoaded(true)}
-                  className="w-full h-full"
-                  title={`${property.title} location map`}
-                />
-
-                {/* Map Overlay Controls */}
-                <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 flex gap-2">
-                  <motion.button
-                    onClick={openDirections}
-                    className="bg-black/80 backdrop-blur-sm text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-black transition-colors border border-gray-700 flex items-center gap-1.5"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                    <span className="hidden xs:inline">Get Directions</span>
-                    <span className="xs:hidden">Directions</span>
-                  </motion.button>
-                </div>
-
-                {/* Location Info Card - Hidden on mobile */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  viewport={{ once: true }}
-                  className="hidden md:block absolute top-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-700 max-w-[200px] md:max-w-xs"
-                >
-                  <h3 className="text-xs md:text-sm font-semibold mb-1.5 md:mb-2 flex items-center gap-1.5">
-                    <span className="text-red-400">📍</span>
-                    Property Location
-                  </h3>
-                  <p className="text-xs text-gray-300 mb-2 md:mb-3">{property.location}</p>
-
-                  <div className="space-y-1 md:space-y-2">
-                    <p className="text-[10px] md:text-xs text-gray-400">Nearby Places:</p>
-                    {property.nearby.slice(0, 2).map((place, index) => (
-                      <div key={index} className="flex items-start gap-1 text-[10px] md:text-xs">
-                        <span className="text-gray-500 mt-0.5">•</span>
-                        <span className="text-gray-300">{place}</span>
-                      </div>
-                    ))}
+                {coordinates && (
+                  <div className="mt-3 text-xs text-gray-500 flex items-center gap-2">
+                    <span>Lat: {coordinates.lat.toFixed(6)}</span>
+                    <span>Lng: {coordinates.lng.toFixed(6)}</span>
                   </div>
-                </motion.div>
+                )}
               </div>
+            )}
+          </div>
 
-              {/* Map Footer */}
-              <div className="p-3 md:p-4 border-t border-gray-700/50 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-4">
-                <div className="flex flex-wrap items-center gap-2 xs:gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-gray-400">Interactive Map</span>
+          {/* Right Column - Sidebar */}
+          <div className="lg:col-span-1 order-2 space-y-6">
+
+            {/* Property Type */}
+            {property.propertyType && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Property Type
+                </h2>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center">
+                    {property.propertyType.icon ? (
+                      (() => {
+                        const IconComponent = getIconComponent(property.propertyType.icon, Building);
+                        return <IconComponent size={20} className="text-gray-300" />;
+                      })()
+                    ) : (
+                      <Building size={20} className="text-gray-400" />
+                    )}
                   </div>
-                  <span className="text-gray-600 hidden xs:inline">|</span>
-                  <span className="text-xs text-gray-400">
-                    {property.coordinates ? `${property.coordinates.lat.toFixed(4)}° N, ${property.coordinates.lng.toFixed(4)}° E` : 'Location available'}
+                  <div>
+                    <div className="text-white font-medium">
+                      {property.propertyType.name}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Price Details */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                Price Details
+              </h2>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">Payment Plan</span>
+                  <span className="text-sm text-white font-medium">{property.priceDetails.paymentPlan}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">Maintenance</span>
+                  <span className="text-sm text-white font-medium">{property.priceDetails.maintenance}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">Handover</span>
+                  <span className="text-sm text-white font-medium">{property.priceDetails.handover}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Publishing Status */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                Publishing Status
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Globe size={16} />
+                    <span className="text-sm">Status</span>
+                  </div>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                    property.isPublished 
+                      ? 'bg-green-500/20 text-green-500' 
+                      : 'bg-gray-800 text-gray-400'
+                  }`}>
+                    {property.isPublished ? (
+                      <>
+                        <Eye size={12} />
+                        Published
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff size={12} />
+                        Draft
+                      </>
+                    )}
                   </span>
                 </div>
 
-                <motion.a
-                  href={`https://www.google.com/maps/search/?api=1&query=${property.coordinates.lat},${property.coordinates.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1"
-                  whileHover={{ x: 2 }}
-                >
-                  <span>View on Maps</span>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </motion.a>
-              </div>
-            </motion.div>
-
-            {/* Nearby Places Grid - Responsive */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="mt-6 md:mt-8 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4"
-            >
-              {property.nearby.map((place, index) => (
-                <div key={index} className="bg-gray-800/30 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-700/50 hover:border-gray-600 transition-colors">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <span className="text-xl md:text-2xl">📍</span>
-                    <div className="min-w-0">
-                      <p className="text-xs md:text-sm font-medium text-white truncate">{place.split('(')[0].trim()}</p>
-                      <p className="text-[10px] md:text-xs text-gray-400">{place.match(/\((.*?)\)/)?.[1] || ''}</p>
+                {property.expiresAt && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Clock size={16} />
+                      <span className="text-sm">Expires</span>
                     </div>
+                    <span className="text-sm text-white">{property.expiresAt}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                Timeline
+              </h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <CalendarDays size={16} />
+                    <span className="text-sm">Created</span>
+                  </div>
+                  <span className="text-sm text-white">{property.createdAt}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <RefreshCw size={16} />
+                    <span className="text-sm">Updated</span>
+                  </div>
+                  <span className="text-sm text-white">{property.updatedAt}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Agent Information */}
+            {(property.agent?.name || property.agent?.phone || property.agent?.email) && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Agent Information
+                </h2>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
+                    {property.agent.image ? (
+                      <img 
+                        src={property.agent.image} 
+                        alt={property.agent.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <User size={20} className="text-gray-400" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    {property.agent.name && (
+                      <div className="text-white font-medium mb-1">
+                        {property.agent.name}
+                      </div>
+                    )}
+                    {property.agent.phone && (
+                      <a href={`tel:${property.agent.phone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-1">
+                        <Phone size={14} />
+                        {property.agent.phone}
+                      </a>
+                    )}
+                    {property.agent.email && (
+                      <a href={`mailto:${property.agent.email}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+                        <Mail size={14} />
+                        {property.agent.email}
+                      </a>
+                    )}
                   </div>
                 </div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-      </main>
+              </div>
+            )}
 
-      {/* Brochure Modal - Responsive */}
-      <AnimatePresence>
-        {showBrochureModal && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowBrochureModal(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
-            />
+            {/* Specs */}
+            {property.specs?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Property Specs
+                </h2>
+                <div className="space-y-2">
+                  {property.specs.map((spec, index) => (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-400">{spec.split(':')[0]}</span>
+                      <span className="text-white font-medium">{spec.split(':')[1] || spec}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Modal - Full width on mobile */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl md:rounded-2xl shadow-2xl z-50 overflow-hidden"
-            >
-              {/* Header */}
-              <div className="relative p-4 md:p-6 border-b border-gray-700">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-white">Download Brochure</h2>
-                <p className="text-xs md:text-sm text-gray-400 mt-1">Get detailed information about this property</p>
-                <button
-                  onClick={() => setShowBrochureModal(false)}
-                  className="absolute top-3 md:top-4 right-3 md:right-4 text-gray-400 hover:text-white transition-colors"
-                  aria-label="Close modal"
-                >
-                  <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+            {/* Quick Summary */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                Quick Summary
+              </h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <BedDouble size={16} />
+                    <span className="text-sm">Bedrooms</span>
+                  </div>
+                  <span className="text-sm text-white">{property.bedrooms || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Bath size={16} />
+                    <span className="text-sm">Bathrooms</span>
+                  </div>
+                  <span className="text-sm text-white">{property.bathrooms || '—'}</span>
+                </div>
+                {property.area && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Maximize2 size={16} />
+                      <span className="text-sm">Area</span>
+                    </div>
+                    <span className="text-sm text-white">{property.area.toLocaleString()} ft²</span>
+                  </div>
+                )}
+                {pricePerSqft && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <DollarSign size={16} />
+                      <span className="text-sm">Price/sq ft</span>
+                    </div>
+                    <span className="text-sm text-white">AED {pricePerSqft}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-gray-800">
+                <div className="text-sm text-gray-400 mb-1">Total Price</div>
+                <div className="text-2xl font-bold text-white">
+                  {formatPrice(property.price)}
+                </div>
+              </div>
+            </div>
+
+            {/* Schedule Viewing Form */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <CalendarDays size={16} className="text-blue-400" />
+                Schedule a Viewing
+              </h2>
+
+              {/* Tour Options */}
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-3 mb-3">
+                  <label className="flex items-center gap-1.5">
+                    <input type="radio" name="tourType" value="in-person" className="text-blue-500" defaultChecked />
+                    <span className="text-xs text-white">In Person</span>
+                  </label>
+                  <label className="flex items-center gap-1.5">
+                    <input type="radio" name="tourType" value="video" />
+                    <span className="text-xs text-white">Video Chat</span>
+                  </label>
+                </div>
               </div>
 
-              {/* Simple Form */}
-              <form onSubmit={handleBrochureSubmit} className="p-4 md:p-6">
-                <div className="space-y-3 md:space-y-4 mb-4 md:mb-6">
-                  <div>
-                    <label className="block text-xs md:text-sm text-gray-400 mb-1">Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={brochureFormData.name}
-                      onChange={handleBrochureInputChange}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      placeholder="Enter your full name"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs md:text-sm text-gray-400 mb-1">Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={brochureFormData.email}
-                      onChange={handleBrochureInputChange}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      placeholder="Enter your email address"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs md:text-sm text-gray-400 mb-1">Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={brochureFormData.phone}
-                      onChange={handleBrochureInputChange}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      placeholder="Enter your phone number"
-                      required
-                    />
-                  </div>
+              {/* Date Selection */}
+              <div className="mb-4">
+                <p className="text-xs text-gray-400 mb-2">PICK A DATE</p>
+                <div className="grid grid-cols-5 gap-1">
+                  {availableDates.map((date, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className="p-1 text-center rounded-lg transition-all bg-gray-800 text-gray-300 hover:bg-gray-700 text-xs"
+                    >
+                      <div className="text-[10px]">{date.day}</div>
+                      <div className="font-semibold text-[10px]">{date.date}</div>
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Submit Button */}
+              {/* Time Selection */}
+              <div className="mb-4">
+                <p className="text-xs text-gray-400 mb-2">PICK A TIME</p>
+                <select
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                >
+                  <option value="">Select time</option>
+                  {availableTimes.map(time => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Contact Info */}
+              <form action="/api/schedule-viewing" method="POST">
+                <input type="hidden" name="propertyId" value={property._id} />
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Name"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-2 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  required
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-2 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  required
+                />
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Phone"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  required
+                />
+                <textarea
+                  name="message"
+                  placeholder="Message to agent"
+                  rows="2"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
+                />
+
                 <button
                   type="submit"
-                  className="w-full bg-white text-black py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-semibold hover:bg-gray-200 transition-colors"
+                  className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Send Brochure
+                  Book Appointment
                 </button>
               </form>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Add custom CSS for hiding scrollbar */}
-      <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        /* Extra small devices (phones, 375px and down) */
-        @media (max-width: 375px) {
-          .xs\\:inline {
-            display: inline;
-          }
-          .xs\\:hidden {
-            display: none;
-          }
-          .xs\\:flex-row {
-            flex-direction: row;
-          }
-        }
-      `}</style>
-    </>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

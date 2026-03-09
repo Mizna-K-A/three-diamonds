@@ -4,7 +4,7 @@ import connectDB from '../../../../lib/mongodb';
 import PropertyType from '../../../../lib/models/PropertyType';
 import Property from '../../../../lib/models/Property';
 
-async function getPropertyTypes() {
+export async function getPropertyTypes() {
   try {
     await connectDB();
 
