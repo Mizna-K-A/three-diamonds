@@ -1,5 +1,5 @@
 import AboutPage from "../components/AboutPage";
-import Header from "../components/Header";
+import HeaderWithPropertyTypes from "../components/HeaderWithPropertyTypes";
 
 export const metadata = {
   title: 'About Us - Three Diamonds Real Estate',
@@ -9,7 +9,7 @@ export const metadata = {
 export default function About() {
   return (
  <>
-  <Header/>
+  <HeaderWithPropertyTypes/>
   <AboutPage />
  </>
   );

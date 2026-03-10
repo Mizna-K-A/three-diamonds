@@ -3,10 +3,22 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key, Computer } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Header() {
+// Resolve Lucide icon by name string (from PropertyType.icon)
+function getIconComponent(name) {
+  if (!name) return Home;
+  const pascalName = String(name)
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  return LucideIcons[pascalName] || Home;
+}
+
+export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
+  const [propertyTypes, setPropertyTypes] = useState(initialPropertyTypes);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
@@ -21,6 +33,18 @@ export default function Header() {
   const mobileMenuRef = useRef(null);
   const headerRef = useRef(null);
   const logoRef = useRef(null);
+
+  // Sync server-passed property types or fetch when empty (client pages)
+  useEffect(() => {
+    if (initialPropertyTypes?.length > 0) {
+      setPropertyTypes(initialPropertyTypes);
+      return;
+    }
+    fetch('/api/property-types')
+      .then((res) => res.json())
+      .then((data) => setPropertyTypes(Array.isArray(data) ? data : []))
+      .catch(() => setPropertyTypes([]));
+  }, [initialPropertyTypes]);
 
   useEffect(() => {
     // Set initial window width
@@ -109,6 +133,16 @@ export default function Header() {
     };
   }, [isMenuOpen, windowWidth]);
 
+  // Build Properties dropdown from dynamic property types (server-rendered)
+  const propertiesDropdownItems = [
+    { label: 'All Properties', href: '/properties', icon: Home },
+    ...propertyTypes.map((type) => ({
+      label: type.name,
+      href: `/properties?type=${encodeURIComponent(type.slug)}`,
+      icon: getIconComponent(type.icon),
+    })),
+  ];
+
   const navItems = [
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
@@ -131,14 +165,7 @@ export default function Header() {
       label: 'Properties',
       href: '/properties',
       hasDropdown: true,
-      dropdownItems: [
-        { label: 'All Properties', href: '/properties', icon: Home },
-        { label: 'Residential', href: '/properties?type=residential', icon: Home },
-        { label: 'Commercial', href: '/properties?type=commercial', icon: Building },
-        { label: 'Industrial', href: '/properties?type=industrial', icon: Warehouse },
-        { label: 'Luxury Estates', href: '/properties?type=luxury', icon: Hotel },
-        { label: 'New Developments', href: '/properties?type=new-developments', icon: Building2 },
-      ]
+      dropdownItems: propertiesDropdownItems,
     },
     { label: 'Insights', href: '/insights' },
     { label: 'Contact Us', href: '/contact' },

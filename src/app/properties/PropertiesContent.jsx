@@ -79,12 +79,22 @@ export default function PropertiesContent({
     }
   }, [searchParams]);
 
-  // Get unique categories from property types or use default
+  // Get categories from property types: use slug for URL/filter, name for display
   const categories = useMemo(() => {
     if (propertyTypes && propertyTypes.length > 0) {
-      return ['all', ...propertyTypes.map(type => type.name)];
+      return [
+        { value: 'all', label: 'All Types' },
+        ...propertyTypes.map((type) => ({ value: type.slug, label: type.name })),
+      ];
     }
-    return ['all', 'Residential', 'Commercial', 'Industrial', 'Retail', 'Luxury'];
+    return [
+      { value: 'all', label: 'All Types' },
+      { value: 'residential', label: 'Residential' },
+      { value: 'commercial', label: 'Commercial' },
+      { value: 'industrial', label: 'Industrial' },
+      { value: 'retail', label: 'Retail' },
+      { value: 'luxury', label: 'Luxury' },
+    ];
   }, [propertyTypes]);
 
   // Filter properties based on selected filters
@@ -98,9 +108,12 @@ export default function PropertiesContent({
         property.city?.toLowerCase().includes(searchLower) ||
         property.description?.toLowerCase().includes(searchLower);
 
-      // Type filter
+      // Type filter (selectedType is slug from URL; support legacy name for backwards compat)
       const matchesType = selectedType === 'all' ||
-        (property.propertyType && property.propertyType.name === selectedType) ||
+        (property.propertyType && (
+          property.propertyType.slug === selectedType ||
+          property.propertyType.name === selectedType
+        )) ||
         property.category === selectedType;
 
       // Status filter
@@ -299,12 +312,12 @@ export default function PropertiesContent({
             className="text-center"
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gray-100 to-gray-400 bg-clip-text text-transparent">
-              {selectedType === 'all' ? 'ALL PROPERTIES' : `${selectedType.toUpperCase()} PROPERTIES`}
+              {selectedType === 'all' ? 'ALL PROPERTIES' : `${(categories.find(c => c.value === selectedType)?.label || selectedType).toUpperCase()} PROPERTIES`}
             </h1>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               {selectedType === 'all'
                 ? 'Discover our complete portfolio of premium real estate opportunities across Dubai'
-                : `Explore our exclusive collection of ${selectedType.toLowerCase()} properties in prime locations`}
+                : `Explore our exclusive collection of ${(categories.find(c => c.value === selectedType)?.label || selectedType).toLowerCase()} properties in prime locations`}
             </p>
           </motion.div>
         </div>
@@ -331,10 +344,9 @@ export default function PropertiesContent({
                       paddingRight: '2.5rem'
                     }}
                   >
-                    <option value="all">All Types</option>
-                    {categories.filter(c => c !== 'all').map((category) => (
-                      <option key={category} value={category}>
-                        {category}
+                    {categories.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
                       </option>
                     ))}
                   </select>
@@ -443,7 +455,7 @@ export default function PropertiesContent({
                   
                   {selectedType !== 'all' && (
                     <span className="px-3 py-1 bg-gray-800 rounded-full text-xs text-gray-300 flex items-center gap-1">
-                      Type: {selectedType}
+                      Type: {categories.find(c => c.value === selectedType)?.label || selectedType}
                       <button onClick={() => handleTypeChange({ target: { value: 'all' } })}>
                         <X size={12} />
                       </button>

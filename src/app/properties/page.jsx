@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import Header from '../components/Header';
+import HeaderWithPropertyTypes from '../components/HeaderWithPropertyTypes';
 import PropertiesContent from './PropertiesContent';
 import { getProperties } from '../admin/properties/page';
 import { getPropertyTypes } from '../admin/property-types/page';
@@ -14,7 +14,7 @@ export default async function PropertiesPage() {
 
   return (
     <>
-      <Header />
+      <HeaderWithPropertyTypes />
       <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100">
         <Suspense fallback={
           <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">

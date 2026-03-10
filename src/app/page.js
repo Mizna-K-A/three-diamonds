@@ -1,5 +1,5 @@
 // app/page.jsx
-import Header from './components/Header';
+import HeaderWithPropertyTypes from './components/HeaderWithPropertyTypes';
 import Hero from './components/Hero';
 import Team from './components/Team';
 import Services from './components/Services';
@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <Loader>
       <main className="min-h-screen">
-        <Header />
+        <HeaderWithPropertyTypes />
         <Hero />
         <Team />
         <Services />
