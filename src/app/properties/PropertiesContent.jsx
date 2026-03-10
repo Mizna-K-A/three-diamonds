@@ -379,12 +379,12 @@ export default function PropertiesContent({
                 {/* DETAILS */}
 
                 <div className="grid grid-cols-3 gap-2 text-center text-sm mb-4">
-                  <div className="bg-gray-900 p-2 rounded">
+                  {/* <div className="bg-gray-900 p-2 rounded">
                     {property.bedrooms || 0} Beds
                   </div>
                   <div className="bg-gray-900 p-2 rounded">
                     {property.bathrooms || 0} Baths
-                  </div>
+                  </div> */}
                   <div className="bg-gray-900 p-2 rounded">
                     {property.area || 0} sqft
                   </div>

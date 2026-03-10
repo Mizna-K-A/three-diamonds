@@ -638,7 +638,7 @@ export default function PropertyForm({
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: Home },
     { id: 'location', label: 'Location', icon: MapPin },
-    { id: 'details', label: 'Details', icon: Settings },
+    // { id: 'details', label: 'Details', icon: Settings },
     { id: 'tags', label: 'Tags', icon: Tag },
     { id: 'features', label: 'Features', icon: Check },
     { id: 'images', label: 'Images', icon: ImageIcon },

@@ -305,7 +305,7 @@ export default function PropertiesClient({
               )}
 
               {/* Action Buttons */}
-              <div className="absolute top-3 right-3 flex gap-2">
+              {/* <div className="absolute top-3 right-3 flex gap-2">
                 <button
                   onClick={() => handleTogglePublish(property._id)}
                   className={`p-2 rounded-lg transition-colors ${
@@ -328,7 +328,7 @@ export default function PropertiesClient({
                 >
                   {property.isFeatured ? <Star size={16} /> : <StarOff size={16} />}
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Content */}
@@ -360,14 +360,14 @@ export default function PropertiesClient({
 
               {/* Details */}
               <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
-                <div className="bg-gray-900 rounded-lg p-2 text-center">
+                {/* <div className="bg-gray-900 rounded-lg p-2 text-center">
                   <span className="text-gray-500">Beds</span>
                   <div className="text-white font-medium">{property.bedrooms || 0}</div>
                 </div>
                 <div className="bg-gray-900 rounded-lg p-2 text-center">
                   <span className="text-gray-500">Baths</span>
                   <div className="text-white font-medium">{property.bathrooms || 0}</div>
-                </div>
+                </div> */}
                 <div className="bg-gray-900 rounded-lg p-2 text-center">
                   <span className="text-gray-500">Area</span>
                   <div className="text-white font-medium">{property.area || 0} sqft</div>

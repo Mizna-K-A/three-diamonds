@@ -338,7 +338,7 @@ export default async function PropertyDetailsPage({ params }) {
 
               {/* Key Stats */}
               <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-gray-800">
-                <div>
+                {/* <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <BedDouble size={16} />
                     Bedrooms
@@ -355,7 +355,7 @@ export default async function PropertyDetailsPage({ params }) {
                   <div className="text-2xl font-semibold text-white">
                     {property.bathrooms ?? '0'}
                   </div>
-                </div>
+                </div> */}
                 <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <Maximize2 size={16} />

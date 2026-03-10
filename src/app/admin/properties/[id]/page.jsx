@@ -484,7 +484,7 @@ export default async function PropertyDetailPage({ params }) {
 
               {/* Key Stats */}
               <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-gray-800">
-                <div>
+                {/* <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <BedDouble size={16} />
                     Bedrooms
@@ -492,8 +492,8 @@ export default async function PropertyDetailPage({ params }) {
                   <div className="text-2xl font-semibold text-white">
                     {property.bedrooms ?? '0'}
                   </div>
-                </div>
-                <div>
+                </div> */}
+                {/* <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <Bath size={16} />
                     Bathrooms
@@ -501,7 +501,7 @@ export default async function PropertyDetailPage({ params }) {
                   <div className="text-2xl font-semibold text-white">
                     {property.bathrooms ?? '0'}
                   </div>
-                </div>
+                </div> */}
                 <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <Maximize2 size={16} />
@@ -558,52 +558,9 @@ export default async function PropertyDetailPage({ params }) {
               </div>
             )}
 
-            {/* Tags */}
-            {property.tags?.length > 0 && (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                  Tags
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {property.tags.map((tag) => (
-                    <TagPill key={tag._id} tag={tag} />
-                  ))}
-                </div>
-              </div>
-            )}
+            
 
-            {/* Agent Information */}
-            {(property.agentName || property.agentPhone || property.agentEmail) && (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                  Agent Information
-                </h2>
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
-                    <User size={20} className="text-gray-400" />
-                  </div>
-                  <div className="flex-1">
-                    {property.agentName && (
-                      <div className="text-white font-medium mb-1">
-                        {property.agentName}
-                      </div>
-                    )}
-                    {property.agentPhone && (
-                      <a href={`tel:${property.agentPhone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-1">
-                        <Phone size={14} />
-                        {property.agentPhone}
-                      </a>
-                    )}
-                    {property.agentEmail && (
-                      <a href={`mailto:${property.agentEmail}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
-                        <Mail size={14} />
-                        {property.agentEmail}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+            
 
             {/* Map Preview - Added here */}
             {property.mapLink && (
@@ -646,7 +603,7 @@ export default async function PropertyDetailPage({ params }) {
             )}
 
             {/* Publishing Status */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            {/* <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
               <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
                 Publishing Status
               </h2>
@@ -699,8 +656,20 @@ export default async function PropertyDetailPage({ params }) {
                   </div>
                 )}
               </div>
-            </div>
-
+            </div> */}
+{/* Tags */}
+            {property.tags?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Tags
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {property.tags.map((tag) => (
+                    <TagPill key={tag._id} tag={tag} />
+                  ))}
+                </div>
+              </div>
+            )}
             {/* Timeline */}
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
               <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
@@ -718,8 +687,8 @@ export default async function PropertyDetailPage({ params }) {
                 Quick Summary
               </h2>
               <div className="space-y-3">
-                <InfoRow icon={BedDouble} label="Bedrooms" value={property.bedrooms} />
-                <InfoRow icon={Bath} label="Bathrooms" value={property.bathrooms} />
+                {/* <InfoRow icon={BedDouble} label="Bedrooms" value={property.bedrooms} />
+                <InfoRow icon={Bath} label="Bathrooms" value={property.bathrooms} /> */}
                 {property.area && (
                   <InfoRow icon={Maximize2} label="Area" value={`${property.area.toLocaleString()} ft²`} />
                 )}
@@ -735,6 +704,38 @@ export default async function PropertyDetailPage({ params }) {
                 </div>
               </div>
             </div>
+            {/* Agent Information */}
+            {(property.agentName || property.agentPhone || property.agentEmail) && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Agent Information
+                </h2>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
+                    <User size={20} className="text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    {property.agentName && (
+                      <div className="text-white font-medium mb-1">
+                        {property.agentName}
+                      </div>
+                    )}
+                    {property.agentPhone && (
+                      <a href={`tel:${property.agentPhone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-1">
+                        <Phone size={14} />
+                        {property.agentPhone}
+                      </a>
+                    )}
+                    {property.agentEmail && (
+                      <a href={`mailto:${property.agentEmail}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+                        <Mail size={14} />
+                        {property.agentEmail}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-const SECRET_KEY = process.env.JWT_SECRET;
+const SECRET_KEY = process.env.JWT_SECRET || "supersecretkey";
 
-export function middleware(req) {
+export async function middleware(req) {
 
   const { pathname } = req.nextUrl;
 
@@ -18,7 +18,8 @@ export function middleware(req) {
   }
 
   try {
-    jwt.verify(token, SECRET_KEY);
+    const secret = new TextEncoder().encode(SECRET_KEY);
+    await jwtVerify(token, secret);
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -26,5 +27,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/admin/dashboard/:path*"],
+  matcher: ["/admin/:path*"],
 };
