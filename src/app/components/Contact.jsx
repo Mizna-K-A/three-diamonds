@@ -19,11 +19,32 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
-      alert('Thank you for your inquiry! We will contact you shortly.');
+
+    try {
+      const res = await fetch('/api/contact-submissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          source: 'contact-page',
+          pagePath: '/contact',
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          propertyType: formData.propertyType,
+          message: formData.message
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || "Submission failed");
+      }
+
+      alert("Thank you! We'll contact you shortly.");
+
       setFormData({
         name: '',
         email: '',
@@ -31,8 +52,12 @@ export default function Contact() {
         propertyType: '',
         message: ''
       });
-      setIsSubmitting(false);
-    }, 1000);
+
+    } catch (error) {
+      alert(error.message || "Something went wrong");
+    }
+
+    setIsSubmitting(false);
   };
 
   const handleChange = (e) => {
@@ -140,7 +165,7 @@ export default function Contact() {
             <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Get in Touch</span>
             <div className="w-16 h-0.5 bg-black mt-2 mx-auto"></div>
           </div>
-          <motion.h2 
+          <motion.h2
             className="text-4xl md:text-5xl font-bold mb-6"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -154,29 +179,29 @@ export default function Contact() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Information */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-1 fade-in"
             whileHover="hover"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-2xl p-8 h-full"
               variants={cardHover}
               whileHover="hover"
             >
               <h3 className="text-2xl font-bold mb-8">Contact Information</h3>
-              
+
               <div className="space-y-6">
                 {contactInfo.map((info, index) => (
-                  <motion.div 
-                    key={info.title} 
+                  <motion.div
+                    key={info.title}
                     className="flex items-start gap-4"
                     whileHover={{ x: 5 }}
                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   >
-                    <motion.div 
+                    <motion.div
                       className={`${info.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0`}
                       variants={iconHover}
                       whileHover="hover"
@@ -197,8 +222,8 @@ export default function Contact() {
               <div className="mt-8 pt-8 border-t border-gray-200">
                 <h4 className="font-bold text-gray-800 mb-4">Follow Us</h4>
                 <div className="flex gap-4">
-                  <motion.a 
-                    href="#" 
+                  <motion.a
+                    href="#"
                     className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800"
                     variants={socialIconHover}
                     whileHover="hover"
@@ -206,8 +231,8 @@ export default function Contact() {
                   >
                     f
                   </motion.a>
-                  <motion.a 
-                    href="#" 
+                  <motion.a
+                    href="#"
                     className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800"
                     variants={socialIconHover}
                     whileHover="hover"
@@ -215,8 +240,8 @@ export default function Contact() {
                   >
                     in
                   </motion.a>
-                  <motion.a 
-                    href="#" 
+                  <motion.a
+                    href="#"
                     className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800"
                     variants={socialIconHover}
                     whileHover="hover"
@@ -230,20 +255,20 @@ export default function Contact() {
           </motion.div>
 
           {/* Contact Form */}
-          <motion.div 
-            className="lg:col-span-2 fade-in" 
+          <motion.div
+            className="lg:col-span-2 fade-in"
             style={{ animationDelay: '0.2s' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-white rounded-2xl border border-gray-200 p-8"
               variants={cardHover}
               whileHover="hover"
             >
               <div className="flex items-center gap-3 mb-6">
-                <motion.div 
+                <motion.div
                   className="bg-black text-white w-10 h-10 rounded-full flex items-center justify-center"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.5, type: "spring" }}

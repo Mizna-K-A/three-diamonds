@@ -16,6 +16,8 @@ import {
   Building2,
   Tag,
   Tags,
+  CalendarDays,
+  Mail,
 } from 'lucide-react';
 
 const navigation = [
@@ -24,6 +26,8 @@ const navigation = [
   { name: 'Property Types', href: '/admin/property-types', icon: Building2 },
   { name: 'Property Statuses', href: '/admin/property-statuses', icon: Tag },
   { name: 'Property Tags', href: '/admin/tags', icon: Tags },
+  { name: 'Viewing Requests', href: '/admin/viewings', icon: CalendarDays },
+  { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
 ];
 
 export const Sidebar = ({ mobileOpen, onMobileClose }) => {

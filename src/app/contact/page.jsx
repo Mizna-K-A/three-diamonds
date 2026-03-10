@@ -375,21 +375,52 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate form submission
-    setFormStatus({ submitted: true, success: true, message: "Thank you! We'll contact you shortly." });
-    showToast("Thank you! We'll contact you shortly.", 'success');
-    setTimeout(() => {
-      setFormStatus({ submitted: false, success: false, message: "" });
-    }, 5000);
+    try {
+      const res = await fetch('/api/contact-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'contact-page',
+          pagePath: '/contact',
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          message: formData.message,
+          propertyType: formData.propertyType,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || 'Failed to submit');
+      }
+
+      setFormStatus({ submitted: true, success: true, message: "Thank you! We'll contact you shortly." });
+      showToast("Thank you! We'll contact you shortly.", 'success');
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        message: "",
+        propertyType: "commercial"
+      });
+      setTimeout(() => {
+        setFormStatus({ submitted: false, success: false, message: "" });
+      }, 5000);
+    } catch (err) {
+      showToast(err?.message || 'Submission failed', 'error');
+    }
   };
 
   const handleBrochureClick = () => {
     setIsModalOpen(true);
   };
 
-  const handleModalSubmit = (modalFormData) => {
+  const handleModalSubmit = async (modalFormData) => {
     // Validate form data
     if (!modalFormData.name || !modalFormData.email || !modalFormData.phone) {
       showToast("Please fill in all fields", 'error');
@@ -397,6 +428,23 @@ export default function Contact() {
     }
 
     setIsDownloading(true);
+
+    try {
+      await fetch('/api/contact-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'brochure-download',
+          pagePath: '/contact',
+          name: modalFormData.name,
+          email: modalFormData.email,
+          phone: modalFormData.phone,
+          message: 'Brochure download request',
+        }),
+      });
+    } catch {
+      // Non-blocking: still allow brochure download
+    }
     
     // Simulate download preparation
     setTimeout(() => {

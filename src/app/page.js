@@ -7,9 +7,17 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Testimonials from './components/Testimonials';
 import FeaturedProperties from './components/FeaturedProperties';
-import Loader from './components/Loader'; 
+import Loader from './components/Loader';
+import { getProperties } from './admin/properties/page';
+import { getPropertyTypes } from './admin/property-types/page';
+import { getPropertyStatuses } from './admin/property-statuses/page';
+import { getTags } from './admin/tags/page';
 
-export default function Home() {
+export default async function Home() {
+  const properties = await getProperties()
+  const propertyTypes = await getPropertyTypes();
+  const statuses = await getPropertyStatuses();
+  const tags = await getTags();
   return (
     <Loader>
       <main className="min-h-screen">
@@ -17,7 +25,12 @@ export default function Home() {
         <Hero />
         <Team />
         <Services />
-        <FeaturedProperties />
+        <FeaturedProperties
+          initialProperties={properties}
+          propertyTypes={propertyTypes}
+          statuses={statuses}
+          tags={tags}               // [{ _id, name }]
+        />
         <Testimonials />
         <Contact />
         <Footer />

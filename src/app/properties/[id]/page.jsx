@@ -752,39 +752,33 @@ export default async function PropertyDetailsPage({ params }) {
                 </div>
               </div>
 
-              {/* Date Selection */}
-              <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-2">PICK A DATE</p>
-                <div className="grid grid-cols-5 gap-1">
-                  {availableDates.map((date, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      className="p-1 text-center rounded-lg transition-all bg-gray-800 text-gray-300 hover:bg-gray-700 text-xs"
-                    >
-                      <div className="text-[10px]">{date.day}</div>
-                      <div className="font-semibold text-[10px]">{date.date}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Time Selection */}
-              <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-2">PICK A TIME</p>
-                <select
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                >
-                  <option value="">Select time</option>
-                  {availableTimes.map(time => (
-                    <option key={time} value={time}>{time}</option>
-                  ))}
-                </select>
-              </div>
-
               {/* Contact Info */}
               <form action="/api/schedule-viewing" method="POST">
                 <input type="hidden" name="propertyId" value={property._id} />
+                
+                {/* Date & Time */}
+                <div className="mb-4">
+                  <p className="text-xs text-gray-400 mb-2">PREFERRED DATE</p>
+                  <input
+                    type="date"
+                    name="preferredDate"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-xs text-gray-400 mb-2">PREFERRED TIME</p>
+                  <select
+                    name="preferredTime"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                  >
+                    <option value="">Select time</option>
+                    {availableTimes.map(time => (
+                      <option key={time} value={time}>{time}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <input
                   type="text"
                   name="name"
