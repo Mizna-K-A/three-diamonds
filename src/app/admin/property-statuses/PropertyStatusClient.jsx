@@ -6,8 +6,6 @@ import {
   Search,
   Edit,
   Trash2,
-  ChevronUp,
-  ChevronDown,
   ChevronDown as ChevronDownIcon,
   X,
   Check,
@@ -137,8 +135,6 @@ function IconPickerDropdown({ value, onChange, disabled }) {
 }
 
 // ─── Color Picker ─────────────────────────────────────────────────────────────
-// Named presets (displayed in UI). The color field stores hex directly.
-// ⚠️ Schema change required: remove enum from `color` field, use `type: String` only.
 const COLOR_PRESETS = [
   { name: 'gray',    hex: '#6b7280', label: 'Gray' },
   { name: 'red',     hex: '#ef4444', label: 'Red' },
@@ -152,11 +148,9 @@ const COLOR_PRESETS = [
   { name: 'emerald', hex: '#10b981', label: 'Emerald' },
 ];
 
-// Resolve display hex — value is now always a hex string
 function resolveHex(value) {
   if (!value) return '#6b7280';
   if (/^#[0-9a-fA-F]{6}$/.test(value)) return value;
-  // legacy: if stored as a name, map it
   const preset = COLOR_PRESETS.find(p => p.name === value);
   return preset ? preset.hex : '#6b7280';
 }
@@ -164,10 +158,9 @@ function resolveHex(value) {
 function resolveLabel(value) {
   if (!value) return 'Gray';
   const preset = COLOR_PRESETS.find(p => p.hex === value || p.name === value);
-  return preset ? preset.label : value; // return hex as label for custom colors
+  return preset ? preset.label : value;
 }
 
-// onChange(hexString) — always a hex value like '#a6db43'
 function ColorPicker({ value, onChange, disabled }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('presets');
@@ -210,7 +203,6 @@ function ColorPicker({ value, onChange, disabled }) {
 
   return (
     <div className="relative" ref={ref}>
-      {/* Trigger */}
       <button
         type="button"
         onClick={() => !disabled && setOpen((o) => !o)}
@@ -224,10 +216,8 @@ function ColorPicker({ value, onChange, disabled }) {
         <ChevronDownIcon size={14} className={`text-gray-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-50 mt-1 left-0 w-64 bg-[#111111] border border-gray-800 rounded-xl shadow-2xl shadow-black/60 overflow-hidden">
-          {/* Tabs */}
           <div className="flex border-b border-gray-800">
             {['presets', 'custom'].map(t => (
               <button
@@ -264,7 +254,6 @@ function ColorPicker({ value, onChange, disabled }) {
 
           {tab === 'custom' && (
             <div className="p-3 space-y-3">
-              {/* Color wheel + hex input */}
               <div className="flex items-center gap-3">
                 <label className="relative cursor-pointer shrink-0">
                   <div
@@ -291,7 +280,6 @@ function ColorPicker({ value, onChange, disabled }) {
                 </div>
               </div>
 
-              {/* Quick picks */}
               <div>
                 <p className="text-xs text-gray-500 mb-1.5">Quick picks</p>
                 <div className="grid grid-cols-8 gap-1">
@@ -315,7 +303,6 @@ function ColorPicker({ value, onChange, disabled }) {
                 </div>
               </div>
 
-              {/* Preview bar */}
               <div
                 className="w-full h-7 rounded-lg border border-white/10 flex items-center justify-center"
                 style={{ backgroundColor: /^#[0-9a-fA-F]{6}$/.test(hexInput) ? hexInput : '#6b7280' }}
@@ -345,13 +332,8 @@ export default function PropertyStatusClient({
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    label: '',
-    description: '',
-    color: '#6b7280',
     icon: '',
-    isDefault: false,
-    isActive: true,
-    sortOrder: 0,
+    color: '#6b7280',
   });
 
   const filteredStatuses = statuses.filter((status) => {
@@ -359,13 +341,12 @@ export default function PropertyStatusClient({
     const q = searchTerm.toLowerCase();
     return (
       status.name?.toLowerCase().includes(q) ||
-      status.label?.toLowerCase().includes(q) ||
-      status.description?.toLowerCase().includes(q)
+      status.slug?.toLowerCase().includes(q)
     );
   });
 
-  const sortedStatuses = [...filteredStatuses].sort(
-    (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
+  const sortedStatuses = [...filteredStatuses].sort((a, b) => 
+    (a.name || '').localeCompare(b.name || '')
   );
 
   const handleOpenModal = (status) => {
@@ -374,26 +355,16 @@ export default function PropertyStatusClient({
       setFormData({
         name: status.name || '',
         slug: status.slug || '',
-        label: status.label || '',
-        description: status.description || '',
-        color: resolveHex(status.color),
         icon: status.icon || '',
-        isDefault: status.isDefault || false,
-        isActive: status.isActive !== false,
-        sortOrder: status.sortOrder || 0,
+        color: resolveHex(status.color),
       });
     } else {
       setEditingStatus(null);
       setFormData({
         name: '',
         slug: '',
-        label: '',
-        description: '',
-        color: '#6b7280',
         icon: '',
-        isDefault: false,
-        isActive: true,
-        sortOrder: statuses.length,
+        color: '#6b7280',
       });
     }
     setIsModalOpen(true);
@@ -405,13 +376,8 @@ export default function PropertyStatusClient({
     setFormData({
       name: '',
       slug: '',
-      label: '',
-      description: '',
-      color: '#6b7280',
       icon: '',
-      isDefault: false,
-      isActive: true,
-      sortOrder: 0,
+      color: '#6b7280',
     });
   };
 
@@ -422,13 +388,8 @@ export default function PropertyStatusClient({
       const fd = new FormData();
       fd.append('name', formData.name);
       fd.append('slug', formData.slug);
-      fd.append('label', formData.label);
-      fd.append('description', formData.description);
-      fd.append('color', formData.color);
       fd.append('icon', formData.icon || '');
-      fd.append('isDefault', formData.isDefault ? 'true' : 'false');
-      fd.append('isActive', formData.isActive ? 'true' : 'false');
-      fd.append('sortOrder', String(formData.sortOrder ?? 0));
+      fd.append('color', formData.color);
 
       let result;
       if (editingStatus) {
@@ -473,16 +434,7 @@ export default function PropertyStatusClient({
 
   const handleNameChange = (e) => {
     const name = e.target.value;
-    setFormData({ ...formData, name, slug: generateSlug(name), label: formData.label || name });
-  };
-
-  const moveStatus = (index, direction) => {
-    const newStatuses = [...statuses];
-    const temp = newStatuses[index];
-    newStatuses[index] = newStatuses[index + direction];
-    newStatuses[index + direction] = temp;
-    newStatuses.forEach((status, i) => { status.sortOrder = i; });
-    setStatuses(newStatuses);
+    setFormData({ ...formData, name, slug: generateSlug(name) });
   };
 
   return (
@@ -526,14 +478,14 @@ export default function PropertyStatusClient({
 
       {/* Statuses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sortedStatuses.map((status, index) => {
+        {sortedStatuses.map((status) => {
           const IconComp = status.icon && LucideIcons[status.icon] ? LucideIcons[status.icon] : null;
           const color = resolveHex(status.color);
 
           return (
             <div
               key={status._id}
-              className={`rounded-xl border p-4 transition-opacity ${!status.isActive ? 'opacity-50' : ''}`}
+              className="rounded-xl border p-4"
               style={{
                 backgroundColor: color + '22',
                 borderColor: color + '55',
@@ -541,7 +493,6 @@ export default function PropertyStatusClient({
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  {/* Icon badge */}
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                     style={{ backgroundColor: color + '33', border: `1px solid ${color}55` }}
@@ -553,49 +504,20 @@ export default function PropertyStatusClient({
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">{status.label}</h3>
-                    <p className="text-xs text-gray-500 font-mono">{status.name}</p>
+                    <h3 className="font-semibold text-white">{status.name}</h3>
+                    <p className="text-xs text-gray-500 font-mono">{status.slug}</p>
                   </div>
-                </div>
-
-                {/* Reorder buttons */}
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    onClick={() => moveStatus(index, -1)}
-                    disabled={index === 0}
-                    className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white disabled:opacity-20 transition-colors"
-                  >
-                    <ChevronUp size={14} />
-                  </button>
-                  <button
-                    onClick={() => moveStatus(index, 1)}
-                    disabled={index === sortedStatuses.length - 1}
-                    className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white disabled:opacity-20 transition-colors"
-                  >
-                    <ChevronDown size={14} />
-                  </button>
                 </div>
               </div>
 
-              {status.description && (
-                <p className="text-sm text-gray-400 mb-3 line-clamp-2">{status.description}</p>
-              )}
-
               <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  <span
-                    className="px-2 py-0.5 rounded text-xs flex items-center gap-1.5"
-                    style={{ backgroundColor: color + '33', color }}
-                  >
-                    <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />
-                    {resolveLabel(status.color)}
-                  </span>
-                  {status.isDefault && (
-                    <span className="px-2 py-0.5 bg-blue-900/50 text-blue-300 rounded text-xs">
-                      Default
-                    </span>
-                  )}
-                </div>
+                <span
+                  className="px-2 py-0.5 rounded text-xs flex items-center gap-1.5"
+                  style={{ backgroundColor: color + '33', color }}
+                >
+                  <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />
+                  {resolveLabel(status.color)}
+                </span>
 
                 <div className="flex gap-1">
                   <button
@@ -606,8 +528,7 @@ export default function PropertyStatusClient({
                   </button>
                   <button
                     onClick={() => handleDelete(status._id)}
-                    disabled={status.isDefault}
-                    className="p-1.5 hover:bg-red-900/30 rounded text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30"
+                    className="p-1.5 hover:bg-red-900/30 rounded text-gray-400 hover:text-red-400 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -628,7 +549,7 @@ export default function PropertyStatusClient({
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="bg-[#111111] border border-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#111111] border border-gray-800 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-800">
               <h2 className="text-lg font-semibold text-white">
                 {editingStatus ? 'Edit Property Status' : 'Add Property Status'}
@@ -636,50 +557,27 @@ export default function PropertyStatusClient({
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Name + Slug */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={handleNameChange}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Slug</label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Display Label */}
+              {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Display Label</label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Name</label>
                 <input
                   type="text"
-                  value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  value={formData.name}
+                  onChange={handleNameChange}
                   className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600"
                   required
                 />
               </div>
 
-              {/* Description */}
+              {/* Slug */}
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={2}
+                <label className="block text-sm font-medium text-gray-400 mb-2">Slug</label>
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600"
+                  required
                 />
               </div>
 
@@ -701,11 +599,11 @@ export default function PropertyStatusClient({
                 </div>
               </div>
 
+              {/* Preview */}
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Preview</label>
                 {(() => {
                   const previewColor = resolveHex(formData.color);
-                  const previewLabel = resolveLabel(formData.color);
                   const PreviewIcon = formData.icon && LucideIcons[formData.icon] ? LucideIcons[formData.icon] : null;
                   return (
                     <div
@@ -723,52 +621,12 @@ export default function PropertyStatusClient({
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">{formData.label || 'Status Label'}</p>
-                        <p className="text-xs font-mono text-gray-500">{formData.name || 'status-name'}</p>
+                        <p className="text-sm font-semibold text-white">{formData.name || 'Status Name'}</p>
+                        <p className="text-xs font-mono text-gray-500">{formData.slug || 'status-slug'}</p>
                       </div>
-                      <span
-                        className="ml-auto text-xs px-2 py-0.5 rounded flex items-center gap-1.5 font-mono"
-                        style={{ backgroundColor: previewColor + '33', color: previewColor }}
-                      >
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: previewColor }} />
-                        {previewLabel}
-                      </span>
                     </div>
                   );
                 })()}
-              </div>
-
-              {/* Sort Order + Toggles */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Sort Order</label>
-                  <input
-                    type="number"
-                    value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600"
-                  />
-                </div>
-                <div className="flex items-end gap-6 pb-2">
-                  <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isDefault}
-                      onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                      className="rounded border-gray-700 bg-[#0a0a0a] accent-blue-500"
-                    />
-                    Default
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="rounded border-gray-700 bg-[#0a0a0a] accent-blue-500"
-                    />
-                    Active
-                  </label>
-                </div>
               </div>
 
               {/* Actions */}

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Plus, Search, Edit, Trash2,
-  FolderTree, Tag as TagIcon,
+  Tag as TagIcon,
   ChevronDown, X, Check,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
@@ -214,90 +214,44 @@ export default function TagsClient({
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTag, setEditingTag] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('PURPOSE');
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', slug: '', label: '', description: '',
-    category: 'PURPOSE', color: '#6b7280', icon: '',
-    isDefault: false, isActive: true, sortOrder: 0,
-    parentId: '', metadata: '',
+    name: '', slug: '', icon: '', color: '#6b7280',
   });
 
+  // Remove category filtering since we removed category
   const filteredTags = tags.filter(tag => {
     if (!tag) return false;
     const q = searchTerm.toLowerCase();
-    return tag.name?.toLowerCase().includes(q) || tag.label?.toLowerCase().includes(q) || tag.description?.toLowerCase().includes(q);
+    return tag.name?.toLowerCase().includes(q) || tag.slug?.toLowerCase().includes(q);
   });
 
-  const parentOptions = tags
-    .filter(t => t.category === formData.category && t._id !== editingTag?._id)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+  // Remove parent options since we removed parentId
+  // Remove category-specific filtering
 
-const handleOpenModal = (tag) => {
-  if (tag) {
-    setEditingTag(tag);
-    setSelectedCategory(tag.category);
-    
-    // Handle metadata safely
-    let metadataString = '';
-    if (tag.metadata) {
-      if (typeof tag.metadata === 'object' && !Array.isArray(tag.metadata)) {
-        // If it's already an object, stringify it directly
-        metadataString = JSON.stringify(tag.metadata, null, 2);
-      } else if (Array.isArray(tag.metadata)) {
-        // If it's an array (like from Object.entries), use fromEntries
-        try {
-          metadataString = JSON.stringify(Object.fromEntries(tag.metadata), null, 2);
-        } catch (e) {
-          metadataString = JSON.stringify(tag.metadata, null, 2);
-        }
-      } else if (typeof tag.metadata === 'string') {
-        // If it's already a string, try to parse and re-stringify for formatting
-        try {
-          const parsed = JSON.parse(tag.metadata);
-          metadataString = JSON.stringify(parsed, null, 2);
-        } catch {
-          metadataString = tag.metadata;
-        }
-      }
+  const handleOpenModal = (tag) => {
+    if (tag) {
+      setEditingTag(tag);
+      setFormData({
+        name: tag.name || '', 
+        slug: tag.slug || '', 
+        icon: tag.icon || '', 
+        color: resolveHex(tag.color),
+      });
+    } else {
+      setEditingTag(null);
+      setFormData({
+        name: '', slug: '', icon: '', color: '#6b7280',
+      });
     }
-    
-    setFormData({
-      name: tag.name || '', 
-      slug: tag.slug || '', 
-      label: tag.label || '',
-      description: tag.description || '', 
-      category: tag.category || 'PURPOSE',
-      color: resolveHex(tag.color),
-      icon: tag.icon || '', 
-      isDefault: tag.isDefault || false,
-      isActive: tag.isActive !== false, 
-      sortOrder: tag.sortOrder || 0,
-      parentId: tag.parentId || '',
-      metadata: metadataString,
-    });
-  } else {
-    setEditingTag(null);
-    setSelectedCategory('PURPOSE');
-    setFormData({
-      name: '', slug: '', label: '', description: '',
-      category: 'PURPOSE', color: '#6b7280', icon: '',
-      isDefault: false, isActive: true,
-      sortOrder: tags.filter(t => t.category === 'PURPOSE').length,
-      parentId: '', metadata: '',
-    });
-  }
-  setIsModalOpen(true);
-};
+    setIsModalOpen(true);
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingTag(null);
     setFormData({
-      name: '', slug: '', label: '', description: '',
-      category: 'PURPOSE', color: '#6b7280', icon: '',
-      isDefault: false, isActive: true, sortOrder: 0,
-      parentId: '', metadata: '',
+      name: '', slug: '', icon: '', color: '#6b7280',
     });
   };
 
@@ -308,16 +262,8 @@ const handleOpenModal = (tag) => {
       const fd = new FormData();
       fd.append('name', formData.name);
       fd.append('slug', formData.slug);
-      fd.append('label', formData.label);
-      fd.append('description', formData.description);
-      fd.append('category', formData.category);
-      fd.append('color', formData.color);
       fd.append('icon', formData.icon || '');
-      fd.append('isDefault', formData.isDefault ? 'true' : 'false');
-      fd.append('isActive', formData.isActive ? 'true' : 'false');
-      fd.append('sortOrder', String(formData.sortOrder ?? 0));
-      fd.append('parentId', formData.parentId || '');
-      fd.append('metadata', formData.metadata || '');
+      fd.append('color', formData.color);
 
       const result = editingTag
         ? await updateTag(editingTag._id, fd)
@@ -358,10 +304,8 @@ const handleOpenModal = (tag) => {
 
   const handleNameChange = (e) => {
     const name = e.target.value;
-    setFormData({ ...formData, name, slug: generateSlug(name), label: formData.label || name });
+    setFormData({ ...formData, name, slug: generateSlug(name) });
   };
-
-  const currentCategoryTags = filteredTags.filter(t => t.category === selectedCategory);
 
   return (
     <div className="p-6 bg-[#0a0a0a] min-h-screen">
@@ -375,20 +319,10 @@ const handleOpenModal = (tag) => {
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white mb-2">Property Tags</h1>
-        <p className="text-gray-400">Manage property tags like "For Sale", "For Rent", "Lease", and more</p>
+        <p className="text-gray-400">Manage tags for properties</p>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {categoryOptions.map(cat => (
-          <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              selectedCategory === cat.value ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-            }`}>
-            {cat.label}
-          </button>
-        ))}
-      </div>
+      {/* Remove Category Tabs */}
 
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -404,17 +338,16 @@ const handleOpenModal = (tag) => {
         </button>
       </div>
 
-      {/* Tags Grid */}
+      {/* Tags Grid - Simplified */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {currentCategoryTags.map(tag => {
+        {filteredTags.map(tag => {
           const usageCount = usageCounts?.[tag._id] || 0;
           const color = resolveHex(tag.color);
           const IconComp = tag.icon && LucideIcons[tag.icon] ? LucideIcons[tag.icon] : null;
 
           return (
             <div key={tag._id}
-              className={`rounded-xl border p-4 transition-opacity ${!tag.isActive ? 'opacity-50' : ''}`}
-              style={{ backgroundColor: color + '22', borderColor: color + '55' }}>
+              className="rounded-xl border border-gray-800 p-4 bg-[#111111] hover:bg-[#161616] transition-colors">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -424,30 +357,24 @@ const handleOpenModal = (tag) => {
                       : <span className="text-lg" style={{ color }}>◆</span>}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">{tag.label}</h3>
-                    <p className="text-xs text-gray-500 font-mono">{tag.name}</p>
+                    <h3 className="font-semibold text-white">{tag.name}</h3>
+                    <p className="text-xs text-gray-500 font-mono">{tag.slug}</p>
                   </div>
                 </div>
               </div>
 
-              {tag.description && <p className="text-sm text-gray-400 mb-3 line-clamp-2">{tag.description}</p>}
-
-              {tag.parentName && (
-                <div className="flex items-center gap-1 text-xs mb-2 text-gray-500">
-                  <FolderTree size={12} />
-                  <span>Parent: {tag.parentLabel || tag.parentName}</span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mt-4">
                 <div className="flex gap-2 flex-wrap">
                   <span className="px-2 py-0.5 rounded text-xs flex items-center gap-1.5"
                     style={{ backgroundColor: color + '33', color }}>
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
                     {resolveLabel(tag.color)}
                   </span>
-                  {tag.isDefault && <span className="px-2 py-0.5 bg-blue-900/50 text-blue-300 rounded text-xs">Default</span>}
-                  {usageCount > 0 && <span className="px-2 py-0.5 bg-green-900/50 text-green-300 rounded text-xs">{usageCount} used</span>}
+                  {usageCount > 0 && (
+                    <span className="px-2 py-0.5 bg-green-900/50 text-green-300 rounded text-xs">
+                      {usageCount} used
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => handleOpenModal(tag)}
@@ -455,8 +382,8 @@ const handleOpenModal = (tag) => {
                     <Edit size={14} />
                   </button>
                   <button onClick={() => handleDelete(tag._id)}
-                    disabled={tag.isDefault || usageCount > 0}
-                    title={tag.isDefault ? 'Default tags cannot be deleted' : usageCount > 0 ? 'Tag is in use' : ''}
+                    disabled={usageCount > 0}
+                    title={usageCount > 0 ? 'Tag is in use' : ''}
                     className="p-1.5 hover:bg-red-900/30 rounded text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30">
                     <Trash2 size={14} />
                   </button>
@@ -466,10 +393,10 @@ const handleOpenModal = (tag) => {
           );
         })}
 
-        {currentCategoryTags.length === 0 && (
+        {filteredTags.length === 0 && (
           <div className="col-span-full text-center py-12">
             <TagIcon size={48} className="mx-auto text-gray-700 mb-3" />
-            <p className="text-gray-500">No tags found in this category</p>
+            <p className="text-gray-500">No tags found</p>
             <button onClick={() => handleOpenModal()}
               className="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg inline-flex items-center gap-2">
               <Plus size={18} /><span>Add your first tag</span>
@@ -478,65 +405,33 @@ const handleOpenModal = (tag) => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal - Simplified */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="bg-[#111111] border border-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#111111] border border-gray-800 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-800">
               <h2 className="text-lg font-semibold text-white">{editingTag ? 'Edit Tag' : 'Add New Tag'}</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Name *</label>
-                  <input type="text" value={formData.name} onChange={handleNameChange} required
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Slug *</label>
-                  <input type="text" value={formData.slug} required
-                    onChange={e => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Name *</label>
+                <input type="text" value={formData.name} onChange={handleNameChange} required
+                  className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" 
+                  placeholder="e.g., For Sale" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Display Label *</label>
-                <input type="text" value={formData.label} required
-                  onChange={e => setFormData({ ...formData, label: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Description</label>
-                <textarea value={formData.description} rows={2}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Category *</label>
-                  <select value={formData.category} required
-                    onChange={e => setFormData({ ...formData, category: e.target.value, parentId: '' })}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600">
-                    {categoryOptions.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Parent Tag</label>
-                  <select value={formData.parentId}
-                    onChange={e => setFormData({ ...formData, parentId: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600">
-                    <option value="">None (Top Level)</option>
-                    {parentOptions.map(p => <option key={p._id} value={p._id}>{p.label} ({p.name})</option>)}
-                  </select>
-                </div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Slug *</label>
+                <input type="text" value={formData.slug} required
+                  onChange={e => setFormData({ ...formData, slug: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" 
+                  placeholder="e.g., for-sale" />
+                <p className="text-xs text-gray-600 mt-1">URL-friendly version of the name</p>
               </div>
 
               {/* Icon + Color */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">Icon</label>
                   <IconPickerDropdown value={formData.icon} onChange={icon => setFormData({ ...formData, icon })} />
@@ -554,8 +449,7 @@ const handleOpenModal = (tag) => {
                   const previewColor = resolveHex(formData.color);
                   const PreviewIcon = formData.icon && LucideIcons[formData.icon] ? LucideIcons[formData.icon] : null;
                   return (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border"
-                      style={{ backgroundColor: previewColor + '22', borderColor: previewColor + '55' }}>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-800 bg-[#0a0a0a]">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                         style={{ backgroundColor: previewColor + '33' }}>
                         {PreviewIcon
@@ -563,8 +457,8 @@ const handleOpenModal = (tag) => {
                           : <span style={{ color: previewColor }}>◆</span>}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">{formData.label || 'Tag Label'}</p>
-                        <p className="text-xs font-mono text-gray-500">{formData.name || 'tag-name'}</p>
+                        <p className="text-sm font-semibold text-white">{formData.name || 'Tag Name'}</p>
+                        <p className="text-xs font-mono text-gray-500">{formData.slug || 'tag-name'}</p>
                       </div>
                       <span className="ml-auto text-xs px-2 py-0.5 rounded flex items-center gap-1.5 font-mono"
                         style={{ backgroundColor: previewColor + '33', color: previewColor }}>
@@ -574,34 +468,6 @@ const handleOpenModal = (tag) => {
                     </div>
                   );
                 })()}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Sort Order</label>
-                  <input type="number" value={formData.sortOrder}
-                    onChange={e => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" />
-                </div>
-                <div className="flex items-end gap-6 pb-2">
-                  <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input type="checkbox" checked={formData.isDefault} className="rounded border-gray-700 bg-[#0a0a0a] accent-blue-500"
-                      onChange={e => setFormData({ ...formData, isDefault: e.target.checked })} />
-                    Default for Category
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input type="checkbox" checked={formData.isActive} className="rounded border-gray-700 bg-[#0a0a0a] accent-blue-500"
-                      onChange={e => setFormData({ ...formData, isActive: e.target.checked })} />
-                    Active
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Metadata (JSON)</label>
-                <textarea value={formData.metadata} rows={3} placeholder='{"key": "value"}'
-                  onChange={e => setFormData({ ...formData, metadata: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white font-mono text-sm focus:outline-none focus:border-gray-600" />
               </div>
 
               <div className="flex gap-3 pt-4">

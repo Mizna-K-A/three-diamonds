@@ -8,7 +8,7 @@ export async function getPropertyStatuses() {
         await connectDB();
 
         const statuses = await PropertyStatus.find({})
-            .sort({ sortOrder: 1, name: 1 })
+            .sort({ name: 1 }) // Simplified sorting since sortOrder is removed
             .lean();
 
         return statuses.map(status => ({
@@ -46,13 +46,8 @@ async function createPropertyStatus(formData) {
         const status = await PropertyStatus.create({
             name: formData.get('name'),
             slug: formData.get('slug'),
-            label: formData.get('label'),
-            description: formData.get('description') || '',
-            color: formData.get('color') || 'gray',
-            icon: formData.get('icon') || '📌',
-            isDefault: formData.get('isDefault') === 'true',
-            isActive: formData.get('isActive') === 'true',
-            sortOrder: parseInt(formData.get('sortOrder')) || 0,
+            icon: formData.get('icon') || '',
+            color: formData.get('color') || '#6b7280',
         });
 
         return {
@@ -92,27 +87,13 @@ async function updatePropertyStatus(id, formData) {
             return { error: 'Property status with this name or slug already exists' };
         }
 
-        // If setting this as default, unset any existing default
-        if (formData.get('isDefault') === 'true') {
-            await PropertyStatus.updateMany(
-                { _id: { $ne: id }, isDefault: true },
-                { $set: { isDefault: false } }
-            );
-        }
-
         const status = await PropertyStatus.findByIdAndUpdate(
             id,
             {
                 name: formData.get('name'),
                 slug: formData.get('slug'),
-                label: formData.get('label'),
-                description: formData.get('description') || '',
-                color: formData.get('color'),
-                icon: formData.get('icon'),
-                isDefault: formData.get('isDefault') === 'true',
-                isActive: formData.get('isActive') === 'true',
-                sortOrder: parseInt(formData.get('sortOrder')) || 0,
-                updatedAt: new Date(),
+                icon: formData.get('icon') || '',
+                color: formData.get('color') || '#6b7280',
             },
             { new: true, runValidators: true }
         );
@@ -141,30 +122,11 @@ async function deletePropertyStatus(id) {
     try {
         await connectDB();
 
-        // Check if this is the default status
-        const statusToDelete = await PropertyStatus.findById(id);
-        if (statusToDelete?.isDefault) {
-            return { error: 'Cannot delete the default status. Please set another status as default first.' };
-        }
-
         // Check if status is being used by any properties
-        // Property model is now imported at the top
         const propertiesCount = await Property.countDocuments({ statusId: id });
 
         if (propertiesCount > 0) {
-            // Option 1: Prevent deletion
             return { error: `Cannot delete: ${propertiesCount} properties are using this status. Please update those properties first.` };
-
-            // Option 2: Automatically reassign to default status (uncomment if preferred)
-            // const defaultStatus = await PropertyStatus.findOne({ isDefault: true });
-            // if (defaultStatus) {
-            //   await Property.updateMany(
-            //     { statusId: id },
-            //     { $set: { statusId: defaultStatus._id } }
-            //   );
-            // } else {
-            //   return { error: 'No default status found to reassign properties.' };
-            // }
         }
 
         await PropertyStatus.findByIdAndDelete(id);

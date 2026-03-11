@@ -13,8 +13,6 @@ import {
   MapPin,
   DollarSign,
   Ruler,
-  BedDouble,
-  Bath,
   User,
   Phone,
   Mail,
@@ -158,23 +156,16 @@ const TagButton = ({ tag, isSelected, onClick }) => (
   </button>
 );
 
-// Feature Card Component
+// Updated Feature Card Component - Simplified to only show name
 const FeatureCard = ({ feature, index, onUpdate, onRemove }) => (
   <div className="flex items-center gap-3 p-3 bg-[#1a1a1a] border border-gray-800 rounded-xl group hover:border-gray-700 transition-all">
-    <div className="flex-1 grid grid-cols-2 gap-3">
+    <div className="flex-1">
       <input
         type="text"
         value={feature.name}
         onChange={(e) => onUpdate(index, 'name', e.target.value)}
-        className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600"
-        placeholder="Feature name"
-      />
-      <input
-        type="text"
-        value={feature.value}
-        onChange={(e) => onUpdate(index, 'value', e.target.value)}
-        className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600"
-        placeholder="Value"
+        className="w-full px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600"
+        placeholder="Feature name (e.g., Pool, Garage, Garden)"
       />
     </div>
     <button
@@ -187,7 +178,7 @@ const FeatureCard = ({ feature, index, onUpdate, onRemove }) => (
   </div>
 );
 
-// Updated Image Card Component
+// Image Card Component (unchanged)
 const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrimary }) => {
   const [imageUrl, setImageUrl] = useState(null);
 
@@ -274,7 +265,7 @@ const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrima
   );
 };
 
-// File Upload Area Component
+// File Upload Area Component (unchanged)
 const FileUploadArea = ({ onFilesSelected, isUploading }) => {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -367,8 +358,6 @@ export default function PropertyForm({
     agentName: '',
     agentPhone: '',
     agentEmail: '',
-    bedrooms: '',
-    bathrooms: '',
     area: '',
     statusId: '',
     propertyTypeId: '',
@@ -382,7 +371,7 @@ export default function PropertyForm({
   });
 
   const [selectedTag, setSelectedTag] = useState(null);
-  const [newFeature, setNewFeature] = useState({ name: '', value: '' });
+  const [newFeatureName, setNewFeatureName] = useState('');
 
   // Group tags by category
   const tagsByCategory = tags.reduce((acc, tag) => {
@@ -414,8 +403,6 @@ export default function PropertyForm({
         agentName: property.agentName || '',
         agentPhone: property.agentPhone || '',
         agentEmail: property.agentEmail || '',
-        bedrooms: property.bedrooms?.toString() || '',
-        bathrooms: property.bathrooms?.toString() || '',
         area: property.area?.toString() || '',
         statusId: property.statusId || '',
         propertyTypeId: property.propertyTypeId || '',
@@ -558,13 +545,14 @@ export default function PropertyForm({
     }
   };
 
+  // Updated addFeature function - simplified
   const addFeature = () => {
-    if (newFeature.name && newFeature.value) {
+    if (newFeatureName.trim()) {
       setFormData({
         ...formData,
-        features: [...formData.features, { ...newFeature, id: Date.now() }]
+        features: [...formData.features, { name: newFeatureName.trim(), id: Date.now() }]
       });
-      setNewFeature({ name: '', value: '' });
+      setNewFeatureName('');
     }
   };
 
@@ -638,7 +626,6 @@ export default function PropertyForm({
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: Home },
     { id: 'location', label: 'Location', icon: MapPin },
-    // { id: 'details', label: 'Details', icon: Settings },
     { id: 'tags', label: 'Tags', icon: Tag },
     { id: 'features', label: 'Features', icon: Check },
     { id: 'images', label: 'Images', icon: ImageIcon },
@@ -694,7 +681,7 @@ export default function PropertyForm({
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs - Updated to remove 'Details' tab */}
           <div className="flex items-center gap-1 mt-4 overflow-x-auto pb-1 scrollbar-hide">
             {tabs.map((tab, index) => (
               <button
@@ -791,6 +778,48 @@ export default function PropertyForm({
                   placeholder="0"
                 />
               </div>
+
+              {/* Settings */}
+              <div className="mt-8 p-6 bg-[#1a1a1a] rounded-xl border border-gray-800">
+                <h4 className="text-md font-medium text-gray-300 mb-4">Additional Settings</h4>
+                <div className="flex flex-wrap items-center gap-6">
+                  <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isFeatured}
+                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-blue-600"
+                    />
+                    <span className="flex items-center gap-2">
+                      <Star size={16} className={formData.isFeatured ? 'text-yellow-500' : 'text-gray-600'} />
+                      Featured Property
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isPublished}
+                      onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-green-600"
+                    />
+                    <span className="flex items-center gap-2">
+                      <Eye size={16} className={formData.isPublished ? 'text-green-500' : 'text-gray-600'} />
+                      Published
+                    </span>
+                  </label>
+
+                  <div className="flex items-center gap-3">
+                    <Calendar size={16} className="text-gray-600" />
+                    <input
+                      type="date"
+                      value={formData.expiresAt}
+                      onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
+                      className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -870,85 +899,6 @@ export default function PropertyForm({
             </div>
           )}
 
-          {/* Details */}
-          {activeTab === 'details' && (
-            <div className="space-y-6 animate-fadeIn">
-              <SectionHeader title="Property Details" icon={Settings} />
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <FormInput
-                  label="Bedrooms"
-                  icon={BedDouble}
-                  type="number"
-                  value={formData.bedrooms}
-                  onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
-                  placeholder="0"
-                />
-
-                <FormInput
-                  label="Bathrooms"
-                  icon={Bath}
-                  type="number"
-                  step="0.5"
-                  value={formData.bathrooms}
-                  onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
-                  placeholder="0"
-                />
-
-                <FormInput
-                  label="Area (sqft)"
-                  icon={Ruler}
-                  type="number"
-                  value={formData.area}
-                  onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                  placeholder="0"
-                />
-              </div>
-
-              {/* Settings */}
-              <div className="mt-8 p-6 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                <h4 className="text-md font-medium text-gray-300 mb-4">Additional Settings</h4>
-                <div className="flex flex-wrap items-center gap-6">
-                  <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-blue-600"
-                    />
-                    <span className="flex items-center gap-2">
-                      <Star size={16} className={formData.isFeatured ? 'text-yellow-500' : 'text-gray-600'} />
-                      Featured Property
-                    </span>
-                  </label>
-
-                  <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isPublished}
-                      onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-green-600"
-                    />
-                    <span className="flex items-center gap-2">
-                      <Eye size={16} className={formData.isPublished ? 'text-green-500' : 'text-gray-600'} />
-                      Published
-                    </span>
-                  </label>
-
-                  <div className="flex items-center gap-3">
-                    <Calendar size={16} className="text-gray-600" />
-                    <input
-                      type="date"
-                      value={formData.expiresAt}
-                      onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
-                      className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Tags */}
           {activeTab === 'tags' && (
             <div className="space-y-6 animate-fadeIn">
@@ -997,7 +947,7 @@ export default function PropertyForm({
             </div>
           )}
 
-          {/* Features */}
+          {/* Features - Updated to only use names */}
           {activeTab === 'features' && (
             <div className="space-y-6 animate-fadeIn">
               <SectionHeader title="Features" icon={Check} />
@@ -1015,31 +965,44 @@ export default function PropertyForm({
               </div>
 
               <div className="flex items-center gap-3 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                <div className="flex-1 grid grid-cols-2 gap-3">
+                <div className="flex-1">
                   <input
                     type="text"
-                    value={newFeature.name}
-                    onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
-                    className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
-                    placeholder="Feature name"
-                  />
-                  <input
-                    type="text"
-                    value={newFeature.value}
-                    onChange={(e) => setNewFeature({ ...newFeature, value: e.target.value })}
-                    className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
-                    placeholder="Value"
+                    value={newFeatureName}
+                    onChange={(e) => setNewFeatureName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addFeature()}
+                    className="w-full px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
+                    placeholder="Enter feature name (e.g., Pool, Garage, Garden)"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={addFeature}
-                  disabled={!newFeature.name || !newFeature.value}
+                  disabled={!newFeatureName.trim()}
                   className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
                 >
                   <Plus size={18} />
-                  Add
+                  Add Feature
                 </button>
+              </div>
+
+              {/* Feature suggestions */}
+              <div className="mt-4">
+                <p className="text-sm text-gray-500 mb-2">Suggested features:</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Pool', 'Garage', 'Garden', 'Balcony', 'Fireplace', 'Central AC', 'Furnished', 'Gym', 'Parking', 'Storage'].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => {
+                        setNewFeatureName(suggestion);
+                      }}
+                      className="px-3 py-1 bg-[#252525] text-gray-400 rounded-lg text-sm hover:bg-gray-700 hover:text-white transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}

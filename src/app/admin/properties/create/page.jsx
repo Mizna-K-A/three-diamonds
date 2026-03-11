@@ -189,7 +189,7 @@ async function createProperty(formData) {
     // Generate slug
     const slug = formData.get('slug') || generateSlug(title);
     
-    // Create property
+    // Create property - REMOVED bedrooms and bathrooms
     const property = await Property.create({
       title,
       slug,
@@ -203,8 +203,7 @@ async function createProperty(formData) {
       agentName: formData.get('agentName') || '',
       agentPhone: formData.get('agentPhone') || '',
       agentEmail: formData.get('agentEmail') || '',
-      bedrooms: parseInt(formData.get('bedrooms')) || 0,
-      bathrooms: parseFloat(formData.get('bathrooms')) || 0,
+      // bedrooms and bathrooms removed
       area: parseFloat(formData.get('area')) || 0,
       statusId,
       propertyTypeId: formData.get('propertyTypeId') || null,

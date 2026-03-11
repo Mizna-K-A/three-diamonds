@@ -288,6 +288,7 @@ async function updateProperty(id, formData) {
     const tagId = formData.get('tagId');
     const tagIds = tagId ? [tagId] : [];
 
+    // Update property - REMOVED bedrooms and bathrooms
     const property = await Property.findByIdAndUpdate(
       id,
       {
@@ -303,8 +304,7 @@ async function updateProperty(id, formData) {
         agentName: formData.get('agentName') || '',
         agentPhone: formData.get('agentPhone') || '',
         agentEmail: formData.get('agentEmail') || '',
-        bedrooms: parseInt(formData.get('bedrooms')) || 0,
-        bathrooms: parseFloat(formData.get('bathrooms')) || 0,
+        // bedrooms and bathrooms removed
         area: parseFloat(formData.get('area')) || 0,
         statusId,
         propertyTypeId: formData.get('propertyTypeId') || null,

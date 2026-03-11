@@ -3,12 +3,10 @@ import Tag from '../../../../lib/models/Tag';
 import connectDB from '../../../../lib/mongodb';
 import TagsClient from './TagsClient';
 
+// Simplified category options since we removed category from the model
+// You might want to remove this entirely or keep for UI organization
 const CATEGORY_OPTIONS = [
-  { value: 'PURPOSE', label: 'Purpose (For Sale, For Rent, Lease, etc.)' },
-  { value: 'FEATURE', label: 'Features' },
-  { value: 'AMENITY', label: 'Amenities' },
-  { value: 'CONDITION', label: 'Condition' },
-  { value: 'OTHER', label: 'Other' },
+  { value: 'general', label: 'General Tags' },
 ];
 
 export async function getTags() {
@@ -16,19 +14,21 @@ export async function getTags() {
     await connectDB();
     
     const tags = await Tag.find({})
-      .populate('parentId', 'name label')
-      .sort({ category: 1, sortOrder: 1, name: 1 })
+      .sort({ name: 1 }) // Simplified sorting
       .lean();
     
     return tags.map(tag => ({
       ...tag,
       _id: tag._id.toString(),
       id: tag._id.toString(),
-      parentId: tag.parentId?._id?.toString() || null,
-      parentName: tag.parentId?.name || null,
-      parentLabel: tag.parentId?.label || null,
-      // Fix: Handle metadata correctly - it's stored as a plain object, not a Map
-      metadata: tag.metadata || {},
+      // Removed parent-related fields since parentId was removed
+      parentId: null,
+      parentName: null,
+      parentLabel: null,
+      // Removed metadata handling since it was removed
+      metadata: {},
+      // Add a default category for UI compatibility
+      category: 'general',
       createdAt: tag.createdAt?.toISOString(),
       updatedAt: tag.updatedAt?.toISOString(),
     }));
@@ -41,12 +41,17 @@ export async function getTags() {
 async function getTagUsageCounts() {
   try {
     await connectDB();
-    const stats = await Property.getTagStats();
+    // You'll need to update this method in your Property model
+    // or implement a simpler version
+    const stats = await Property.aggregate([
+      { $unwind: '$tagIds' },
+      { $group: { _id: '$tagIds', count: { $sum: 1 } } }
+    ]);
     
     // Convert to map for easy lookup
     const usageMap = {};
     stats.forEach(stat => {
-      usageMap[stat.tagId.toString()] = stat.count;
+      usageMap[stat._id.toString()] = stat.count;
     });
     
     return usageMap;
@@ -75,30 +80,11 @@ async function createTag(formData) {
       return { error: 'Tag with this name or slug already exists' };
     }
     
-    // Parse metadata if provided
-    let metadata = {};
-    const metadataStr = formData.get('metadata');
-    if (metadataStr) {
-      try {
-        metadata = JSON.parse(metadataStr);
-      } catch (e) {
-        console.error('Error parsing metadata:', e);
-      }
-    }
-    
     const tag = await Tag.create({
       name: formData.get('name'),
       slug: formData.get('slug'),
-      label: formData.get('label'),
-      description: formData.get('description') || '',
-      category: formData.get('category') || 'PURPOSE',
-      color: formData.get('color') || 'gray',
-      icon: formData.get('icon') || '🏷️',
-      isDefault: formData.get('isDefault') === 'true',
-      isActive: formData.get('isActive') === 'true',
-      sortOrder: parseInt(formData.get('sortOrder')) || 0,
-      parentId: formData.get('parentId') || null,
-      metadata: metadata,
+      icon: formData.get('icon') || '',
+      color: formData.get('color') || '#6b7280',
     });
     
     return { 
@@ -107,7 +93,9 @@ async function createTag(formData) {
         ...tag.toObject(),
         _id: tag._id.toString(),
         id: tag._id.toString(),
-        metadata: metadata, // Already an object
+        // Add UI compatibility fields
+        category: 'general',
+        metadata: {},
       }
     };
   } catch (error) {
@@ -137,44 +125,13 @@ async function updateTag(id, formData) {
       return { error: 'Tag with this name or slug already exists' };
     }
     
-    // Parse metadata if provided
-    let metadata = {};
-    const metadataStr = formData.get('metadata');
-    if (metadataStr) {
-      try {
-        metadata = JSON.parse(metadataStr);
-      } catch (e) {
-        console.error('Error parsing metadata:', e);
-      }
-    }
-    
-    // If setting this as default for category, unset any existing default
-    if (formData.get('isDefault') === 'true') {
-      await Tag.updateMany(
-        { 
-          _id: { $ne: id }, 
-          category: formData.get('category'),
-          isDefault: true 
-        },
-        { $set: { isDefault: false } }
-      );
-    }
-    
     const tag = await Tag.findByIdAndUpdate(
       id,
       {
         name: formData.get('name'),
         slug: formData.get('slug'),
-        label: formData.get('label'),
-        description: formData.get('description') || '',
-        category: formData.get('category'),
-        color: formData.get('color'),
-        icon: formData.get('icon'),
-        isDefault: formData.get('isDefault') === 'true',
-        isActive: formData.get('isActive') === 'true',
-        sortOrder: parseInt(formData.get('sortOrder')) || 0,
-        parentId: formData.get('parentId') || null,
-        metadata: metadata,
+        icon: formData.get('icon') || '',
+        color: formData.get('color') || '#6b7280',
         updatedAt: new Date(),
       },
       { new: true, runValidators: true }
@@ -190,7 +147,9 @@ async function updateTag(id, formData) {
         ...tag.toObject(),
         _id: tag._id.toString(),
         id: tag._id.toString(),
-        metadata: metadata, // Already an object
+        // Add UI compatibility fields
+        category: 'general',
+        metadata: {},
       }
     };
   } catch (error) {
@@ -204,18 +163,6 @@ async function deleteTag(id) {
   
   try {
     await connectDB();
-    
-    // Check if this is a default tag
-    const tagToDelete = await Tag.findById(id);
-    if (tagToDelete?.isDefault) {
-      return { error: 'Cannot delete default tag. Please set another tag as default first.' };
-    }
-    
-    // Check if tag has children
-    const childrenCount = await Tag.countDocuments({ parentId: id });
-    if (childrenCount > 0) {
-      return { error: `Cannot delete: ${childrenCount} child tags depend on this tag.` };
-    }
     
     // Check if tag is being used by any properties
     const propertiesCount = await Property.countDocuments({ tagIds: id });
@@ -237,11 +184,10 @@ export default async function TagsPage() {
   const tags = await getTags();
   const usageCounts = await getTagUsageCounts();
   
-  // Group tags by category
-  const tagsByCategory = {};
-  CATEGORY_OPTIONS.forEach(cat => {
-    tagsByCategory[cat.value] = tags.filter(t => t.category === cat.value);
-  });
+  // Group tags by category (simplified - all in one category)
+  const tagsByCategory = {
+    general: tags
+  };
   
   return (
     <TagsClient 
