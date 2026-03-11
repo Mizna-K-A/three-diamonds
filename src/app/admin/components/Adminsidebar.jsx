@@ -18,14 +18,16 @@ import {
   Tags,
   CalendarDays,
   Mail,
+  ImageIcon,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: Home },
-  { name: 'Properties', href: '/admin/properties', icon: Home }, // Add this
+  { name: 'Properties', href: '/admin/properties', icon: Home },
   { name: 'Property Types', href: '/admin/property-types', icon: Building2 },
   { name: 'Property Statuses', href: '/admin/property-statuses', icon: Tag },
   { name: 'Property Tags', href: '/admin/tags', icon: Tags },
+  { name: 'Hero Slides', href: '/admin/hero-slides', icon: ImageIcon },
   { name: 'Viewing Requests', href: '/admin/viewings', icon: CalendarDays },
   { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
 ];
@@ -41,10 +43,10 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
   }, []);
 
 
-const handleLogout = async () => {
-  await fetch("/api/admin/logout", { method: "POST" });
-  router.push("/login");
-};
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.push("/login");
+  };
   const isActive = (href) => pathname === href;
 
   if (!mounted) {
@@ -70,9 +72,8 @@ const handleLogout = async () => {
           backgroundColor: '#111111',
           borderRight: '1px solid #222222',
         }}
-        className={`fixed top-0 left-0 h-full z-40 flex flex-col shadow-xl ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 transition-transform lg:transition-[width] duration-300`}
+        className={`fixed top-0 left-0 h-full z-40 flex flex-col shadow-xl ${mobileOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 transition-transform lg:transition-[width] duration-300`}
       >
         {/* Logo / Brand */}
         <div className="relative flex items-center h-16 px-4 border-b border-gray-800">
@@ -138,11 +139,10 @@ const handleLogout = async () => {
                 style={{
                   justifyContent: minimized ? 'center' : 'flex-start',
                 }}
-                className={`group relative flex items-center gap-3 h-10 px-3 rounded-xl text-sm font-medium transition-all duration-150 ${
-                  active
+                className={`group relative flex items-center gap-3 h-10 px-3 rounded-xl text-sm font-medium transition-all duration-150 ${active
                     ? 'bg-gray-800 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-                }`}
+                  }`}
               >
                 {active && (
                   <span
@@ -204,9 +204,8 @@ const handleLogout = async () => {
           {/* Minimize Button */}
           <button
             onClick={() => setMinimized(!minimized)}
-            className={`w-full flex items-center gap-3 h-10 px-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-150 ${
-              minimized ? 'justify-center' : 'justify-between'
-            }`}
+            className={`w-full flex items-center gap-3 h-10 px-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-150 ${minimized ? 'justify-center' : 'justify-between'
+              }`}
           >
             <div className="flex items-center gap-3">
               {minimized ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}

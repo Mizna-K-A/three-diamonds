@@ -4,54 +4,66 @@
 import { useEffect, useState } from 'react';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 
+const FALLBACK_SLIDES = [
+  {
+    title: 'Premium Commercial Spaces',
+    subtitle: 'Warehouses • Showrooms • Offices',
+    image: '/d11.webp',
+    cta: 'Explore Commercial Properties',
+  },
+  {
+    title: 'Luxury Residential Properties',
+    subtitle: 'Villas • Apartments • Townhouses',
+    image: '/d2.jpg',
+    cta: 'View Residential Listings',
+  },
+  {
+    title: 'Expert Property Management',
+    subtitle: 'Relax While We Handle Everything',
+    image: '/d3.webp',
+    cta: 'Learn About Our Services',
+  },
+];
+
 export default function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-  
-  const heroSlides = [
-    { 
-      title: "Premium Commercial Spaces", 
-      subtitle: "Warehouses • Showrooms • Offices",
-      image: "/d11.webp",
-      cta: "Explore Commercial Properties"
-    },
-    { 
-      title: "Luxury Residential Properties", 
-      subtitle: "Villas • Apartments • Townhouses",
-      image: "/d2.jpg",
-      cta: "View Residential Listings"
-    },
-    { 
-      title: "Expert Property Management", 
-      subtitle: "Relax While We Handle Everything",
-      image: "/d3.webp",
-      cta: "Learn About Our Services"
-    },
-  ];
+  const [heroSlides, setHeroSlides] = useState(FALLBACK_SLIDES);
+
+  useEffect(() => {
+    // Fetch slides from DB
+    fetch('/api/hero-slides')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setHeroSlides(data);
+        }
+      })
+      .catch(() => {
+        // Keep fallback slides on error
+      });
+  }, []);
 
   useEffect(() => {
     // Preload images
-    const preloadImages = () => {
-      heroSlides.forEach(slide => {
-        const img = new Image();
-        img.src = slide.image;
-      });
-    };
-    preloadImages();
-    
+    heroSlides.forEach(slide => {
+      const img = new Image();
+      img.src = slide.image;
+    });
+
     // Set loaded state after a short delay
     const timer = setTimeout(() => setIsLoaded(true), 100);
-    
+
     // Auto slide
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
-    
+
     return () => {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, []);
+  }, [heroSlides]);
 
   const nextSlide = () => {
     setCurrentImage((prev) => (prev + 1) % heroSlides.length);
@@ -68,9 +80,8 @@ export default function Hero() {
         {heroSlides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              currentImage === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            } ${isLoaded ? 'scale-100' : 'scale-110'}`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${currentImage === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              } ${isLoaded ? 'scale-100' : 'scale-110'}`}
             style={{
               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), url('${slide.image}')`,
               backgroundSize: 'cover',
@@ -80,7 +91,7 @@ export default function Hero() {
             }}
           />
         ))}
-        
+
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
@@ -97,16 +108,15 @@ export default function Hero() {
               </span>
               <div className="w-20 h-0.5 bg-white/50 mx-auto mt-2"></div>
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
               <span className="block text-white">DISCOVER DUBAI'S FINEST</span>
               <span className="block text-white mt-2">PROPERTIES</span>
             </h1>
-            
+
             <div className="h-24 md:h-20 mb-8">
-              <div className={`transition-all duration-500 transform ${
-                isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-              }`}>
+              <div className={`transition-all duration-500 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                }`}>
                 <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
                   {heroSlides[currentImage].subtitle}
                 </p>
@@ -115,9 +125,8 @@ export default function Hero() {
           </div>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-300 ${
-            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-          }`}>
+          <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+            }`}>
             <a
               href="#properties"
               className="group bg-white text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 shadow-2xl"
@@ -135,9 +144,8 @@ export default function Hero() {
           </div>
 
           {/* Featured Stats */}
-          <div className={`mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto transition-all duration-700 delay-500 ${
-            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-          }`}>
+          <div className={`mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+            }`}>
             {[
               { value: '15+', label: 'Years Experience' },
               { value: '500+', label: 'Properties' },
@@ -172,11 +180,10 @@ export default function Hero() {
             <button
               key={index}
               onClick={() => setCurrentImage(index)}
-              className={`transition-all duration-300 ${
-                currentImage === index 
-                  ? 'w-10 bg-white' 
-                  : 'w-3 bg-white/50 hover:bg-white/80'
-              } h-1 rounded-full`}
+              className={`transition-all duration-300 ${currentImage === index
+                ? 'w-10 bg-white'
+                : 'w-3 bg-white/50 hover:bg-white/80'
+                } h-1 rounded-full`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
