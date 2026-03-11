@@ -30,7 +30,7 @@ export default function ServiceNavigation() {
               key={service.href}
               href={service.href}
               className={`
-                inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300
+                inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300
                 ${isActive 
                   ? 'bg-gray-100 text-gray-900 shadow-lg' 
                   : 'bg-gray-900 text-gray-300 hover:bg-gray-800 border border-gray-800'

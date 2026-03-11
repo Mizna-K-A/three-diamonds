@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, MessageSquare } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, Instagram, Facebook } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Contact() {
@@ -223,31 +223,24 @@ export default function Contact() {
                 <h4 className="font-bold text-gray-800 mb-4">Follow Us</h4>
                 <div className="flex gap-4">
                   <motion.a
-                    href="#"
-                    className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800"
-                    variants={socialIconHover}
-                    whileHover="hover"
-                    whileTap={{ scale: 0.9 }}
+                    href="https://facebook.com/threediamondsreal-estate"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
                   >
-                    f
+                    <Facebook className="w-6 h-6 text-white" />
                   </motion.a>
                   <motion.a
-                    href="#"
-                    className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800"
-                    variants={socialIconHover}
-                    whileHover="hover"
-                    whileTap={{ scale: 0.9 }}
+                    href="https://instagram.com/threediamondsrealestate"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
                   >
-                    in
-                  </motion.a>
-                  <motion.a
-                    href="#"
-                    className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800"
-                    variants={socialIconHover}
-                    whileHover="hover"
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    @
+                    <Instagram className="w-6 h-6 text-white" />
                   </motion.a>
                 </div>
               </div>
@@ -363,7 +356,7 @@ export default function Contact() {
                   <motion.button
                     type="submit"
                     disabled={isSubmitting}
-                    className="btn-primary flex items-center gap-2 px-8 py-4"
+                    className="btn-primary flex items-center gap-2"
                     variants={buttonHover}
                     whileHover="hover"
                     whileTap="tap"
@@ -374,7 +367,9 @@ export default function Contact() {
                         Sending...
                       </>
                     ) : (
-                      'Send Message'
+                      <span className='border-2 p-3'>
+                        Send Message
+                      </span>
                     )}
                   </motion.button>
                   <p className="text-sm text-gray-500">

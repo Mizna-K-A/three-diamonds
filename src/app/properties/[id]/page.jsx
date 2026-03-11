@@ -289,15 +289,6 @@ export default async function PropertyDetailsPage({ params }) {
                 {property.title}
               </h1>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/admin/properties/${property._id}/edit`}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                Edit
-              </Link>
-            </div>
           </div>
         </div>
 
@@ -542,28 +533,6 @@ export default async function PropertyDetailsPage({ params }) {
                   </div>
                 </div>
               )}
-
-              {/* Price Details */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                  Price Details
-                </h2>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-400">Payment Plan</span>
-                    <span className="text-sm text-white font-medium">{property.priceDetails.paymentPlan}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-400">Maintenance</span>
-                    <span className="text-sm text-white font-medium">{property.priceDetails.maintenance}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-400">Handover</span>
-                    <span className="text-sm text-white font-medium">{property.priceDetails.handover}</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Timeline */}
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">

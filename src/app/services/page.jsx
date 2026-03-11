@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { Building2, Wrench, Search, TrendingUp, Users, Key, ArrowRight } from 'lucide-react';
+import { Building2, Wrench, Search, TrendingUp, Users, Key, ArrowRight, HardHat } from 'lucide-react';
 import Header from '../components/Header';
 
 export default function ServicesPage() {
-  const services = [
+ const services = [
     {
       title: 'Property Management',
       description: 'Comprehensive property management services including tenant screening, rent collection, maintenance coordination, and financial reporting.',
@@ -45,6 +45,13 @@ export default function ServicesPage() {
       icon: Key,
       href: '/services/landlord-agency',
       features: ['Tenant Sourcing', 'Lease Marketing', 'Rent Optimization', 'Lease Administration']
+    },
+    {
+      title: 'Technical Services',
+      description: 'Comprehensive technical due diligence and building consultancy services for property acquisitions, developments, and portfolio management.',
+      icon: HardHat, 
+      href: '/services/technical-service',
+      features: ['Technical Due Diligence', 'Building Surveys', 'Project Monitoring', 'Sustainability Consulting', 'Health & Safety Compliance', 'Condition Assessments']
     }
   ];
 

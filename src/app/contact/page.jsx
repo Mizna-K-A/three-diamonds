@@ -558,7 +558,7 @@ export default function Contact() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: false, margin: "-100px" }}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 -mt-32"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-32"
           >
             {/* Phone Card */}
             <motion.a
@@ -622,7 +622,7 @@ export default function Contact() {
             </motion.div>
 
             {/* Website Card */}
-            <motion.a
+            {/* <motion.a
               href="https://www.threediamonds.ae"
               target="_blank"
               rel="noopener noreferrer"
@@ -641,7 +641,7 @@ export default function Contact() {
               </motion.div>
               <h3 className="text-2xl font-bold mb-2 text-white">WEBSITE</h3>
               <p className="text-gray-400">www.threediamonds.ae</p>
-            </motion.a>
+            </motion.a> */}
           </motion.div>
 
           {/* Main Content Grid - Form and Brochure */}
