@@ -181,69 +181,69 @@ export default function FeaturedProperties({
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
               transition={{ duration: 0.5, delay: 0.55 }}
             >
-             
+
               {/* Dropdown Panel */}
               <AnimatePresence>
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className=" right-0 bg-white overflow-hidden z-50"
-                  >
-                    <div className="flex items-end gap-6">
-                      {/* Property Type */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className=" right-0 bg-white overflow-hidden z-50"
+                >
+                  <div className="flex items-end gap-6">
+                    {/* Property Type */}
+                    <div className="flex-1">
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                        Property Type
+                      </label>
+                      <select
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white"
+                      >
+                        {categories.map((cat) => (
+                          <option key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Status */}
+                    {statuses.length > 0 && (
                       <div className="flex-1">
                         <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                          Property Type
+                          Status
                         </label>
                         <select
-                          value={selectedType}
-                          onChange={(e) => setSelectedType(e.target.value)}
+                          value={selectedStatus}
+                          onChange={(e) => setSelectedStatus(e.target.value)}
                           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white"
                         >
-                          {categories.map((cat) => (
-                            <option key={cat.value} value={cat.value}>
-                              {cat.label}
+                          <option value="all">Any Status</option>
+                          {statuses.map((s) => (
+                            <option key={s._id} value={s._id}>
+                              {s.name ?? s.label}
                             </option>
                           ))}
                         </select>
                       </div>
+                    )}
 
-                      {/* Status */}
-                      {statuses.length > 0 && (
-                        <div className="flex-1">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                            Status
-                          </label>
-                          <select
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white"
-                          >
-                            <option value="all">Any Status</option>
-                            {statuses.map((s) => (
-                              <option key={s._id} value={s._id}>
-                                {s.name ?? s.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-3 pb-[2px]">
-                        <button
-                          onClick={clearFilters}
-                          className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-black transition-colors border border-gray-200 rounded-xl hover:border-gray-400"
-                        >
-                          Clear
-                        </button>
-                      </div>
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-3 pb-[2px]">
+                      <button
+                        onClick={clearFilters}
+                        className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-black transition-colors border border-gray-200 rounded-xl hover:border-gray-400"
+                      >
+                        Clear
+                      </button>
                     </div>
+                  </div>
 
 
-                  </motion.div>
+                </motion.div>
               </AnimatePresence>
             </motion.div>
           </div>
@@ -395,7 +395,7 @@ export default function FeaturedProperties({
                         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                         transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
                       >
-                        <Link href={`/properties/${property.id ?? property._id}`} className="flex-1">
+                        <Link href={`/properties/${property.slug || property.id || property._id}`} className="flex-1">
                           <motion.button
                             className="w-full py-2.5 rounded-xl bg-black text-white text-xs font-semibold tracking-wide hover:bg-gray-800 transition-colors"
                             whileHover={{ scale: 1.03 }}

@@ -201,7 +201,7 @@ export default function PropertiesContent({
                 <div
                   key={property._id}
                   className="group bg-[#161616] rounded-2xl overflow-hidden border border-white/6 hover:border-white/15 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                  onClick={() => router.push(`/properties/${property._id}`)}
+                  onClick={() => router.push(`/properties/${property.slug || property._id}`)}
                 >
                   {/* IMAGE */}
                   <div className="relative h-52 overflow-hidden bg-[#1a1a1a]">
@@ -276,7 +276,7 @@ export default function PropertiesContent({
                     {/* Actions */}
                     <div className="flex gap-2 pt-3 border-t border-white/5">
                       <Link
-                        href={`/properties/${property._id}`}
+                        href={`/properties/${property.slug || property._id}`}
                         className="flex-1"
                         onClick={(e) => e.stopPropagation()}
                       >

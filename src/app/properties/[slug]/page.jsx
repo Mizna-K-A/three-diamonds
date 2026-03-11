@@ -28,24 +28,39 @@ import {
   AlertCircle,
   Info,
   CheckCheck,
+  Download,
 } from 'lucide-react';
 import ImageGallery from './ImageGallery';
+import DownloadProposalButton from './DownloadProposalButton';
+import mongoose from 'mongoose';
 import connectDB from '../../../../lib/mongodb';
 import Property from '../../../../lib/models/Property';
 import Header from '../../components/Header';
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
-async function getProperty(id) {
+async function getProperty(slugOrId) {
   try {
     await connectDB();
 
-    const property = await Property.findById(id)
+    // Try to find by slug first, then fallback to ID
+    let property = await Property.findOne({ slug: slugOrId })
       .populate('statusId', 'name label color icon')
       .populate('propertyTypeId', 'name slug icon')
       .populate('tagIds', 'name label color icon category')
       .populate('purposeTagId', 'name label color icon')
       .lean();
+
+    const isObjectId = slugOrId && slugOrId.length === 24 && /^[0-9a-fA-F]{24}$/.test(slugOrId);
+
+    if (!property && isObjectId) {
+      property = await Property.findById(slugOrId)
+        .populate('statusId', 'name label color icon')
+        .populate('propertyTypeId', 'name slug icon')
+        .populate('tagIds', 'name label color icon category')
+        .populate('purposeTagId', 'name label color icon')
+        .lean();
+    }
 
     if (!property) return null;
 
@@ -133,7 +148,7 @@ const formatPrice = (price) =>
 // Icon mapping helper
 const getIconComponent = (iconName, defaultIcon = Info) => {
   if (!iconName) return defaultIcon;
-  
+
   const iconMap = {
     'home': Building,
     'building': Building,
@@ -163,7 +178,7 @@ const getIconComponent = (iconName, defaultIcon = Info) => {
     'globe': Globe,
     'airventicon': Building, // Map AirVentIcon to Building as fallback
   };
-  
+
   const normalizedName = iconName.toLowerCase();
   return iconMap[normalizedName] || defaultIcon;
 };
@@ -171,7 +186,7 @@ const getIconComponent = (iconName, defaultIcon = Info) => {
 // Extract coordinates from Google Maps URL
 const extractCoordinatesFromMapLink = (mapLink) => {
   if (!mapLink) return null;
-  
+
   const atCoordinatesRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
   const atMatch = mapLink.match(atCoordinatesRegex);
   if (atMatch) {
@@ -180,7 +195,7 @@ const extractCoordinatesFromMapLink = (mapLink) => {
       lng: parseFloat(atMatch[2]),
     };
   }
-  
+
   const qCoordinatesRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
   const qMatch = mapLink.match(qCoordinatesRegex);
   if (qMatch) {
@@ -189,26 +204,26 @@ const extractCoordinatesFromMapLink = (mapLink) => {
       lng: parseFloat(qMatch[2]),
     };
   }
-  
+
   return null;
 };
 
 // Generate embed URL for iframe
 const getEmbedMapUrl = (mapLink) => {
   if (!mapLink) return null;
-  
+
   if (mapLink.includes('google.com/maps')) {
     const coordinates = extractCoordinatesFromMapLink(mapLink);
     if (coordinates) {
       return `https://www.google.com/maps/embed/v1/place?key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${coordinates.lat},${coordinates.lng}`;
     }
-    
+
     const placeMatch = mapLink.match(/place\/([^/]+)/);
     if (placeMatch) {
       return `https://www.google.com/maps/embed/v1/place?key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${placeMatch[1]}`;
     }
   }
-  
+
   return mapLink;
 };
 
@@ -216,9 +231,9 @@ const getEmbedMapUrl = (mapLink) => {
 
 function StatusBadge({ status }) {
   if (!status) return null;
-  
+
   const IconComponent = status.icon ? getIconComponent(status.icon) : null;
-  
+
   return (
     <span
       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
@@ -235,9 +250,9 @@ function StatusBadge({ status }) {
 
 function TagPill({ tag }) {
   if (!tag) return null;
-  
+
   const IconComponent = tag.icon ? getIconComponent(tag.icon) : null;
-  
+
   return (
     <span
       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
@@ -255,8 +270,8 @@ function TagPill({ tag }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function PropertyDetailsPage({ params }) {
-  const { id } = await params;
-  const property = await getProperty(id);
+  const { slug } = await params;
+  const property = await getProperty(slug);
 
   if (!property) notFound();
 
@@ -270,20 +285,20 @@ export default async function PropertyDetailsPage({ params }) {
     <>
       {/* Header - Fixed positioning with proper z-index and layout */}
       <Header />
-      
+
       {/* Main content with proper padding to account for fixed header */}
       <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100 pt-16">
         {/* Sub-header - Now properly positioned below the main header */}
         <div className="sticky top-16 z-40 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            <Link 
-              href="/properties" 
+            <Link
+              href="/properties"
               className="inline-flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-800 hover:bg-gray-900 transition-colors"
             >
               <ArrowLeft size={16} />
               Back to Properties
             </Link>
-            
+
             <div className="flex-1 min-w-0">
               <h1 className="text-white font-semibold text-base truncate">
                 {property.title}
@@ -295,7 +310,7 @@ export default async function PropertyDetailsPage({ params }) {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8">
-            
+
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 order-1 space-y-6">
 
@@ -350,7 +365,7 @@ export default async function PropertyDetailsPage({ params }) {
                       {property.NoOFCheck ?? '0'}
                     </div>
                   </div>
-                
+
                   <div>
                     <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                       <Maximize2 size={16} />
@@ -533,29 +548,6 @@ export default async function PropertyDetailsPage({ params }) {
                   </div>
                 </div>
               )}
-              {/* Timeline */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                  Timeline
-                </h2>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <CalendarDays size={16} />
-                      <span className="text-sm">Created</span>
-                    </div>
-                    <span className="text-sm text-white">{property.createdAt}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <RefreshCw size={16} />
-                      <span className="text-sm">Updated</span>
-                    </div>
-                    <span className="text-sm text-white">{property.updatedAt}</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Agent Information */}
               {(property.agent?.name || property.agent?.phone || property.agent?.email) && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -565,8 +557,8 @@ export default async function PropertyDetailsPage({ params }) {
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
                       {property.agent.image ? (
-                        <img 
-                          src={property.agent.image} 
+                        <img
+                          src={property.agent.image}
                           alt={property.agent.name}
                           className="w-full h-full rounded-full object-cover"
                         />
@@ -594,6 +586,17 @@ export default async function PropertyDetailsPage({ params }) {
                       )}
                     </div>
                   </div>
+                  {/* <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Download size={16} className="text-blue-400" />
+                  Property Documents
+                </h2> */}
+                  <DownloadProposalButton
+                    propertyId={property._id}
+                    propertyTitle={property.title}
+                  />
+                  <p className="mt-3 text-[10px] text-center text-gray-500">
+                    By clicking download, you agree to our terms and privacy policy.
+                  </p>
                 </div>
               )}
 
@@ -627,7 +630,7 @@ export default async function PropertyDetailsPage({ params }) {
                     </div>
                     <span className="text-sm text-white">{property.NoOFCheck || '—'}</span>
                   </div>
-                  
+
                   {property.area && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-gray-400">
@@ -647,13 +650,18 @@ export default async function PropertyDetailsPage({ params }) {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-gray-800">
                   <div className="text-sm text-gray-400 mb-1">Total Price</div>
                   <div className="text-2xl font-bold text-white">
                     {formatPrice(property.price)}
                   </div>
                 </div>
+              </div>
+
+              {/* Download Proposal */}
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+
               </div>
 
               {/* Schedule Viewing Form */}
@@ -680,7 +688,7 @@ export default async function PropertyDetailsPage({ params }) {
                 {/* Contact Info */}
                 <form action="/api/schedule-viewing" method="POST">
                   <input type="hidden" name="propertyId" value={property._id} />
-                  
+
                   {/* Date & Time */}
                   <div className="mb-4">
                     <p className="text-xs text-gray-400 mb-2">PREFERRED DATE</p>

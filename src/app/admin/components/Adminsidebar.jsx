@@ -23,12 +23,13 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: Home },
+  { name: 'Home Slides', href: '/admin/hero-slides', icon: ImageIcon },
   { name: 'Properties', href: '/admin/properties', icon: Home },
   { name: 'Property Types', href: '/admin/property-types', icon: Building2 },
   { name: 'Property Statuses', href: '/admin/property-statuses', icon: Tag },
   { name: 'Property Tags', href: '/admin/tags', icon: Tags },
-  { name: 'Hero Slides', href: '/admin/hero-slides', icon: ImageIcon },
   { name: 'Viewing Requests', href: '/admin/viewings', icon: CalendarDays },
+  { name: 'Proposal Requests', href: '/admin/proposals', icon: FileText },
   { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
 ];
 
@@ -140,8 +141,8 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
                   justifyContent: minimized ? 'center' : 'flex-start',
                 }}
                 className={`group relative flex items-center gap-3 h-10 px-3 rounded-xl text-sm font-medium transition-all duration-150 ${active
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                  ? 'bg-gray-800 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                   }`}
               >
                 {active && (
