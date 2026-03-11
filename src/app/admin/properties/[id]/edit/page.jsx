@@ -26,36 +26,36 @@ async function processAndSaveImage(file, index, isPrimary = false, alt = '') {
   try {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
+
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
     const baseFilename = `${timestamp}-${random}`;
-    
+
     const uploadDir = path.join(process.cwd(), 'public/uploads/properties');
     await mkdir(uploadDir, { recursive: true });
-    
+
     // Generate main image (WebP)
     const webpBuffer = await sharp(buffer)
       .webp({ quality: 85, effort: 6 })
       .toBuffer();
-    
+
     const mainFilename = `${baseFilename}.webp`;
     const mainPath = path.join(uploadDir, mainFilename);
     await writeFile(mainPath, webpBuffer);
-    
+
     // Generate thumbnail
     const thumbnailBuffer = await sharp(buffer)
       .resize(150, 150, { fit: 'cover', position: 'center' })
       .webp({ quality: 70, effort: 6 })
       .toBuffer();
-    
+
     const thumbnailFilename = `${baseFilename}-thumbnail.webp`;
     const thumbnailPath = path.join(uploadDir, thumbnailFilename);
     await writeFile(thumbnailPath, thumbnailBuffer);
-    
+
     // Get metadata
     const mainMetadata = await sharp(webpBuffer).metadata();
-    
+
     // Return simplified image object
     return {
       url: `/uploads/properties/${mainFilename}`,
@@ -76,11 +76,11 @@ async function deleteImageFiles(image) {
   try {
     if (image.url) {
       const filePath = path.join(process.cwd(), 'public', image.url);
-      await unlink(filePath).catch(() => {});
+      await unlink(filePath).catch(() => { });
     }
     if (image.thumbnailUrl) {
       const thumbnailPath = path.join(process.cwd(), 'public', image.thumbnailUrl);
-      await unlink(thumbnailPath).catch(() => {});
+      await unlink(thumbnailPath).catch(() => { });
     }
   } catch (error) {
     console.error('Error deleting image files:', error);
@@ -113,13 +113,21 @@ async function getProperty(id) {
       uploadedAt: img.uploadedAt,
     }));
 
+    // Process features to ensure they are plain objects
+    const processedFeatures = (property.features || []).map(feature => ({
+      _id: feature._id?.toString() || '',
+      name: feature.name || '',
+    }));
+
     return {
       ...property,
       _id: property._id.toString(),
       statusId: property.statusId?._id?.toString() || '',
       propertyTypeId: property.propertyTypeId?._id?.toString() || '',
+      purposeTagId: property.purposeTagId?._id?.toString() || '',
       tagIds: property.tagIds?.map(t => t._id.toString()) || [],
       images: processedImages,
+      features: processedFeatures,
       expiresAt: property.expiresAt ? property.expiresAt.toISOString().split('T')[0] : '',
     };
   } catch (error) {
@@ -174,39 +182,39 @@ async function updateProperty(id, formData) {
     const title = formData.get('title');
     const statusId = formData.get('statusId');
     const price = formData.get('price');
-    
+
     if (!title || !statusId || !price) {
       return { error: 'Title, status, and price are required' };
     }
 
-    const features = formData.get('features') 
-      ? JSON.parse(formData.get('features')) 
+    const features = formData.get('features')
+      ? JSON.parse(formData.get('features'))
       : [];
 
     // Handle images - UPDATED for simplified schema
     const images = [];
-    
+
     // Process existing images
     const existingImagesJson = formData.get('images');
     const existingImages = existingImagesJson ? JSON.parse(existingImagesJson) : [];
-    
+
     // Keep track of images to keep
     const keepImageUrls = new Set(existingImages.map(img => img.url));
-    
+
     // Delete images that are no longer needed
     const currentProperty = await Property.findById(id);
     if (currentProperty) {
       const imagesToDelete = (currentProperty.images || []).filter(
         img => !keepImageUrls.has(img.url)
       );
-      
+
       for (const img of imagesToDelete) {
         await deleteImageFiles(img);
       }
     }
-    
+
     images.push(...existingImages);
-    
+
     // Process new image files
     const newImages = [];
     let i = 0;
@@ -217,17 +225,17 @@ async function updateProperty(id, formData) {
       });
       i++;
     }
-    
+
     const imageFiles = formData.getAll('new_images');
-    
+
     for (let i = 0; i < imageFiles.length; i++) {
       const file = imageFiles[i];
       const { alt, isPrimary } = newImages[i] || { alt: title, isPrimary: false };
-      
+
       const processedImage = await processAndSaveImage(file, images.length + i, isPrimary, alt);
       images.push(processedImage);
     }
-    
+
     // Ensure only one primary image
     if (images.length > 0) {
       const hasPrimary = images.some(img => img.isPrimary);

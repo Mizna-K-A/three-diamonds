@@ -1,6 +1,6 @@
 import connectDB from '../../../../lib/mongodb';
 import ProposalRequest from '../../../../lib/models/ProposalRequest';
-import Link from 'next/link';
+import ProposalRequestsClient from './ProposalRequestsClient';
 
 async function getProposals() {
     try {
@@ -26,6 +26,8 @@ async function getProposals() {
                 id: d._id.toString(),
                 propertyId: d.propertyId?.toString?.() || '',
                 propertyTitle: d.propertyTitle || '',
+                agentName: d.agentName || '',
+                agentEmail: d.agentEmail || '',
                 name: d.name || '',
                 email: d.email || '',
                 phone: d.phone || '',
@@ -72,7 +74,7 @@ export default async function ProposalRequestsPage() {
     const { proposals, stats } = await getProposals();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-[#0a0a0a] to-gray-900">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-[#0a0a0a] to-gray-900 text-white">
             {/* Header with gradient */}
             <div className="border-b border-gray-800/50 bg-black/20 backdrop-blur-sm sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -88,14 +90,14 @@ export default async function ProposalRequestsPage() {
                         </div>
 
                         {/* Stats badges */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 text-white">
                             <div className="px-4 py-2 rounded-xl bg-gray-900/50 border border-gray-800 backdrop-blur-sm">
                                 <div className="text-xs text-gray-400">Today</div>
-                                <div className="text-xl font-semibold text-white">{stats.today}</div>
+                                <div className="text-xl font-semibold">{stats.today}</div>
                             </div>
                             <div className="px-4 py-2 rounded-xl bg-gray-900/50 border border-gray-800 backdrop-blur-sm">
                                 <div className="text-xs text-gray-400">Total</div>
-                                <div className="text-xl font-semibold text-white">{stats.total}</div>
+                                <div className="text-xl font-semibold">{stats.total}</div>
                             </div>
                         </div>
                     </div>
@@ -105,7 +107,7 @@ export default async function ProposalRequestsPage() {
                         {Object.entries(stats.byStatus).map(([status, count]) => (
                             <div key={status} className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-800/50 border border-gray-700">
                                 <StatusBadge status={status} />
-                                <span className="text-sm font-medium text-white">{count}</span>
+                                <span className="text-sm font-medium">{count}</span>
                             </div>
                         ))}
                         <div className="px-3 py-1 rounded-full bg-gray-800/50 border border-gray-700 text-sm text-gray-400">
@@ -117,112 +119,7 @@ export default async function ProposalRequestsPage() {
 
             {/* Main content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-900/80 border-b border-gray-800">
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Created
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Property
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Customer
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Contact Details
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-800/60">
-                                {proposals.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-16 text-center">
-                                            <div className="flex flex-col items-center justify-center text-gray-400">
-                                                <svg className="w-12 h-12 mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                                <p className="text-lg font-medium text-gray-300">No proposal requests yet</p>
-                                                <p className="text-sm text-gray-500 mt-1">Downloading proposals will trigger requests here</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    proposals.map((v, index) => (
-                                        <tr
-                                            key={v.id}
-                                            className="hover:bg-white/5 transition-colors group"
-                                            style={{ animationDelay: `${index * 50}ms` }}
-                                        >
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex flex-col">
-                                                    <time className="text-sm text-gray-300 font-medium">
-                                                        {v.createdAt ? new Date(v.createdAt).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        }) : '—'}
-                                                    </time>
-                                                    <span className="text-xs text-gray-500">
-                                                        {v.createdAt ? new Date(v.createdAt).toLocaleTimeString('en-US', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        }) : ''}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4 max-w-xs">
-                                                <div className="flex flex-col gap-1">
-                                                    {v.propertyId ? (
-                                                        <Link
-                                                            href={`/admin/properties/${v.propertyId}`}
-                                                            className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 group/link"
-                                                        >
-                                                            <span className="truncate font-medium">
-                                                                {v.propertyTitle || v.propertyId}
-                                                            </span>
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="text-gray-300">{v.propertyTitle || '—'}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4">
-                                                <span className="font-medium text-white">{v.name || '—'}</span>
-                                            </td>
-
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col gap-1">
-                                                    {v.email && (
-                                                        <a href={`mailto:${v.email}`} className="text-sm text-gray-400 hover:text-blue-400 transition-colors flex items-center gap-1">
-                                                            {v.email}
-                                                        </a>
-                                                    )}
-                                                    {v.phone && (
-                                                        <a href={`tel:${v.phone}`} className="text-sm text-gray-400 hover:text-blue-400 transition-colors flex items-center gap-1">
-                                                            {v.phone}
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-6 py-4">
-                                                <StatusBadge status={v.status} />
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <ProposalRequestsClient initialProposals={proposals} />
             </div>
         </div>
     );

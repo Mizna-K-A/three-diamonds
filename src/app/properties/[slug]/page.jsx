@@ -35,6 +35,9 @@ import DownloadProposalButton from './DownloadProposalButton';
 import mongoose from 'mongoose';
 import connectDB from '../../../../lib/mongodb';
 import Property from '../../../../lib/models/Property';
+import PropertyStatus from '../../../../lib/models/PropertyStatus';
+import PropertyType from '../../../../lib/models/PropertyType';
+import TagModel from '../../../../lib/models/Tag';
 import Header from '../../components/Header';
 
 // ─── Data fetching ────────────────────────────────────────────────────────────

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import connectDB from '../../../../lib/mongodb';
 import ProposalRequest from '../../../../lib/models/ProposalRequest';
 import Property from '../../../../lib/models/Property';
+import PropertyType from '../../../../lib/models/PropertyType';
+import PropertyStatus from '../../../../lib/models/PropertyStatus';
+import Tag from '../../../../lib/models/Tag';
 
 export async function POST(request) {
     try {
@@ -19,9 +22,14 @@ export async function POST(request) {
         await connectDB();
 
         let propertyTitle = '';
+        let agentEmail = '';
+        let agentName = '';
+
         try {
-            const property = await Property.findById(propertyId).select('title').lean();
+            const property = await Property.findById(propertyId).select('title agentEmail agentName').lean();
             propertyTitle = property?.title || '';
+            agentEmail = property?.agentEmail || '';
+            agentName = property?.agentName || '';
         } catch {
             // ignore property lookup errors; still store request
         }
@@ -29,6 +37,8 @@ export async function POST(request) {
         const doc = await ProposalRequest.create({
             propertyId,
             propertyTitle,
+            agentName,
+            agentEmail,
             name,
             email,
             phone,
@@ -58,6 +68,22 @@ export async function POST(request) {
                 await sendMail({
                     to: process.env.ADMIN_EMAIL,
                     ...adminMail
+                });
+            }
+
+            // 3. Send to Agent
+            if (agentEmail) {
+                const agentMail = getAdminNotificationTemplate('Direct Property Inquiry (Proposal)', {
+                    agent: agentName,
+                    customer: name,
+                    email,
+                    phone,
+                    property: propertyTitle,
+                    id: propertyId
+                });
+                await sendMail({
+                    to: agentEmail,
+                    ...agentMail
                 });
             }
         } catch (mailError) {
