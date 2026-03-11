@@ -90,7 +90,7 @@ export default function PropertiesContent({
       <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
-        <div className="text-center mb-14">
+        <div className="text-center mb-8">
           <div className="inline-block mb-4">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-[0.2em]">
               Our Portfolio
@@ -105,87 +105,79 @@ export default function PropertiesContent({
           </p>
         </div>
 
-        {/* FILTER BAR */}
-        <div id="filter-bar" className="flex flex-col items-center gap-5 mb-10">
-
-          {/* Type segmented control */}
-          {categories.length > 1 && (
-            <div className="inline-flex items-center bg-white/8 rounded-2xl p-1 gap-1">
-              {categories.map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => handleTypeChange(cat.value)}
-                  className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${selectedType === cat.value
-                    ? "bg-white/15 text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-200"
-                    }`}
+        {/* FILTER BAR - Below Heading */}
+        <div id="filter-bar" className="flex justify-center mb-10">
+          <div className="overflow-hidden p-6 w-full max-w-4xl">
+            <div className="flex flex-wrap items-end gap-4">
+              {/* Property Type */}
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                  Property Type
+                </label>
+                <select
+                  value={selectedType}
+                  onChange={(e) => handleTypeChange(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white text-black"
                 >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          )}
+                  {categories.map((cat) => (
+                    <option key={cat.value} value={cat.value} className="text-black">
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Status + Tags */}
-          <div className="flex flex-wrap justify-center items-center gap-2">
-            {statuses.length > 0 && (
-              <>
-                {/* <button
-                  onClick={() => setSelectedStatus("all")}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
-                    selectedStatus === "all"
-                      ? "bg-white text-black border-white shadow"
-                      : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
-                  }`}
-                >
-                  All Status
-                </button> */}
-                {statuses.map((s) => (
-                  <button
-                    key={s._id}
-                    onClick={() => setSelectedStatus(s._id)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${selectedStatus === s._id
-                      ? "bg-white text-black border-white shadow"
-                      : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
-                      }`}
+              {/* Status */}
+              {statuses.length > 0 && (
+                <div className="flex-1 min-w-[180px]">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                    Status
+                  </label>
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white text-black"
                   >
-                    {s.name ?? s.label}
-                  </button>
-                ))}
-                {/* {tags.length > 0 && <span className="w-px h-4 bg-white/10 mx-1 self-center" />} */}
-              </>
-            )}
+                    <option value="all">Any Status</option>
+                    {statuses.map((s) => (
+                      <option key={s._id} value={s._id} className="text-black">
+                        {s.name ?? s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-            {/* {tags.map((tag) => {
-              const active = selectedTags.includes(tag._id);
-              return (
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 pb-[2px]">
                 <button
-                  key={tag._id}
-                  onClick={() => toggleTag(tag._id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
-                    active
-                      ? "bg-white text-black border-white"
-                      : "bg-white/5 text-gray-500 border-white/10 hover:border-white/30 hover:text-white"
-                  }`}
+                  onClick={clearFilters}
+                  className="px-4 py-2.5 text-xs font-medium text-white hover:text-black transition-colors border border-gray-200 rounded-xl hover:border-gray-400"
                 >
-                  {active && <span className="mr-1">✓</span>}
-                  {tag.name}
+                  Clear
                 </button>
-              );
-            })} */}
+              </div>
+            </div>
+
+            {/* Active Filters Summary (optional) */}
+            {hasFilters && (
+              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
+                <span className="text-xs text-gray-500">Active filters:</span>
+                <div className="flex flex-wrap gap-2">
+                  {selectedType !== "all" && (
+                    <span className="bg-black text-white text-xs px-2 py-1 rounded-full">
+                      Type: {categories.find(c => c.value === selectedType)?.label}
+                    </span>
+                  )}
+                  {selectedStatus !== "all" && (
+                    <span className="bg-black text-white text-xs px-2 py-1 rounded-full">
+                      Status: {statuses.find(s => s._id === selectedStatus)?.name}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Clear */}
-
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium text-gray-600 border border-dashed border-white/15 hover:border-red-500/50 hover:text-red-400 transition-colors"
-            >
-              ✕ Clear filters
-            </button>
-          )}
-
         </div>
 
         {/* Result count */}
@@ -199,7 +191,7 @@ export default function PropertiesContent({
             {filteredProperties.map((property, index) => {
               const imageUrl = getPrimaryImageUrl(property);
               const specs = [
-                property.price != null ? `${formatPrice(property.price).toLocaleString()}` : null,
+                property.price != null ? `${formatPrice(property.price)}` : null,
                 property.area != null ? `${Number(property.area).toLocaleString()} sqft` : null,
                 property.NoOFCheck != null ? `${property.NoOFCheck} Checks` : null,
                 property.RentalPeriod ? property.RentalPeriod : null,
@@ -227,20 +219,25 @@ export default function PropertiesContent({
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Status badge */}
-                    <div className="absolute top-3 left-3">
-                      <span
-                        className="backdrop-blur-sm text-black px-3 py-1 text-[11px] font-bold rounded-full inline-block tracking-wide border border-white/20"
-                        style={{ backgroundColor: property.tags[0].color }}
-                      >
-                        {property.tags[0].name}
-                      </span>
-                    </div>
+                    {/* Tags */}
+                    {property.tags && property.tags.length > 0 && (
+                      <div className="absolute top-3 left-3">
+                        <span
+                          className="backdrop-blur-sm text-black px-3 py-1 text-[11px] font-bold rounded-full inline-block tracking-wide border border-white/20"
+                          style={{ backgroundColor: property.tags[0].color || '#ffffff' }}
+                        >
+                          {property.tags[0].name}
+                        </span>
+                      </div>
+                    )}
 
-                    {/* Price */}
-                    <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10" style={{ backgroundColor: property.status.color }}>
-                      {property.status.name}
-                    </div>
+                    {/* Status */}
+                    {property.status && (
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10"
+                        style={{ backgroundColor: property.status.color || '#000000' }}>
+                        {property.status.name}
+                      </div>
+                    )}
 
                     {/* Featured */}
                     {property.isFeatured && (
