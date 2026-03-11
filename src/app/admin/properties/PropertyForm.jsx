@@ -21,12 +21,13 @@ import {
   Eye,
   Image as ImageIcon,
   Tag,
-  Settings,
   Check,
   X,
   ChevronRight,
   Upload,
-  Loader2
+  Loader2,
+  List,
+  HomeIcon
 } from 'lucide-react';
 
 function generateSlug(title) {
@@ -47,7 +48,7 @@ const FormInput = ({ label, icon: Icon, error, ...props }) => (
     </label>
     <div className="relative">
       {Icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-3">
           <Icon size={18} className="text-gray-500" />
         </div>
       )}
@@ -98,7 +99,7 @@ const FormSelect = ({ label, icon: Icon, options, ...props }) => (
     <div className="relative">
       {Icon && (
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon size={18} className="text-gray-500" />
+          <Icon size={18} className="text-black" />
         </div>
       )}
       <select
@@ -111,10 +112,10 @@ const FormSelect = ({ label, icon: Icon, options, ...props }) => (
           ${Icon ? 'pl-10' : 'pl-4'} pr-10 py-2.5
         `}
       >
-        <option value="">Select {label}</option>
+        <option value="" className='text-black'>Select {label}</option>
         {options.map(option => (
-          <option key={option._id} value={option._id}>
-            {option.label || option.name}
+          <option key={option._id} value={option._id} className='text-black'>
+            {option.name}
           </option>
         ))}
       </select>
@@ -133,7 +134,7 @@ const SectionHeader = ({ title, icon: Icon }) => (
   </div>
 );
 
-// Tag Button Component
+// Tag Button Component - Updated to handle multiple tag selection
 const TagButton = ({ tag, isSelected, onClick }) => (
   <button
     type="button"
@@ -147,7 +148,7 @@ const TagButton = ({ tag, isSelected, onClick }) => (
       }
     `}
   >
-    {tag.label}
+    {tag.name}
     {isSelected && (
       <span className="ml-2 inline-flex">
         <Check size={14} />
@@ -156,7 +157,7 @@ const TagButton = ({ tag, isSelected, onClick }) => (
   </button>
 );
 
-// Updated Feature Card Component - Simplified to only show name
+// Feature Card Component
 const FeatureCard = ({ feature, index, onUpdate, onRemove }) => (
   <div className="flex items-center gap-3 p-3 bg-[#1a1a1a] border border-gray-800 rounded-xl group hover:border-gray-700 transition-all">
     <div className="flex-1">
@@ -178,13 +179,13 @@ const FeatureCard = ({ feature, index, onUpdate, onRemove }) => (
   </div>
 );
 
-// Image Card Component (unchanged)
+// Image Card Component - Updated for simplified schema
 const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrimary }) => {
   const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
-    if (image.webp?.original?.url) {
-      setImageUrl(image.webp.original.url);
+    if (image.url) {
+      setImageUrl(image.url);
     } else if (image.preview) {
       setImageUrl(image.preview);
     }
@@ -213,9 +214,9 @@ const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrima
 
       <div className="w-12 h-12 bg-[#252525] rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden">
         {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={image.caption || 'Property image'} 
+          <img
+            src={imageUrl}
+            alt={image.alt || 'Property image'}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -223,20 +224,13 @@ const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrima
         )}
       </div>
 
-      <div className="flex-1 grid grid-cols-2 gap-3">
-        <input
-          type="text"
-          value={image.caption || ''}
-          onChange={(e) => onUpdate(index, 'caption', e.target.value)}
-          className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600"
-          placeholder="Caption"
-        />
+      <div className="flex-1">
         <input
           type="text"
           value={image.alt || ''}
           onChange={(e) => onUpdate(index, 'alt', e.target.value)}
-          className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600"
-          placeholder="Alt text"
+          className="w-full px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600"
+          placeholder="Alt text for image"
         />
       </div>
 
@@ -265,7 +259,7 @@ const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrima
   );
 };
 
-// File Upload Area Component (unchanged)
+// File Upload Area Component
 const FileUploadArea = ({ onFilesSelected, isUploading }) => {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -298,8 +292,8 @@ const FileUploadArea = ({ onFilesSelected, isUploading }) => {
       onDrop={handleDrop}
       className={`
         relative border-2 border-dashed rounded-xl p-8 text-center transition-all
-        ${isDragging 
-          ? 'border-blue-500 bg-blue-500/10' 
+        ${isDragging
+          ? 'border-blue-500 bg-blue-500/10'
           : 'border-gray-700 hover:border-gray-600 bg-[#1a1a1a]'
         }
       `}
@@ -312,7 +306,7 @@ const FileUploadArea = ({ onFilesSelected, isUploading }) => {
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         disabled={isUploading}
       />
-      
+
       <div className="space-y-3">
         {isUploading ? (
           <>
@@ -359,9 +353,11 @@ export default function PropertyForm({
     agentPhone: '',
     agentEmail: '',
     area: '',
+    NoOFCheck: '',
+    RentalPeriod: '',
     statusId: '',
     propertyTypeId: '',
-    tagId: '',
+    tagIds: [], // Changed from tagId to tagIds array
     images: [],
     features: [],
     isFeatured: false,
@@ -370,7 +366,7 @@ export default function PropertyForm({
     mapLink: '',
   });
 
-  const [selectedTag, setSelectedTag] = useState(null);
+  const [selectedTags, setSelectedTags] = useState([]); // Changed to array
   const [newFeatureName, setNewFeatureName] = useState('');
 
   // Group tags by category
@@ -385,11 +381,22 @@ export default function PropertyForm({
   // Process existing property images
   useEffect(() => {
     if (property) {
+      // Process images for simplified schema
       const processedImages = (property.images || []).map((img, index) => ({
-        ...img,
         id: img._id?.toString() || `img-${index}-${Date.now()}`,
+        url: img.url,
+        thumbnailUrl: img.thumbnailUrl,
+        alt: img.alt || property.title || 'Property image',
         isPrimary: img.isPrimary || false,
+        sortOrder: img.sortOrder || index,
+        uploadedAt: img.uploadedAt,
       }));
+
+      // Get tag IDs
+      const tagIds = property.tagIds || (property.tagId ? [property.tagId] : []);
+
+      // Find selected tags
+      const selected = tags.filter(tag => tagIds.includes(tag._id));
 
       setFormData({
         title: property.title || '',
@@ -404,35 +411,36 @@ export default function PropertyForm({
         agentPhone: property.agentPhone || '',
         agentEmail: property.agentEmail || '',
         area: property.area?.toString() || '',
+        NoOFCheck: property.NoOFCheck || '',
+        RentalPeriod: property.RentalPeriod || '',
         statusId: property.statusId || '',
         propertyTypeId: property.propertyTypeId || '',
-        tagId: property.tagId || property.tagIds?.[0] || '',
+        tagIds: tagIds,
         images: processedImages,
         features: property.features || [],
         isFeatured: property.isFeatured || false,
         isPublished: property.isPublished !== false,
-        expiresAt: property.expiresAt || '',
+        expiresAt: property.expiresAt ? property.expiresAt.split('T')[0] : '',
       });
 
-      if (property.tagId || property.tagIds?.[0]) {
-        const tagId = property.tagId || property.tagIds[0];
-        const tag = tags.find(t => t._id === tagId);
-        setSelectedTag(tag || null);
-      }
+      setSelectedTags(selected);
     } else {
+      // Set default status for new property
+      const defaultStatus = statuses.find(s => s.isDefault);
       setFormData(prev => ({
         ...prev,
-        statusId: statuses.find(s => s.isDefault)?._id || '',
+        statusId: defaultStatus?._id || '',
       }));
     }
   }, [property, statuses, tags]);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.title) newErrors.title = 'Title is required';
+    if (!formData.title?.trim()) newErrors.title = 'Title is required';
     if (!formData.statusId) newErrors.statusId = 'Status is required';
     if (!formData.price) newErrors.price = 'Price is required';
-    if (formData.price && isNaN(formData.price)) newErrors.price = 'Price must be a number';
+    if (formData.price && isNaN(parseFloat(formData.price))) newErrors.price = 'Price must be a number';
+    if (formData.price && parseFloat(formData.price) < 0) newErrors.price = 'Price cannot be negative';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -449,26 +457,55 @@ export default function PropertyForm({
 
     try {
       const submitData = new FormData();
+
+      // Add slug
       const slug = property?.slug || generateSlug(formData.title);
       submitData.append('slug', slug);
 
       // Append all form fields
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'images') {
+          // Handle images separately
+          const existingImages = [];
+          const newFiles = [];
+
           value.forEach((image, index) => {
             if (image.file) {
-              submitData.append('images', image.file);
-              submitData.append(`image_captions[${index}]`, image.caption || '');
-              submitData.append(`image_alts[${index}]`, image.alt || image.caption || '');
-              submitData.append(`image_isPrimary[${index}]`, image.isPrimary ? 'true' : 'false');
+              // New file upload
+              newFiles.push({
+                file: image.file,
+                alt: image.alt || formData.title,
+                isPrimary: image.isPrimary,
+                sortOrder: image.sortOrder || index
+              });
             } else {
-              submitData.append(`existing_images[${index}]`, JSON.stringify(image));
+              // Existing image
+              existingImages.push({
+                url: image.url,
+                thumbnailUrl: image.thumbnailUrl,
+                alt: image.alt,
+                isPrimary: image.isPrimary,
+                sortOrder: image.sortOrder || index
+              });
             }
           });
+
+          // Add existing images as JSON
+          submitData.append('images', JSON.stringify(existingImages));
+
+          // Add new files
+          newFiles.forEach((fileData, index) => {
+            submitData.append('new_images', fileData.file);
+            submitData.append(`new_image_alts[${index}]`, fileData.alt);
+            submitData.append(`new_image_isPrimary[${index}]`, fileData.isPrimary ? 'true' : 'false');
+          });
+
         } else if (key === 'features') {
           submitData.append(key, JSON.stringify(value));
+        } else if (key === 'tagIds') {
+          submitData.append(key, JSON.stringify(value));
         } else {
-          submitData.append(key, value.toString());
+          submitData.append(key, value?.toString() || '');
         }
       });
 
@@ -479,12 +516,11 @@ export default function PropertyForm({
         result = await action(submitData);
       }
 
-      // Handle the response
       if (result) {
         if (result.error) {
           throw new Error(result.error);
         }
-        
+
         if (result.redirect) {
           router.push(result.redirect);
         } else if (result.success) {
@@ -497,7 +533,7 @@ export default function PropertyForm({
       if (error.message?.includes('NEXT_REDIRECT')) {
         return;
       }
-      
+
       console.error('Error saving property:', error);
       alert(error.message || 'Error saving property');
     } finally {
@@ -505,28 +541,36 @@ export default function PropertyForm({
     }
   };
 
+  // Updated tag toggle to handle multiple tags
   const handleTagToggle = (tag) => {
-    if (selectedTag?._id === tag._id) {
-      setFormData({ ...formData, tagId: '' });
-      setSelectedTag(null);
+    let newTagIds;
+    let newSelectedTags;
+
+    if (selectedTags.some(t => t._id === tag._id)) {
+      // Remove tag
+      newTagIds = formData.tagIds.filter(id => id !== tag._id);
+      newSelectedTags = selectedTags.filter(t => t._id !== tag._id);
     } else {
-      setFormData({ ...formData, tagId: tag._id });
-      setSelectedTag(tag);
+      // Add tag
+      newTagIds = [...formData.tagIds, tag._id];
+      newSelectedTags = [...selectedTags, tag];
     }
+
+    setFormData({ ...formData, tagIds: newTagIds });
+    setSelectedTags(newSelectedTags);
   };
 
   const handleFileUpload = async (files) => {
     setIsUploading(true);
-    
+
     try {
       const newImages = await Promise.all(files.map(async (file, index) => {
         const preview = URL.createObjectURL(file);
-        
+
         return {
-          id: Date.now() + index + Math.random(),
+          id: `new-${Date.now()}-${index}-${Math.random()}`,
           file,
           preview,
-          caption: '',
           alt: '',
           isPrimary: formData.images.length === 0 && index === 0,
           sortOrder: formData.images.length + index,
@@ -545,12 +589,14 @@ export default function PropertyForm({
     }
   };
 
-  // Updated addFeature function - simplified
   const addFeature = () => {
     if (newFeatureName.trim()) {
       setFormData({
         ...formData,
-        features: [...formData.features, { name: newFeatureName.trim(), id: Date.now() }]
+        features: [...formData.features, {
+          name: newFeatureName.trim(),
+          id: Date.now()
+        }]
       });
       setNewFeatureName('');
     }
@@ -577,15 +623,17 @@ export default function PropertyForm({
 
   const removeImage = (index) => {
     const newImages = formData.images.filter((_, i) => i !== index);
-    
+
+    // Revoke object URL if it's a new image
     if (formData.images[index].preview) {
       URL.revokeObjectURL(formData.images[index].preview);
     }
-    
+
+    // If we removed the primary image, set the first one as primary
     if (formData.images[index].isPrimary && newImages.length > 0) {
       newImages[0].isPrimary = true;
     }
-    
+
     setFormData({ ...formData, images: newImages });
   };
 
@@ -626,7 +674,7 @@ export default function PropertyForm({
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: Home },
     { id: 'location', label: 'Location', icon: MapPin },
-    { id: 'tags', label: 'Tags', icon: Tag },
+    // { id: 'tags', label: 'Tags', icon: Tag },
     { id: 'features', label: 'Features', icon: Check },
     { id: 'images', label: 'Images', icon: ImageIcon },
   ];
@@ -681,7 +729,7 @@ export default function PropertyForm({
             </div>
           </div>
 
-          {/* Tabs - Updated to remove 'Details' tab */}
+          {/* Tabs */}
           <div className="flex items-center gap-1 mt-4 overflow-x-auto pb-1 scrollbar-hide">
             {tabs.map((tab, index) => (
               <button
@@ -777,10 +825,66 @@ export default function PropertyForm({
                   onChange={(e) => setFormData({ ...formData, area: e.target.value })}
                   placeholder="0"
                 />
+                <FormInput
+                  label="No Of Check"
+                  icon={List}
+                  value={formData.NoOFCheck}
+                  onChange={(e) => setFormData({ ...formData, NoOFCheck: e.target.value })}
+                  placeholder="No Of Check"
+                />
+                <FormInput
+                  label="Rental Period"
+                  icon={HomeIcon}
+                  value={formData.RentalPeriod}
+                  onChange={(e) => setFormData({ ...formData, RentalPeriod: e.target.value })}
+                  placeholder="Rental Period"
+                />
               </div>
+              <div className="space-y-6 animate-fadeIn">
+                <SectionHeader title="Tags" icon={Tag} />
 
+                <div className="space-y-6">
+                  {Object.entries(tagsByCategory).map(([category, categoryTags]) => (
+                    <div key={category} className="space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        {categoryTags.map(tag => (
+                          <TagButton
+                            key={tag._id}
+                            tag={tag}
+                            isSelected={selectedTags.some(t => t._id === tag._id)}
+                            onClick={() => handleTagToggle(tag)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {selectedTags.length > 0 && (
+                  <div className="mt-6 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
+                    <p className="text-sm text-gray-400 mb-2">Selected Tags:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTags.map(tag => (
+                        <span
+                          key={tag._id}
+                          className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2"
+                        >
+                          {tag.name}
+                          <button
+                            type="button"
+                            onClick={() => handleTagToggle(tag)}
+                            className="hover:bg-blue-700 rounded p-0.5"
+                          >
+                            <X size={14} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               {/* Settings */}
-              <div className="mt-8 p-6 bg-[#1a1a1a] rounded-xl border border-gray-800">
+              {/* <div className="mt-8 p-6 bg-[#1a1a1a] rounded-xl border border-gray-800">
                 <h4 className="text-md font-medium text-gray-300 mb-4">Additional Settings</h4>
                 <div className="flex flex-wrap items-center gap-6">
                   <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
@@ -819,7 +923,7 @@ export default function PropertyForm({
                     />
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -899,55 +1003,9 @@ export default function PropertyForm({
             </div>
           )}
 
-          {/* Tags */}
-          {activeTab === 'tags' && (
-            <div className="space-y-6 animate-fadeIn">
-              <SectionHeader title="Tags" icon={Tag} />
+          {/* Tags - Updated for multiple selection */}
 
-              <div className="space-y-6">
-                {Object.entries(tagsByCategory).map(([category, categoryTags]) => (
-                  <div key={category} className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-400">
-                      {category}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {categoryTags.map(tag => (
-                        <TagButton
-                          key={tag._id}
-                          tag={tag}
-                          isSelected={selectedTag?._id === tag._id}
-                          onClick={() => handleTagToggle(tag)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {selectedTag && (
-                <div className="mt-6 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                  <p className="text-sm text-gray-400 mb-2">Selected Tag:</p>
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2">
-                      {selectedTag.label}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, tagId: '' });
-                          setSelectedTag(null);
-                        }}
-                        className="hover:bg-blue-700 rounded p-0.5"
-                      >
-                        <X size={14} />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Features - Updated to only use names */}
+          {/* Features */}
           {activeTab === 'features' && (
             <div className="space-y-6 animate-fadeIn">
               <SectionHeader title="Features" icon={Check} />
@@ -1007,12 +1065,12 @@ export default function PropertyForm({
             </div>
           )}
 
-          {/* Images */}
+          {/* Images - Updated for simplified schema */}
           {activeTab === 'images' && (
             <div className="space-y-6 animate-fadeIn">
               <SectionHeader title="Images" icon={ImageIcon} />
 
-              <FileUploadArea 
+              <FileUploadArea
                 onFilesSelected={handleFileUpload}
                 isUploading={isUploading}
               />
@@ -1040,9 +1098,9 @@ export default function PropertyForm({
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                       {formData.images.map((image, index) => {
                         let imageSrc = null;
-                        
-                        if (image.webp?.original?.url) {
-                          imageSrc = image.webp.original.url;
+
+                        if (image.url) {
+                          imageSrc = image.url;
                         } else if (image.preview) {
                           imageSrc = image.preview;
                         }
@@ -1058,7 +1116,7 @@ export default function PropertyForm({
                             {imageSrc ? (
                               <img
                                 src={imageSrc}
-                                alt={image.alt || image.caption || 'Property image'}
+                                alt={image.alt || 'Property image'}
                                 className="w-full h-full object-cover"
                               />
                             ) : (

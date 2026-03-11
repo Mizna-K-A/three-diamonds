@@ -32,10 +32,12 @@ export default function ImageGallery({ images, title }) {
   const next = () => setActive((i) => Math.min(imageUrls.length - 1, i + 1));
 
   const getThumbnailUrl = (img) => {
+    // img is the full image object, we need to access its webp properties
     return img.webp?.thumbnail?.url || 
            img.webp?.small?.url || 
            img.webp?.medium?.url || 
-           imageUrls[0];
+           img.url ||
+           '/placeholder-image.jpg'; // Add a fallback
   };
 
   return (
@@ -88,17 +90,16 @@ export default function ImageGallery({ images, title }) {
                 key={i}
                 onClick={() => setActive(i)}
                 className={`w-[72px] h-16 overflow-hidden cursor-pointer relative transition-opacity ${
-                  active === i ? 'ring-2 ring-white/90' : ''
+                  active === i ? 'ring-2 ring-white/90' : 'opacity-70 hover:opacity-100'
                 }`}
               >
                 <img 
                   src={thumbUrl} 
                   alt={`${title} thumbnail ${i + 1}`}
-                  className={`w-full h-full object-cover transition-all duration-250 ${
-                    active === i ? 'opacity-100' : 'opacity-60 hover:opacity-80 hover:scale-105'
-                  }`}
+                  className="w-full h-full object-cover transition-all duration-250 hover:scale-105"
                   onError={(e) => {
-                    e.target.src = imageUrls[0];
+                    // If thumbnail fails, try using the main image URL for this index
+                    e.target.src = imageUrls[i] || '/placeholder-image.jpg';
                   }}
                 />
               </div>

@@ -10,10 +10,10 @@ export async function getProperties() {
     await connectDB();
     
     const properties = await Property.find({})
-      .populate('statusId', 'name label color icon')
+      .populate('statusId', 'name label color icon slug') // Added slug
       .populate('propertyTypeId', 'name slug icon')
-      .populate('tagIds', 'name label color icon category')
-      .populate('purposeTagId', 'name label color icon')
+      .populate('tagIds', 'name label color icon category slug') // Added slug
+      .populate('purposeTagId', 'name label color icon slug') // Added slug
       .sort({ createdAt: -1 })
       .lean();
     
@@ -25,29 +25,38 @@ export async function getProperties() {
       status: property.statusId ? {
         ...property.statusId,
         _id: property.statusId._id.toString(),
+        slug: property.statusId.slug, // Include slug
       } : null,
       propertyTypeId: property.propertyTypeId?._id?.toString() || null,
       propertyType: property.propertyTypeId ? {
         ...property.propertyTypeId,
         _id: property.propertyTypeId._id.toString(),
+        slug: property.propertyTypeId.slug, // Include slug
       } : null,
       tagIds: property.tagIds?.map(t => t._id.toString()) || [],
       tags: property.tagIds?.map(tag => ({
         ...tag,
         _id: tag._id.toString(),
+        slug: tag.slug, // Include slug
       })) || [],
       purposeTagId: property.purposeTagId?._id?.toString() || null,
       purposeTag: property.purposeTagId ? {
         ...property.purposeTagId,
         _id: property.purposeTagId._id.toString(),
+        slug: property.purposeTagId.slug, // Include slug
       } : null,
       userId: property.userId?.toString() || null,
-      // Fix: Properly serialize the images array
+      // Fix: Properly serialize the images array with the simplified schema
       images: (property.images || []).map(image => ({
-        ...image,
+        url: image.url,
+        thumbnailUrl: image.thumbnailUrl || null,
+        alt: image.alt || '', // Alt field is now the main descriptive field
+        isPrimary: image.isPrimary || false,
+        sortOrder: image.sortOrder || 0,
+        uploadedAt: image.uploadedAt?.toISOString() || new Date().toISOString(),
         _id: image._id?.toString() || null,
       })),
-      // Fix: Properly serialize the features array if it contains ObjectIds
+      // Fix: Properly serialize the features array
       features: (property.features || []).map(feature => {
         if (feature._id) {
           return {
@@ -76,6 +85,7 @@ async function getPropertyTypes() {
       ...type,
       _id: type._id.toString(),
       id: type._id.toString(),
+      slug: type.slug, // Ensure slug is included
     }));
   } catch (error) {
     console.error('Error fetching property types:', error);
@@ -86,13 +96,15 @@ async function getPropertyTypes() {
 async function getPropertyStatuses() {
   try {
     await connectDB();
-    const statuses = await PropertyStatus.find({ isActive: true })
-      .sort({ sortOrder: 1, name: 1 })
+    // Remove the isActive filter if the field doesn't exist
+    const statuses = await PropertyStatus.find({}) // Changed from { isActive: true }
+      .sort({ name: 1 }) // Changed from sortOrder since it doesn't exist
       .lean();
     return statuses.map(status => ({
       ...status,
       _id: status._id.toString(),
       id: status._id.toString(),
+      slug: status.slug,
     }));
   } catch (error) {
     console.error('Error fetching property statuses:', error);
@@ -103,18 +115,49 @@ async function getPropertyStatuses() {
 async function getTags() {
   try {
     await connectDB();
-    const tags = await Tag.find({ isActive: true })
-      .sort({ category: 1, sortOrder: 1, name: 1 })
+    // Remove filters and sort by name only
+    const tags = await Tag.find({}) // Changed from { isActive: true }
+      .sort({ name: 1 }) // Simplified sorting
       .lean();
     return tags.map(tag => ({
       ...tag,
       _id: tag._id.toString(),
       id: tag._id.toString(),
+      slug: tag.slug,
+      // Handle parentId if it exists in the schema, otherwise set to null
       parentId: tag.parentId?.toString() || null,
     }));
   } catch (error) {
     console.error('Error fetching tags:', error);
     return [];
+  }
+}
+
+// Helper function to convert slug to ID for tags
+async function getTagIdsFromSlugs(slugs = []) {
+  if (!slugs.length) return [];
+  
+  try {
+    await connectDB();
+    const tags = await Tag.find({ slug: { $in: slugs } }).select('_id').lean();
+    return tags.map(tag => tag._id.toString());
+  } catch (error) {
+    console.error('Error converting slugs to IDs:', error);
+    return [];
+  }
+}
+
+// Helper function to get slug from ID (for response)
+async function getTagSlugFromId(id) {
+  if (!id) return null;
+  
+  try {
+    await connectDB();
+    const tag = await Tag.findById(id).select('slug').lean();
+    return tag?.slug || null;
+  } catch (error) {
+    console.error('Error getting tag slug:', error);
+    return null;
   }
 }
 
@@ -128,7 +171,33 @@ async function createProperty(formData) {
     // Parse features and images from JSON strings
     const features = formData.get('features') ? JSON.parse(formData.get('features')) : [];
     const images = formData.get('images') ? JSON.parse(formData.get('images')) : [];
-    const tagIds = formData.get('tagIds') ? JSON.parse(formData.get('tagIds')) : [];
+    
+    // Handle tags - support both IDs and slugs
+    let tagIds = [];
+    const tagInput = formData.get('tagIds');
+    
+    if (tagInput) {
+      const parsedTags = JSON.parse(tagInput);
+      
+      // Check if the first item is a slug (string without ObjectId format)
+      if (parsedTags.length > 0 && typeof parsedTags[0] === 'string' && !parsedTags[0].match(/^[0-9a-fA-F]{24}$/)) {
+        // Input is slugs, convert to IDs
+        tagIds = await getTagIdsFromSlugs(parsedTags);
+      } else {
+        // Input is already IDs
+        tagIds = parsedTags;
+      }
+    }
+    
+    // Prepare images with simplified schema
+    const processedImages = images.map((img, index) => ({
+      url: img.url,
+      thumbnailUrl: img.thumbnailUrl || null,
+      alt: img.alt || formData.get('title') || 'Property image', // Use alt or fallback to title
+      isPrimary: img.isPrimary || index === 0, // First image is primary by default
+      sortOrder: img.sortOrder || index,
+      uploadedAt: new Date(),
+    }));
     
     const property = await Property.create({
       title: formData.get('title'),
@@ -138,17 +207,19 @@ async function createProperty(formData) {
       city: formData.get('city') || '',
       state: formData.get('state') || '',
       zipCode: formData.get('zipCode') || '',
-       agentName: formData.get('agentName'),
+      agentName: formData.get('agentName'),
       agentPhone: formData.get('agentPhone'),
       agentEmail: formData.get('agentEmail'),
       bedrooms: parseInt(formData.get('bedrooms')) || 0,
       bathrooms: parseFloat(formData.get('bathrooms')) || 0,
       area: parseFloat(formData.get('area')) || 0,
+       NoOFCheck: formData.get('NoOFCheck'),
+      RentalPeriod: formData.get('RentalPeriod'),
       statusId: formData.get('statusId'),
       propertyTypeId: formData.get('propertyTypeId') || null,
       tagIds: tagIds,
       userId: formData.get('userId') || null,
-      images: images,
+      images: processedImages,
       features: features,
       isFeatured: formData.get('isFeatured') === 'true',
       isPublished: formData.get('isPublished') === 'true',
@@ -157,10 +228,10 @@ async function createProperty(formData) {
     
     // Fetch populated property
     const populatedProperty = await Property.findById(property._id)
-      .populate('statusId', 'name label color icon')
+      .populate('statusId', 'name label color icon slug')
       .populate('propertyTypeId', 'name slug icon')
-      .populate('tagIds', 'name label color icon category')
-      .populate('purposeTagId', 'name label color icon')
+      .populate('tagIds', 'name label color icon category slug')
+      .populate('purposeTagId', 'name label color icon slug')
       .lean();
     
     return { 
@@ -173,22 +244,36 @@ async function createProperty(formData) {
         status: populatedProperty.statusId ? {
           ...populatedProperty.statusId,
           _id: populatedProperty.statusId._id.toString(),
+          slug: populatedProperty.statusId.slug,
         } : null,
         propertyTypeId: populatedProperty.propertyTypeId?._id?.toString() || null,
         propertyType: populatedProperty.propertyTypeId ? {
           ...populatedProperty.propertyTypeId,
           _id: populatedProperty.propertyTypeId._id.toString(),
+          slug: populatedProperty.propertyTypeId.slug,
         } : null,
         tagIds: populatedProperty.tagIds?.map(t => t._id.toString()) || [],
         tags: populatedProperty.tagIds?.map(tag => ({
           ...tag,
           _id: tag._id.toString(),
+          slug: tag.slug,
         })) || [],
         purposeTagId: populatedProperty.purposeTagId?._id?.toString() || null,
         purposeTag: populatedProperty.purposeTagId ? {
           ...populatedProperty.purposeTagId,
           _id: populatedProperty.purposeTagId._id.toString(),
+          slug: populatedProperty.purposeTagId.slug,
         } : null,
+        // Return simplified images
+        images: (populatedProperty.images || []).map(img => ({
+          url: img.url,
+          thumbnailUrl: img.thumbnailUrl,
+          alt: img.alt,
+          isPrimary: img.isPrimary,
+          sortOrder: img.sortOrder,
+          uploadedAt: img.uploadedAt?.toISOString(),
+          _id: img._id?.toString(),
+        })),
       }
     };
   } catch (error) {
@@ -206,7 +291,33 @@ async function updateProperty(id, formData) {
     // Parse features and images from JSON strings
     const features = formData.get('features') ? JSON.parse(formData.get('features')) : [];
     const images = formData.get('images') ? JSON.parse(formData.get('images')) : [];
-    const tagIds = formData.get('tagIds') ? JSON.parse(formData.get('tagIds')) : [];
+    
+    // Handle tags - support both IDs and slugs
+    let tagIds = [];
+    const tagInput = formData.get('tagIds');
+    
+    if (tagInput) {
+      const parsedTags = JSON.parse(tagInput);
+      
+      // Check if the first item is a slug (string without ObjectId format)
+      if (parsedTags.length > 0 && typeof parsedTags[0] === 'string' && !parsedTags[0].match(/^[0-9a-fA-F]{24}$/)) {
+        // Input is slugs, convert to IDs
+        tagIds = await getTagIdsFromSlugs(parsedTags);
+      } else {
+        // Input is already IDs
+        tagIds = parsedTags;
+      }
+    }
+    
+    // Prepare images with simplified schema
+    const processedImages = images.map((img, index) => ({
+      url: img.url,
+      thumbnailUrl: img.thumbnailUrl || null,
+      alt: img.alt || formData.get('title') || 'Property image',
+      isPrimary: img.isPrimary || index === 0,
+      sortOrder: img.sortOrder || index,
+      uploadedAt: img.uploadedAt ? new Date(img.uploadedAt) : new Date(),
+    }));
     
     const property = await Property.findByIdAndUpdate(
       id,
@@ -218,16 +329,18 @@ async function updateProperty(id, formData) {
         city: formData.get('city') || '',
         state: formData.get('state') || '',
         zipCode: formData.get('zipCode') || '',
-         agentName: formData.get('agentName'),
-      agentPhone: formData.get('agentPhone'),
-      agentEmail: formData.get('agentEmail'),
+        agentName: formData.get('agentName'),
+        agentPhone: formData.get('agentPhone'),
+        agentEmail: formData.get('agentEmail'),
         bedrooms: parseInt(formData.get('bedrooms')) || 0,
         bathrooms: parseFloat(formData.get('bathrooms')) || 0,
         area: parseFloat(formData.get('area')) || 0,
+        NoOFCheck: formData.get('NoOFCheck'),
+        RentalPeriod: formData.get('RentalPeriod'),
         statusId: formData.get('statusId'),
         propertyTypeId: formData.get('propertyTypeId') || null,
         tagIds: tagIds,
-        images: images,
+        images: processedImages,
         features: features,
         isFeatured: formData.get('isFeatured') === 'true',
         isPublished: formData.get('isPublished') === 'true',
@@ -235,41 +348,57 @@ async function updateProperty(id, formData) {
         updatedAt: new Date(),
       },
       { new: true, runValidators: true }
-    ).populate('statusId', 'name label color icon')
+    ).populate('statusId', 'name label color icon slug')
      .populate('propertyTypeId', 'name slug icon')
-     .populate('tagIds', 'name label color icon category')
-     .populate('purposeTagId', 'name label color icon');
+     .populate('tagIds', 'name label color icon category slug')
+     .populate('purposeTagId', 'name label color icon slug');
     
     if (!property) {
       return { error: 'Property not found' };
     }
     
+    const propertyObj = property.toObject();
+    
     return { 
       success: true,
       data: {
-        ...property.toObject(),
-        _id: property._id.toString(),
-        id: property._id.toString(),
-        statusId: property.statusId?._id?.toString() || null,
-        status: property.statusId ? {
-          ...property.statusId,
-          _id: property.statusId._id.toString(),
+        ...propertyObj,
+        _id: propertyObj._id.toString(),
+        id: propertyObj._id.toString(),
+        statusId: propertyObj.statusId?._id?.toString() || null,
+        status: propertyObj.statusId ? {
+          ...propertyObj.statusId,
+          _id: propertyObj.statusId._id.toString(),
+          slug: propertyObj.statusId.slug,
         } : null,
-        propertyTypeId: property.propertyTypeId?._id?.toString() || null,
-        propertyType: property.propertyTypeId ? {
-          ...property.propertyTypeId,
-          _id: property.propertyTypeId._id.toString(),
+        propertyTypeId: propertyObj.propertyTypeId?._id?.toString() || null,
+        propertyType: propertyObj.propertyTypeId ? {
+          ...propertyObj.propertyTypeId,
+          _id: propertyObj.propertyTypeId._id.toString(),
+          slug: propertyObj.propertyTypeId.slug,
         } : null,
-        tagIds: property.tagIds?.map(t => t._id.toString()) || [],
-        tags: property.tagIds?.map(tag => ({
+        tagIds: propertyObj.tagIds?.map(t => t._id.toString()) || [],
+        tags: propertyObj.tagIds?.map(tag => ({
           ...tag,
           _id: tag._id.toString(),
+          slug: tag.slug,
         })) || [],
-        purposeTagId: property.purposeTagId?._id?.toString() || null,
-        purposeTag: property.purposeTagId ? {
-          ...property.purposeTagId,
-          _id: property.purposeTagId._id.toString(),
+        purposeTagId: propertyObj.purposeTagId?._id?.toString() || null,
+        purposeTag: propertyObj.purposeTagId ? {
+          ...propertyObj.purposeTagId,
+          _id: propertyObj.purposeTagId._id.toString(),
+          slug: propertyObj.purposeTagId.slug,
         } : null,
+        // Return simplified images
+        images: (propertyObj.images || []).map(img => ({
+          url: img.url,
+          thumbnailUrl: img.thumbnailUrl,
+          alt: img.alt,
+          isPrimary: img.isPrimary,
+          sortOrder: img.sortOrder,
+          uploadedAt: img.uploadedAt?.toISOString(),
+          _id: img._id?.toString(),
+        })),
       }
     };
   } catch (error) {

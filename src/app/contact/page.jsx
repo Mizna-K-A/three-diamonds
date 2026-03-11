@@ -398,7 +398,7 @@ export default function Contact() {
         throw new Error(data?.message || 'Failed to submit');
       }
 
-      setFormStatus({ submitted: true, success: true, message: "Thank you! We'll contact you shortly." });
+      // setFormStatus({ submitted: true, success: true, message: "Thank you! We'll contact you shortly." });
       showToast("Thank you! We'll contact you shortly.", 'success');
       setFormData({
         name: "",

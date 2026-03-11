@@ -21,13 +21,12 @@ function generateSlug(title) {
     + '-' + Date.now();
 }
 
-// Helper function to process and save image
-async function processAndSaveImage(file, index, isPrimary = false) {
+// Helper function to process and save image - UPDATED for simplified schema
+async function processAndSaveImage(file, index, isPrimary = false, alt = '') {
   try {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
-    const originalName = file.name;
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
     const baseFilename = `${timestamp}-${random}`;
@@ -35,8 +34,7 @@ async function processAndSaveImage(file, index, isPrimary = false) {
     const uploadDir = path.join(process.cwd(), 'public/uploads/properties');
     await mkdir(uploadDir, { recursive: true });
     
-    const metadata = await sharp(buffer).metadata();
-    
+    // Generate main image (WebP)
     const webpBuffer = await sharp(buffer)
       .webp({ quality: 85, effort: 6 })
       .toBuffer();
@@ -45,64 +43,24 @@ async function processAndSaveImage(file, index, isPrimary = false) {
     const mainPath = path.join(uploadDir, mainFilename);
     await writeFile(mainPath, webpBuffer);
     
+    // Generate thumbnail
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(150, 150, { fit: 'cover', position: 'center' })
+      .webp({ quality: 70, effort: 6 })
+      .toBuffer();
+    
+    const thumbnailFilename = `${baseFilename}-thumbnail.webp`;
+    const thumbnailPath = path.join(uploadDir, thumbnailFilename);
+    await writeFile(thumbnailPath, thumbnailBuffer);
+    
+    // Get metadata
     const mainMetadata = await sharp(webpBuffer).metadata();
     
-    const sizes = [
-      { name: 'thumbnail', width: 150, height: 150, quality: 70, fit: 'cover' },
-      { name: 'small', width: 400, height: 300, quality: 75, fit: 'inside' },
-      { name: 'medium', width: 800, height: 600, quality: 80, fit: 'inside' },
-      { name: 'large', width: 1200, height: 900, quality: 85, fit: 'inside' }
-    ];
-    
-    const webpVersions = {
-      thumbnail: null,
-      small: null,
-      medium: null,
-      large: null
-    };
-    
-    for (const { name, width, height, quality, fit } of sizes) {
-      if (width < metadata.width || height < metadata.height) {
-        const resizedBuffer = await sharp(buffer)
-          .resize(width, height, { fit, withoutEnlargement: true, position: 'center' })
-          .webp({ quality, effort: 6 })
-          .toBuffer();
-        
-        const sizeFilename = `${baseFilename}-${name}.webp`;
-        const sizePath = path.join(uploadDir, sizeFilename);
-        await writeFile(sizePath, resizedBuffer);
-        
-        const sizeMetadata = await sharp(resizedBuffer).metadata();
-        
-        webpVersions[name] = {
-          url: `/uploads/properties/${sizeFilename}`,
-          width: sizeMetadata.width,
-          height: sizeMetadata.height,
-          size: resizedBuffer.length,
-        };
-      }
-    }
-    
+    // Return simplified image object
     return {
-      original: {
-        filename: originalName,
-        size: buffer.length,
-        contentType: file.type,
-      },
-      webp: {
-        thumbnail: webpVersions.thumbnail,
-        small: webpVersions.small,
-        medium: webpVersions.medium,
-        large: webpVersions.large,
-        original: {
-          url: `/uploads/properties/${mainFilename}`,
-          width: mainMetadata.width,
-          height: mainMetadata.height,
-          size: webpBuffer.length,
-        },
-      },
-      caption: '',
-      alt: '',
+      url: `/uploads/properties/${mainFilename}`,
+      thumbnailUrl: `/uploads/properties/${thumbnailFilename}`,
+      alt: alt || 'Property image',
       isPrimary,
       sortOrder: index,
       uploadedAt: new Date(),
@@ -113,24 +71,16 @@ async function processAndSaveImage(file, index, isPrimary = false) {
   }
 }
 
-// Helper function to delete image files
+// Helper function to delete image files - UPDATED for simplified schema
 async function deleteImageFiles(image) {
   try {
-    if (image.webp) {
-      const urls = [
-        image.webp.original?.url,
-        image.webp.thumbnail?.url,
-        image.webp.small?.url,
-        image.webp.medium?.url,
-        image.webp.large?.url
-      ];
-      
-      for (const url of urls) {
-        if (url) {
-          const filePath = path.join(process.cwd(), 'public', url);
-          await unlink(filePath).catch(() => {});
-        }
-      }
+    if (image.url) {
+      const filePath = path.join(process.cwd(), 'public', image.url);
+      await unlink(filePath).catch(() => {});
+    }
+    if (image.thumbnailUrl) {
+      const thumbnailPath = path.join(process.cwd(), 'public', image.thumbnailUrl);
+      await unlink(thumbnailPath).catch(() => {});
     }
   } catch (error) {
     console.error('Error deleting image files:', error);
@@ -142,20 +92,25 @@ async function getProperty(id) {
     await connectDB();
 
     const property = await Property.findById(id)
-      .populate('statusId', 'name label color icon')
+      .populate('statusId', 'name label color icon slug')
       .populate('propertyTypeId', 'name slug icon')
-      .populate('tagIds', 'name label color icon category')
-      .populate('purposeTagId', 'name label color icon')
+      .populate('tagIds', 'name label color icon category slug')
+      .populate('purposeTagId', 'name label color icon slug')
       .lean();
 
     if (!property) {
       return null;
     }
 
+    // Process images for simplified schema
     const processedImages = (property.images || []).map((img, index) => ({
-      ...img,
       id: img._id?.toString() || `img-${index}-${Date.now()}`,
+      url: img.url,
+      thumbnailUrl: img.thumbnailUrl,
+      alt: img.alt || property.title || 'Property image',
       isPrimary: img.isPrimary || false,
+      sortOrder: img.sortOrder || index,
+      uploadedAt: img.uploadedAt,
     }));
 
     return {
@@ -164,8 +119,6 @@ async function getProperty(id) {
       statusId: property.statusId?._id?.toString() || '',
       propertyTypeId: property.propertyTypeId?._id?.toString() || '',
       tagIds: property.tagIds?.map(t => t._id.toString()) || [],
-      tagId: property.purposeTagId?._id?.toString() || property.tagIds?.[0]?._id?.toString() || '',
-      purposeTagId: property.purposeTagId?._id?.toString() || '',
       images: processedImages,
       expiresAt: property.expiresAt ? property.expiresAt.toISOString().split('T')[0] : '',
     };
@@ -181,8 +134,10 @@ async function getFormData() {
 
     const [propertyTypes, statuses, tags] = await Promise.all([
       PropertyType.find({}).sort({ name: 1 }).lean(),
-      PropertyStatus.find({ isActive: true }).sort({ sortOrder: 1, name: 1 }).lean(),
-      Tag.find({ isActive: true }).sort({ category: 1, sortOrder: 1, name: 1 }).lean(),
+      // Remove the isActive filter and sortOrder sorting since they don't exist in schema
+      PropertyStatus.find({}).sort({ name: 1 }).lean(),
+      // Remove the isActive filter and category/sortOrder sorting since they don't exist in schema
+      Tag.find({}).sort({ name: 1 }).lean(),
     ]);
 
     return {
@@ -209,7 +164,7 @@ async function getFormData() {
   }
 }
 
-// Server Action for updating property
+// Server Action for updating property - UPDATED for multiple tags and simplified images
 async function updateProperty(id, formData) {
   'use server';
 
@@ -228,22 +183,21 @@ async function updateProperty(id, formData) {
       ? JSON.parse(formData.get('features')) 
       : [];
 
+    // Handle images - UPDATED for simplified schema
     const images = [];
     
-    const existingImages = [];
-    let i = 0;
-    while (formData.has(`existing_images[${i}]`)) {
-      const existingImage = JSON.parse(formData.get(`existing_images[${i}]`));
-      existingImages.push(existingImage);
-      i++;
-    }
+    // Process existing images
+    const existingImagesJson = formData.get('images');
+    const existingImages = existingImagesJson ? JSON.parse(existingImagesJson) : [];
     
-    const keepImageIds = new Set(existingImages.map(img => img.id || img._id));
+    // Keep track of images to keep
+    const keepImageUrls = new Set(existingImages.map(img => img.url));
     
+    // Delete images that are no longer needed
     const currentProperty = await Property.findById(id);
     if (currentProperty) {
       const imagesToDelete = (currentProperty.images || []).filter(
-        img => !keepImageIds.has(img.id) && !keepImageIds.has(img._id?.toString())
+        img => !keepImageUrls.has(img.url)
       );
       
       for (const img of imagesToDelete) {
@@ -253,42 +207,49 @@ async function updateProperty(id, formData) {
     
     images.push(...existingImages);
     
-    const imageFiles = formData.getAll('images');
-    const imageCaptions = formData.getAll('image_captions');
-    const imageAlts = formData.getAll('image_alts');
-    const imageIsPrimary = formData.getAll('image_isPrimary');
+    // Process new image files
+    const newImages = [];
+    let i = 0;
+    while (formData.has(`new_image_alts[${i}]`)) {
+      newImages.push({
+        alt: formData.get(`new_image_alts[${i}]`),
+        isPrimary: formData.get(`new_image_isPrimary[${i}]`) === 'true',
+      });
+      i++;
+    }
+    
+    const imageFiles = formData.getAll('new_images');
     
     for (let i = 0; i < imageFiles.length; i++) {
       const file = imageFiles[i];
-      const caption = imageCaptions[i] || '';
-      const alt = imageAlts[i] || caption;
-      const isPrimary = imageIsPrimary[i] === 'true';
+      const { alt, isPrimary } = newImages[i] || { alt: title, isPrimary: false };
       
-      const processedImage = await processAndSaveImage(file, images.length + i, isPrimary);
-      processedImage.caption = caption;
-      processedImage.alt = alt;
-      
+      const processedImage = await processAndSaveImage(file, images.length + i, isPrimary, alt);
       images.push(processedImage);
     }
     
-    const hasPrimary = images.some(img => img.isPrimary);
-    if (!hasPrimary && images.length > 0) {
-      images[0].isPrimary = true;
-    } else if (images.length > 0) {
-      let primarySet = false;
-      images.forEach(img => {
-        if (img.isPrimary && !primarySet) {
-          primarySet = true;
-        } else if (img.isPrimary) {
-          img.isPrimary = false;
-        }
-      });
+    // Ensure only one primary image
+    if (images.length > 0) {
+      const hasPrimary = images.some(img => img.isPrimary);
+      if (!hasPrimary) {
+        images[0].isPrimary = true;
+      } else {
+        let primarySet = false;
+        images.forEach(img => {
+          if (img.isPrimary && !primarySet) {
+            primarySet = true;
+          } else if (img.isPrimary) {
+            img.isPrimary = false;
+          }
+        });
+      }
     }
 
-    const tagId = formData.get('tagId');
-    const tagIds = tagId ? [tagId] : [];
+    // Handle tags - UPDATED for multiple tags
+    const tagIdsJson = formData.get('tagIds');
+    const tagIds = tagIdsJson ? JSON.parse(tagIdsJson) : [];
 
-    // Update property - REMOVED bedrooms and bathrooms
+    // Update property - UPDATED schema
     const property = await Property.findByIdAndUpdate(
       id,
       {
@@ -304,12 +265,12 @@ async function updateProperty(id, formData) {
         agentName: formData.get('agentName') || '',
         agentPhone: formData.get('agentPhone') || '',
         agentEmail: formData.get('agentEmail') || '',
-        // bedrooms and bathrooms removed
         area: parseFloat(formData.get('area')) || 0,
+        NoOFCheck: formData.get('NoOFCheck') || '',
+        RentalPeriod: formData.get('RentalPeriod') || '',
         statusId,
         propertyTypeId: formData.get('propertyTypeId') || null,
         tagIds,
-        purposeTagId: tagId || null,
         images,
         features,
         isFeatured: formData.get('isFeatured') === 'true',

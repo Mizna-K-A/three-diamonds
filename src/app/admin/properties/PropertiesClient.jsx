@@ -18,15 +18,25 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 function LucideIcon({ name, size = 14, className = '' }) {
   if (!name) return null;
+
+  // Handle different icon name formats
   const pascalName = name
     .split('-')
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
-  const Icon = LucideIcons[pascalName];
-  if (!Icon) return null;
+    .join('')
+    .replace(/[^a-zA-Z]/g, ''); // Remove any non-alphabetic characters
+
+  const Icon = LucideIcons[pascalName] || LucideIcons[pascalName.replace(/icon$/i, '')];
+
+  if (!Icon) {
+    console.warn(`Icon not found: ${name} (${pascalName})`);
+    return null;
+  }
+
   return <Icon size={size} className={className} />;
 }
 
@@ -49,6 +59,7 @@ export default function PropertiesClient({
   const [selectedType, setSelectedType] = useState('all');
   const [selectedTags, setSelectedTags] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageErrors, setImageErrors] = useState({});
 
   /* ── Tag toggle ── */
   const toggleTag = (id) =>
@@ -63,15 +74,21 @@ export default function PropertiesClient({
 
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        property.title?.toLowerCase().includes(searchLower) ||
-        property.address?.toLowerCase().includes(searchLower) ||
-        property.city?.toLowerCase().includes(searchLower);
+        (property.title || '').toLowerCase().includes(searchLower) ||
+        (property.address || '').toLowerCase().includes(searchLower) ||
+        (property.city || '').toLowerCase().includes(searchLower);
 
       const matchesStatus = selectedStatus === 'all' || property.statusId === selectedStatus;
-      const matchesType   = selectedType   === 'all' || property.propertyTypeId === selectedType;
-      const matchesTags   =
-        selectedTags.length === 0 ||
-        property.tags?.some((tag) => selectedTags.includes(tag._id));
+      const matchesType = selectedType === 'all' || property.propertyTypeId === selectedType;
+
+      // Handle tags filtering - tags can be objects or IDs
+      const matchesTags = selectedTags.length === 0 || (
+        property.tags && property.tags.some((tag) => {
+          // If tag is an object with _id, use that, otherwise use the tag itself
+          const tagId = tag?._id || tag;
+          return selectedTags.includes(tagId);
+        })
+      );
 
       return matchesSearch && matchesStatus && matchesType && matchesTags;
     }),
@@ -87,9 +104,16 @@ export default function PropertiesClient({
     setSelectedTags([]);
   };
 
-  /* ── Handlers (unchanged) ── */
-  const handleOpenModal = (property) => { setEditingProperty(property); setIsModalOpen(true); };
-  const handleCloseModal = () => { setIsModalOpen(false); setEditingProperty(null); };
+  /* ── Handlers ── */
+  const handleOpenModal = (property) => {
+    setEditingProperty(property);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingProperty(null);
+  };
 
   const handleSubmit = async (formData) => {
     setIsLoading(true);
@@ -140,6 +164,7 @@ export default function PropertiesClient({
       alert(error.message);
     }
   };
+  console.log(properties, 'ee');
 
   const handleTogglePublish = async (id) => {
     try {
@@ -152,31 +177,56 @@ export default function PropertiesClient({
     }
   };
 
-  const formatPrice = (price) =>
-    new Intl.NumberFormat('en-US', {
+  const handleImageError = (propertyId) => {
+    setImageErrors(prev => ({ ...prev, [propertyId]: true }));
+  };
+
+  const formatPrice = (price) => {
+    if (!price && price !== 0) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
+  };
 
   const getStatusColor = (status) => {
+    if (!status) return 'bg-gray-900 text-gray-300';
+
     const colorMap = {
-      gray:   'bg-gray-900 text-gray-300',
-      red:    'bg-red-900 text-red-300',
-      green:  'bg-green-900 text-green-300',
-      blue:   'bg-blue-900 text-blue-300',
+      gray: 'bg-gray-900 text-gray-300',
+      red: 'bg-red-900 text-red-300',
+      green: 'bg-green-900 text-green-300',
+      blue: 'bg-blue-900 text-blue-300',
       yellow: 'bg-yellow-900 text-yellow-300',
       purple: 'bg-purple-900 text-purple-300',
       orange: 'bg-orange-900 text-orange-300',
     };
-    return colorMap[status?.color] || 'bg-gray-900 text-gray-300';
+
+    // Handle color from status object or string
+    const colorKey = status.color?.toLowerCase() || status.toLowerCase?.() || 'gray';
+    return colorMap[colorKey] || 'bg-gray-900 text-gray-300';
+  };
+
+  // Function to get the best available image URL
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    // Try to get the best quality image available
+    return image.url || image.thumbnailUrl || null;
+  };
+
+  // Function to get primary image or first image
+  const getPrimaryImage = (images) => {
+    if (!images || images.length === 0) return null;
+    const primary = images.find(img => img.isPrimary === true);
+    return primary || images[0];
   };
 
   // Function to render features
   const renderFeatures = (features) => {
     if (!features || features.length === 0) return null;
-    
+
     return (
       <div className="flex flex-wrap gap-1 mb-3">
         {features.slice(0, 3).map((feature, index) => (
@@ -184,7 +234,7 @@ export default function PropertiesClient({
             key={index}
             className="px-2 py-1 bg-gray-900 rounded-lg text-xs text-gray-400"
           >
-            {feature.name}
+            {typeof feature === 'string' ? feature : feature.name || 'Feature'}
           </span>
         ))}
         {features.length > 3 && (
@@ -233,8 +283,8 @@ export default function PropertiesClient({
           className="px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-gray-300 focus:outline-none focus:border-gray-700"
         >
           <option value="all">All Statuses</option>
-          {statuses.map(status => (
-            <option key={status._id} value={status._id}>{status.label}</option>
+          {statuses?.map(status => (
+            <option key={status._id} value={status._id}>{status.name}</option>
           ))}
         </select>
 
@@ -244,7 +294,7 @@ export default function PropertiesClient({
           className="px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-gray-300 focus:outline-none focus:border-gray-700"
         >
           <option value="all">All Types</option>
-          {propertyTypes.map(type => (
+          {propertyTypes?.map(type => (
             <option key={type._id} value={type._id}>{type.name}</option>
           ))}
         </select>
@@ -254,7 +304,7 @@ export default function PropertiesClient({
             onClick={clearFilters}
             className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
           >
-            Clear
+            Clear Filters
           </button>
         )}
 
@@ -272,25 +322,32 @@ export default function PropertiesClient({
         <div className="flex flex-wrap gap-2 mb-6">
           {tags.map((tag) => {
             const active = selectedTags.includes(tag._id);
+            const tagColor = tag.color || '#6B7280'; // Default gray if no color provided
+
             return (
               <button
                 key={tag._id}
                 onClick={() => toggleTag(tag._id)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
-                  active
-                    ? 'bg-white text-gray-900 border-white'
-                    : 'bg-transparent text-gray-400 border-gray-700 hover:border-gray-500 hover:text-gray-200'
-                }`}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${active
+                    ? 'text-white border-transparent'
+                    : 'text-gray-300 hover:text-white'
+                  }`}
+                style={{
+                  backgroundColor: active ? tagColor : 'transparent',
+                  borderColor: active ? tagColor : tagColor,
+                  borderWidth: '1px',
+                  borderStyle: 'solid'
+                }}
+                title={tag.name}
               >
                 {tag.icon && <LucideIcon name={tag.icon} size={11} className="shrink-0" />}
-                {active && <span>✓</span>}
-                {tag.label ?? tag.name}
+                {active && <span className="text-xs">✓</span>}
+                <span>{tag.name}</span>
               </button>
             );
           })}
         </div>
       )}
-
       {/* Results count */}
       <p className="text-gray-500 text-sm mb-4">
         Showing {filteredProperties.length} of {properties.length} properties
@@ -298,147 +355,163 @@ export default function PropertiesClient({
 
       {/* Properties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.map((property) => (
-          <div
-            key={property._id}
-            className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden hover:border-gray-700 transition-colors"
-          >
-            <div className="relative h-48 bg-gray-900">
-              {property.images && property.images.length > 0 ? (
-                <img
-                  src={(() => {
-                    const primaryImage = property.images.find(img => img.isPrimary === true) || property.images[0];
-                    return primaryImage.webp?.medium?.url || primaryImage.webp?.original?.url || primaryImage.original?.url;
-                  })()}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <ImageIcon size={48} className="text-gray-700" />
-                </div>
-              )}
+        {filteredProperties.map((property) => {
+          const primaryImage = getPrimaryImage(property.images);
+          const imageUrl = !imageErrors[property._id] ? getImageUrl(primaryImage) : null;
 
-              {/* Status Badge */}
-              {property.status && (
-                <div className={`absolute top-3 left-3 px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1 ${getStatusColor(property.status)}`}>
-                  {property.status.icon && <LucideIcon name={property.status.icon} size={12} />}
-                  {property.status.label}
-                </div>
-              )}
+          return (
+            <div
+              key={property._id}
+              className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden hover:border-gray-700 transition-colors"
+            >
+              <div className="relative h-48 bg-gray-900">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={primaryImage?.alt || property.title || 'Property image'}
+                    className="w-full h-full object-cover"
+                    onError={() => handleImageError(property._id)}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon size={48} className="text-gray-700" />
+                  </div>
+                )}
 
-              {/* Action Buttons - Commented out as in original */}
-              {/* ... */}
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-white mb-1 line-clamp-1">
-                {property.title}
-              </h3>
-
-              <div className="flex items-center gap-1 text-gray-500 text-sm mb-2">
-                <MapPin size={14} />
-                <span className="line-clamp-1">{property.fullAddress || 'No address'}</span>
-              </div>
-
-              <div className="flex items-center gap-4 mb-3">
-                <div className="flex items-center gap-1 text-gray-300">
-                  <DollarSign size={16} className="text-gray-500" />
-                  <span className="font-semibold">{formatPrice(property.price)}</span>
-                </div>
-                {property.propertyType && (
-                  <div className="flex items-center gap-1 text-gray-400 text-sm">
-                    {property.propertyType.icon
-                      ? <LucideIcon name={property.propertyType.icon} size={14} />
-                      : <Home size={14} />
-                    }
-                    <span>{property.propertyType.name}</span>
+                {/* Status Badge */}
+                {property.status && (
+                  <div
+                    className="absolute top-3 left-3 px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1 text-white"
+                    style={{ backgroundColor: property.status.color || '#6B7280' }}
+                  >
+                    {property.status.icon && <LucideIcon name={property.status.icon} size={12} />}
+                    {property.status.name}
                   </div>
                 )}
               </div>
 
-              {/* Details - Updated to remove bedrooms/bathrooms and show features */}
-              <div className="mb-3">
-                {/* Area display (if available) */}
-                {property.area && (
-                  <div className="bg-gray-900 rounded-lg p-2 text-center mb-2 inline-block mr-2">
-                    <span className="text-gray-500">Area</span>
-                    <div className="text-white font-medium">{property.area} sqft</div>
-                  </div>
-                )}
-                
-                {/* Features display */}
-                {property.features && property.features.length > 0 && (
-                  <div className="mt-2">
-                    <span className="text-gray-500 text-xs block mb-1">Features:</span>
-                    {renderFeatures(property.features)}
-                  </div>
-                )}
-              </div>
+              {/* Content */}
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-white mb-1 line-clamp-1">
+                  {property.title || 'Untitled Property'}
+                </h3>
 
-              {/* Tags — clickable to filter, active ones highlighted */}
-              {property.tags && property.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {property.tags.slice(0, 3).map(tag => {
-                    const active = selectedTags.includes(tag._id);
-                    return (
-                      <button
-                        key={tag._id}
-                        onClick={() => toggleTag(tag._id)}
-                        className={`px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition-all duration-150 border ${
-                          active
-                            ? 'bg-white text-gray-900 border-white'
-                            : 'bg-gray-900 text-gray-400 border-transparent hover:border-gray-600'
-                        }`}
-                      >
-                        {tag.icon && <LucideIcon name={tag.icon} size={11} className="shrink-0" />}
-                        {tag.label ?? tag.name}
-                      </button>
-                    );
-                  })}
-                  {property.tags.length > 3 && (
-                    <span className="px-2 py-1 bg-gray-900 rounded-lg text-xs text-gray-400">
-                      +{property.tags.length - 3}
-                    </span>
+                <div className="flex items-center gap-1 text-gray-500 text-sm mb-2">
+                  <MapPin size={14} />
+                  <span className="line-clamp-1">
+                    {[property.address, property.city, property.state]
+                      .filter(Boolean)
+                      .join(', ') || 'No address provided'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="flex items-center gap-1 text-gray-300">
+                    <DollarSign size={16} className="text-gray-500" />
+                    <span className="font-semibold">{formatPrice(property.price)}</span>
+                  </div>
+                  {property.propertyType && (
+                    <div className="flex items-center gap-1 text-gray-400 text-sm">
+                      {property.propertyType.icon ? (
+                        <LucideIcon name={property.propertyType.icon} size={14} />
+                      ) : (
+                        <Home size={14} />
+                      )}
+                      <span>{property.propertyType.name}</span>
+                    </div>
                   )}
                 </div>
-              )}
 
-              {/* Footer */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-800">
-                <div className="flex items-center gap-1 text-gray-500 text-xs">
-                  <Calendar size={12} />
-                  <span>{new Date(property.createdAt).toLocaleDateString()}</span>
+                {/* Details */}
+                <div className="mb-3">
+                  {/* Area display (if available) */}
+                  {property.area && (
+                    <div className="bg-gray-900 rounded-lg p-2 text-center mb-2 inline-block mr-2">
+                      <span className="text-gray-500 text-xs block">Area</span>
+                      <div className="text-white font-medium text-sm">{property.area} sqft</div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex gap-1">
-                  <Link
-                    href={`/admin/properties/${property._id}`}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                    title="View property"
-                  >
-                    <Eye size={16} />
-                  </Link>
-                  <Link
-                    href={`/admin/properties/${property._id}/edit`}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                    title="Edit property"
-                  >
-                    <Edit size={16} />
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(property._id)}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
-                    title="Delete property"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                {/* Tags — clickable to filter, active ones highlighted */}
+                {property.tags && property.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {property.tags.slice(0, 3).map(tag => {
+                      // Handle both object and string tags
+                      const tagId = tag?._id || tag;
+                      const tagName = tag?.name || (typeof tag === 'string' ? tag : 'Tag');
+                      const tagIcon = tag?.icon;
+                      const tagColor = tag?.color || '#6B7280'; // Default gray if no color provided
+                      const active = selectedTags.includes(tagId);
+
+                      return (
+                        <button
+                          key={tagId}
+                          onClick={() => toggleTag(tagId)}
+                          className={`px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition-all duration-150 border ${active
+                              ? 'text-white border-transparent'
+                              : 'text-gray-300 hover:text-white'
+                            }`}
+                          style={{
+                            backgroundColor: active ? tagColor : 'transparent',
+                            borderColor: tagColor,
+                            borderWidth: '1px',
+                            borderStyle: 'solid'
+                          }}
+                          title={tagName}
+                        >
+                          {tagIcon && <LucideIcon name={tagIcon} size={11} className="shrink-0" />}
+                          <span>{tagName}</span>
+                        </button>
+                      );
+                    })}
+                    {property.tags.length > 3 && (
+                      <span className="px-2 py-1 bg-gray-900 rounded-lg text-xs text-gray-400">
+                        +{property.tags.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-800">
+                  <div className="flex items-center gap-1 text-gray-500 text-xs">
+                    <Calendar size={12} />
+                    <span>
+                      {property.createdAt
+                        ? new Date(property.createdAt).toLocaleDateString()
+                        : 'No date'}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-1">
+                    <Link
+                      href={`/admin/properties/${property._id}/`}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                      title="Edit property"
+                    >
+                      <Eye size={16} />
+                    </Link>
+                    <Link
+                      href={`/admin/properties/${property._id}/edit`}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                      title="Edit property"
+                    >
+                      <Edit size={16} />
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(property._id)}
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
+                      title="Delete property"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {filteredProperties.length === 0 && (
           <div className="col-span-full text-center py-12">

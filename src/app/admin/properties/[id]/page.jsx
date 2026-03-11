@@ -33,6 +33,8 @@ import {
   Calendar,
   AlertCircle,
   Info,
+  List,
+  HomeIcon,
 } from 'lucide-react';
 import connectDB from '../../../../../lib/mongodb';
 import Property from '../../../../../lib/models/Property';
@@ -45,50 +47,59 @@ async function getProperty(id) {
     await connectDB();
 
     const property = await Property.findById(id)
-      .populate('statusId', 'name label color icon')
+      .populate('statusId', 'name label color icon slug')
       .populate('propertyTypeId', 'name slug icon')
-      .populate('tagIds', 'name label color icon category')
-      .populate('purposeTagId', 'name label color icon')
+      .populate('tagIds', 'name label color icon category slug')
+      .populate('purposeTagId', 'name label color icon slug')
       .lean();
 
     if (!property) return null;
+
+    // Process images for simplified schema - UPDATED
+    const processedImages = (property.images || []).map((image, index) => ({
+      _id: image._id?.toString() || `img-${index}`,
+      url: image.url,
+      thumbnailUrl: image.thumbnailUrl || image.url,
+      alt: image.alt || property.title || 'Property image',
+      isPrimary: image.isPrimary || false,
+      sortOrder: image.sortOrder || index,
+      uploadedAt: image.uploadedAt,
+    }));
 
     return {
       ...property,
       _id: property._id.toString(),
       id: property._id.toString(),
       status: property.statusId
-        ? { ...property.statusId, _id: property.statusId._id.toString() }
+        ? {
+          ...property.statusId,
+          _id: property.statusId._id.toString(),
+          slug: property.statusId.slug
+        }
         : null,
       propertyType: property.propertyTypeId
-        ? { ...property.propertyTypeId, _id: property.propertyTypeId._id.toString() }
+        ? {
+          ...property.propertyTypeId,
+          _id: property.propertyTypeId._id.toString(),
+          slug: property.propertyTypeId.slug
+        }
         : null,
-      tags: property.tagIds?.map((tag) => ({ ...tag, _id: tag._id.toString() })) || [],
+      tags: property.tagIds?.map((tag) => ({
+        ...tag,
+        _id: tag._id.toString(),
+        slug: tag.slug
+      })) || [],
       purposeTag: property.purposeTagId
-        ? { ...property.purposeTagId, _id: property.purposeTagId._id.toString() }
+        ? {
+          ...property.purposeTagId,
+          _id: property.purposeTagId._id.toString(),
+          slug: property.purposeTagId.slug
+        }
         : null,
-      images: (property.images || []).map((image, index) => {
-        const imageUrl = image.webp?.medium?.url || 
-                        image.webp?.small?.url || 
-                        image.webp?.thumbnail?.url || 
-                        image.webp?.original?.url || 
-                        null;
-
-        return {
-          ...image,
-          _id: image._id?.toString() || `img-${index}`,
-          url: imageUrl,
-          thumbnailUrl: image.webp?.thumbnail?.url || imageUrl,
-          isPrimary: image.isPrimary || false,
-          caption: image.caption || '',
-          alt: image.alt || image.caption || 'Property image',
-          original: image.original,
-          webp: image.webp,
-        };
-      }),
+      images: processedImages,
       features: (property.features || []).map(feature => {
         if (typeof feature === 'object') {
-          return feature.value || feature.name || JSON.stringify(feature);
+          return feature.name || feature.value || JSON.stringify(feature);
         }
         return feature;
       }),
@@ -115,7 +126,7 @@ const formatPrice = (price) =>
 // Icon mapping helper
 const getIconComponent = (iconName, defaultIcon = Info) => {
   if (!iconName) return defaultIcon;
-  
+
   const iconMap = {
     'home': Home,
     'building': Building,
@@ -145,17 +156,15 @@ const getIconComponent = (iconName, defaultIcon = Info) => {
     'user': User,
     'globe': Globe,
   };
-  
+
   return iconMap[iconName.toLowerCase()] || defaultIcon;
 };
 
 // Extract coordinates from Google Maps URL
 const extractCoordinatesFromMapLink = (mapLink) => {
   if (!mapLink) return null;
-  
+
   // Handle different Google Maps URL formats
-  
-  // Format: https://www.google.com/maps/place/@37.7749,-122.4194,15z
   const atCoordinatesRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
   const atMatch = mapLink.match(atCoordinatesRegex);
   if (atMatch) {
@@ -164,8 +173,7 @@ const extractCoordinatesFromMapLink = (mapLink) => {
       lng: parseFloat(atMatch[2]),
     };
   }
-  
-  // Format: https://www.google.com/maps?q=37.7749,-122.4194
+
   const qCoordinatesRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
   const qMatch = mapLink.match(qCoordinatesRegex);
   if (qMatch) {
@@ -174,8 +182,7 @@ const extractCoordinatesFromMapLink = (mapLink) => {
       lng: parseFloat(qMatch[2]),
     };
   }
-  
-  // Format: https://maps.google.com/?ll=37.7749,-122.4194
+
   const llCoordinatesRegex = /[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/;
   const llMatch = mapLink.match(llCoordinatesRegex);
   if (llMatch) {
@@ -184,44 +191,36 @@ const extractCoordinatesFromMapLink = (mapLink) => {
       lng: parseFloat(llMatch[2]),
     };
   }
-  
+
   return null;
 };
 
 // Generate static map image URL from coordinates
 const getStaticMapUrl = (coordinates, zoom = 15, width = 600, height = 300) => {
   if (!coordinates) return null;
-  
+
   // Using Google Maps Static API (you'll need an API key for production)
-  // For demo purposes, we'll use a placeholder service
-  // Replace with your actual Google Maps API key in production
   const apiKey = process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY';
-  
+
   return `https://maps.googleapis.com/maps/api/staticmap?center=${coordinates.lat},${coordinates.lng}&zoom=${zoom}&size=${width}x${height}&maptype=roadmap&markers=color:red%7C${coordinates.lat},${coordinates.lng}&key=${apiKey}`;
-  
-  // Fallback to OpenStreetMap static map if no API key
-  // return `https://staticmap.openstreetmap.de/staticmap.php?center=${coordinates.lat},${coordinates.lng}&zoom=${zoom}&size=${width}x${height}&maptype=mapnik&markers=${coordinates.lat},${coordinates.lng},red`;
 };
 
 // Generate embed URL for iframe
 const getEmbedMapUrl = (mapLink) => {
   if (!mapLink) return null;
-  
-  // Convert Google Maps URL to embed URL
+
   if (mapLink.includes('google.com/maps')) {
-    // Try to extract place ID or coordinates for embed
     const coordinates = extractCoordinatesFromMapLink(mapLink);
     if (coordinates) {
       return `https://www.google.com/maps/embed/v1/place?key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${coordinates.lat},${coordinates.lng}`;
     }
-    
-    // If it's a place URL, try to convert to embed
+
     const placeMatch = mapLink.match(/place\/([^/]+)/);
     if (placeMatch) {
       return `https://www.google.com/maps/embed/v1/place?key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&q=${placeMatch[1]}`;
     }
   }
-  
+
   return null;
 };
 
@@ -229,9 +228,9 @@ const getEmbedMapUrl = (mapLink) => {
 
 function StatusBadge({ status }) {
   if (!status) return null;
-  
+
   const IconComponent = status.icon ? getIconComponent(status.icon) : null;
-  
+
   return (
     <span
       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
@@ -248,9 +247,9 @@ function StatusBadge({ status }) {
 
 function TagPill({ tag }) {
   if (!tag) return null;
-  
+
   const IconComponent = tag.icon ? getIconComponent(tag.icon) : null;
-  
+
   return (
     <span
       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
@@ -289,13 +288,13 @@ function FeatureItem({ feature }) {
 // Map Preview Component
 function MapPreview({ mapLink, address, city, state }) {
   if (!mapLink) return null;
-  
+
   const coordinates = extractCoordinatesFromMapLink(mapLink);
   const embedUrl = getEmbedMapUrl(mapLink);
   const staticMapUrl = coordinates ? getStaticMapUrl(coordinates) : null;
-  
+
   const fullAddress = [address, city, state].filter(Boolean).join(', ');
-  
+
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
       <div className="p-4 border-b border-gray-800 flex items-center justify-between">
@@ -315,15 +314,14 @@ function MapPreview({ mapLink, address, city, state }) {
           Open in Maps
         </a>
       </div>
-      
+
       <div className="p-4">
         {fullAddress && (
           <div className="mb-3 text-sm text-gray-400">
             {fullAddress}
           </div>
         )}
-        
-        {/* Interactive Map (if embed URL available) */}
+
         {embedUrl && (
           <div className="relative w-full h-64 rounded-lg overflow-hidden border border-gray-700">
             <iframe
@@ -339,8 +337,7 @@ function MapPreview({ mapLink, address, city, state }) {
             />
           </div>
         )}
-        
-        {/* Static Map Fallback (if coordinates available but no embed) */}
+
         {!embedUrl && staticMapUrl && (
           <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-700 bg-gray-800">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -349,7 +346,6 @@ function MapPreview({ mapLink, address, city, state }) {
               alt={`Map location for ${fullAddress || 'property'}`}
               className="w-full h-full object-cover"
               onError={(e) => {
-                // Fallback if static map fails to load
                 e.target.style.display = 'none';
                 e.target.parentElement.innerHTML = `
                   <div class="flex items-center justify-center h-full bg-gray-800">
@@ -366,8 +362,7 @@ function MapPreview({ mapLink, address, city, state }) {
             />
           </div>
         )}
-        
-        {/* Simple Link Button (if no map preview available) */}
+
         {!embedUrl && !staticMapUrl && (
           <a
             href={mapLink}
@@ -384,8 +379,7 @@ function MapPreview({ mapLink, address, city, state }) {
             <ExternalLink size={16} className="text-gray-500 group-hover:text-gray-400" />
           </a>
         )}
-        
-        {/* Coordinates Display (if available) */}
+
         {coordinates && (
           <div className="mt-3 text-xs text-gray-500 flex items-center gap-2">
             <span>Lat: {coordinates.lat.toFixed(6)}</span>
@@ -413,14 +407,14 @@ export default async function PropertyDetailPage({ params }) {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <Link 
-            href="/admin/properties" 
+          <Link
+            href="/admin/properties"
             className="inline-flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-800 hover:bg-gray-900 transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Properties
           </Link>
-          
+
           <div className="flex-1 min-w-0">
             <h1 className="text-white font-semibold text-base truncate">
               {property.title}
@@ -451,7 +445,7 @@ export default async function PropertyDetailPage({ params }) {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+
           {/* Main Content - Left 2 columns */}
           <div className="lg:col-span-2 space-y-6">
 
@@ -484,24 +478,6 @@ export default async function PropertyDetailPage({ params }) {
 
               {/* Key Stats */}
               <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-gray-800">
-                {/* <div>
-                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-                    <BedDouble size={16} />
-                    Bedrooms
-                  </div>
-                  <div className="text-2xl font-semibold text-white">
-                    {property.bedrooms ?? '0'}
-                  </div>
-                </div> */}
-                {/* <div>
-                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-                    <Bath size={16} />
-                    Bathrooms
-                  </div>
-                  <div className="text-2xl font-semibold text-white">
-                    {property.bathrooms ?? '0'}
-                  </div>
-                </div> */}
                 <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <Maximize2 size={16} />
@@ -512,6 +488,29 @@ export default async function PropertyDetailPage({ params }) {
                     <span className="text-sm font-normal text-gray-500 ml-1">ft²</span>
                   </div>
                 </div>
+                {console.log(property, 'ttt')
+                }
+                <div>
+                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                    <List size={16} />
+                    No of check
+                  </div>
+                  <div className="text-xl font-semibold text-white">
+                    {property.NoOFCheck}
+                  </div>
+                </div>
+                {property.RentalPeriod &&
+                  <div>
+                    <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                      <HomeIcon size={16} />
+                      Rental Period
+                    </div>
+                    <div className="text-xl font-semibold text-white">
+                      {property.RentalPeriod}
+                    </div>
+                  </div>
+                }
+
               </div>
 
               {/* Location */}
@@ -558,14 +557,10 @@ export default async function PropertyDetailPage({ params }) {
               </div>
             )}
 
-            
-
-            
-
-            {/* Map Preview - Added here */}
+            {/* Map Preview */}
             {property.mapLink && (
-              <MapPreview 
-                mapLink={property.mapLink} 
+              <MapPreview
+                mapLink={property.mapLink}
                 address={property.address}
                 city={property.city}
                 state={property.state}
@@ -601,6 +596,31 @@ export default async function PropertyDetailPage({ params }) {
                 </div>
               </div>
             )}
+
+            {/* Tags */}
+            {property.tags?.length > 0 && (
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                  Tags
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {property.tags.map((tag) => (
+                    <TagPill key={tag._id} tag={tag} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Timeline */}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                Timeline
+              </h2>
+              <div className="space-y-3">
+                <InfoRow icon={CalendarDays} label="Created" value={property.createdAt} />
+                <InfoRow icon={RefreshCw} label="Updated" value={property.updatedAt} />
+              </div>
+            </div>
 
             {/* Publishing Status */}
             {/* <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -657,29 +677,6 @@ export default async function PropertyDetailPage({ params }) {
                 )}
               </div>
             </div> */}
-{/* Tags */}
-            {property.tags?.length > 0 && (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                  Tags
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {property.tags.map((tag) => (
-                    <TagPill key={tag._id} tag={tag} />
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* Timeline */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                Timeline
-              </h2>
-              <div className="space-y-3">
-                <InfoRow icon={CalendarDays} label="Created" value={property.createdAt} />
-                <InfoRow icon={RefreshCw} label="Updated" value={property.updatedAt} />
-              </div>
-            </div>
 
             {/* Quick Summary */}
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -687,8 +684,6 @@ export default async function PropertyDetailPage({ params }) {
                 Quick Summary
               </h2>
               <div className="space-y-3">
-                {/* <InfoRow icon={BedDouble} label="Bedrooms" value={property.bedrooms} />
-                <InfoRow icon={Bath} label="Bathrooms" value={property.bathrooms} /> */}
                 {property.area && (
                   <InfoRow icon={Maximize2} label="Area" value={`${property.area.toLocaleString()} ft²`} />
                 )}
@@ -696,7 +691,7 @@ export default async function PropertyDetailPage({ params }) {
                   <InfoRow icon={DollarSign} label="Price/sq ft" value={`$${pricePerSqft}`} />
                 )}
               </div>
-              
+
               <div className="mt-4 pt-4 border-t border-gray-800">
                 <div className="text-sm text-gray-400 mb-1">Total Price</div>
                 <div className="text-2xl font-bold text-white">
@@ -704,6 +699,7 @@ export default async function PropertyDetailPage({ params }) {
                 </div>
               </div>
             </div>
+
             {/* Agent Information */}
             {(property.agentName || property.agentPhone || property.agentEmail) && (
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">

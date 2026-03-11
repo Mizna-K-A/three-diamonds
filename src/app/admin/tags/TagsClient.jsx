@@ -418,7 +418,7 @@ export default function TagsClient({
                 <label className="block text-sm font-medium text-gray-400 mb-2">Name *</label>
                 <input type="text" value={formData.name} onChange={handleNameChange} required
                   className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" 
-                  placeholder="e.g., For Sale" />
+                 />
               </div>
 
               <div>
@@ -426,8 +426,7 @@ export default function TagsClient({
                 <input type="text" value={formData.slug} required
                   onChange={e => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:outline-none focus:border-gray-600" 
-                  placeholder="e.g., for-sale" />
-                <p className="text-xs text-gray-600 mt-1">URL-friendly version of the name</p>
+                  />
               </div>
 
               {/* Icon + Color */}

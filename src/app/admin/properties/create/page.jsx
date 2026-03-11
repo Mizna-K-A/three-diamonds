@@ -20,13 +20,12 @@ function generateSlug(title) {
     + '-' + Date.now();
 }
 
-// Helper function to process and save image
-async function processAndSaveImage(file, index, isPrimary = false) {
+// Helper function to process and save image - UPDATED for simplified schema
+async function processAndSaveImage(file, index, isPrimary = false, alt = '') {
   try {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
-    const originalName = file.name;
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
     const baseFilename = `${timestamp}-${random}`;
@@ -34,9 +33,7 @@ async function processAndSaveImage(file, index, isPrimary = false) {
     const uploadDir = path.join(process.cwd(), 'public/uploads/properties');
     await mkdir(uploadDir, { recursive: true });
     
-    const metadata = await sharp(buffer).metadata();
-    
-    // Convert to WebP
+    // Generate main image (WebP)
     const webpBuffer = await sharp(buffer)
       .webp({ quality: 85, effort: 6 })
       .toBuffer();
@@ -45,65 +42,24 @@ async function processAndSaveImage(file, index, isPrimary = false) {
     const mainPath = path.join(uploadDir, mainFilename);
     await writeFile(mainPath, webpBuffer);
     
+    // Generate thumbnail
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(150, 150, { fit: 'cover', position: 'center' })
+      .webp({ quality: 70, effort: 6 })
+      .toBuffer();
+    
+    const thumbnailFilename = `${baseFilename}-thumbnail.webp`;
+    const thumbnailPath = path.join(uploadDir, thumbnailFilename);
+    await writeFile(thumbnailPath, thumbnailBuffer);
+    
+    // Get metadata
     const mainMetadata = await sharp(webpBuffer).metadata();
     
-    // Generate different sizes
-    const sizes = [
-      { name: 'thumbnail', width: 150, height: 150, quality: 70, fit: 'cover' },
-      { name: 'small', width: 400, height: 300, quality: 75, fit: 'inside' },
-      { name: 'medium', width: 800, height: 600, quality: 80, fit: 'inside' },
-      { name: 'large', width: 1200, height: 900, quality: 85, fit: 'inside' }
-    ];
-    
-    const webpVersions = {
-      thumbnail: null,
-      small: null,
-      medium: null,
-      large: null
-    };
-    
-    for (const { name, width, height, quality, fit } of sizes) {
-      if (width < metadata.width || height < metadata.height) {
-        const resizedBuffer = await sharp(buffer)
-          .resize(width, height, { fit, withoutEnlargement: true, position: 'center' })
-          .webp({ quality, effort: 6 })
-          .toBuffer();
-        
-        const sizeFilename = `${baseFilename}-${name}.webp`;
-        const sizePath = path.join(uploadDir, sizeFilename);
-        await writeFile(sizePath, resizedBuffer);
-        
-        const sizeMetadata = await sharp(resizedBuffer).metadata();
-        
-        webpVersions[name] = {
-          url: `/uploads/properties/${sizeFilename}`,
-          width: sizeMetadata.width,
-          height: sizeMetadata.height,
-          size: resizedBuffer.length,
-        };
-      }
-    }
-    
+    // Return simplified image object
     return {
-      original: {
-        filename: originalName,
-        size: buffer.length,
-        contentType: file.type,
-      },
-      webp: {
-        thumbnail: webpVersions.thumbnail,
-        small: webpVersions.small,
-        medium: webpVersions.medium,
-        large: webpVersions.large,
-        original: {
-          url: `/uploads/properties/${mainFilename}`,
-          width: mainMetadata.width,
-          height: mainMetadata.height,
-          size: webpBuffer.length,
-        },
-      },
-      caption: '',
-      alt: '',
+      url: `/uploads/properties/${mainFilename}`,
+      thumbnailUrl: `/uploads/properties/${thumbnailFilename}`,
+      alt: alt || 'Property image',
       isPrimary,
       sortOrder: index,
       uploadedAt: new Date(),
@@ -114,7 +70,7 @@ async function processAndSaveImage(file, index, isPrimary = false) {
   }
 }
 
-// Server Action for creating property
+// Server Action for creating property - UPDATED for multiple tags and simplified images
 async function createProperty(formData) {
   'use server';
   
@@ -135,61 +91,49 @@ async function createProperty(formData) {
       ? JSON.parse(formData.get('features')) 
       : [];
     
-    // Handle images
+    // Handle images - UPDATED for simplified schema
     const images = [];
     
-    // Process existing images
-    const existingImages = [];
-    let i = 0;
-    while (formData.has(`existing_images[${i}]`)) {
-      const existingImage = JSON.parse(formData.get(`existing_images[${i}]`));
-      existingImages.push(existingImage);
-      i++;
-    }
-    images.push(...existingImages);
-    
     // Process new image files
-    const imageFiles = formData.getAll('images');
-    const imageCaptions = formData.getAll('image_captions');
-    const imageAlts = formData.getAll('image_alts');
-    const imageIsPrimary = formData.getAll('image_isPrimary');
+    const imageFiles = formData.getAll('new_images');
+    const imageAlts = formData.getAll('new_image_alts');
+    const imageIsPrimary = formData.getAll('new_image_isPrimary');
     
     for (let i = 0; i < imageFiles.length; i++) {
       const file = imageFiles[i];
-      const caption = imageCaptions[i] || '';
-      const alt = imageAlts[i] || caption;
+      const alt = imageAlts[i] || title;
       const isPrimary = imageIsPrimary[i] === 'true' || (images.length === 0 && i === 0);
       
-      const processedImage = await processAndSaveImage(file, images.length + i, isPrimary);
-      processedImage.caption = caption;
-      processedImage.alt = alt;
-      
+      const processedImage = await processAndSaveImage(file, images.length + i, isPrimary, alt);
       images.push(processedImage);
     }
     
     // Ensure only one primary image
-    const hasPrimary = images.some(img => img.isPrimary);
-    if (!hasPrimary && images.length > 0) {
-      images[0].isPrimary = true;
-    } else if (images.length > 0) {
-      let primarySet = false;
-      images.forEach(img => {
-        if (img.isPrimary && !primarySet) {
-          primarySet = true;
-        } else if (img.isPrimary) {
-          img.isPrimary = false;
-        }
-      });
+    if (images.length > 0) {
+      const hasPrimary = images.some(img => img.isPrimary);
+      if (!hasPrimary) {
+        images[0].isPrimary = true;
+      } else {
+        // Ensure only one primary
+        let primarySet = false;
+        images.forEach(img => {
+          if (img.isPrimary && !primarySet) {
+            primarySet = true;
+          } else if (img.isPrimary) {
+            img.isPrimary = false;
+          }
+        });
+      }
     }
     
-    // Handle tag
-    const tagId = formData.get('tagId');
-    const tagIds = tagId ? [tagId] : [];
+    // Handle tags - UPDATED for multiple tags
+    const tagIdsJson = formData.get('tagIds');
+    const tagIds = tagIdsJson ? JSON.parse(tagIdsJson) : [];
     
     // Generate slug
     const slug = formData.get('slug') || generateSlug(title);
     
-    // Create property - REMOVED bedrooms and bathrooms
+    // Create property - UPDATED schema
     const property = await Property.create({
       title,
       slug,
@@ -203,12 +147,12 @@ async function createProperty(formData) {
       agentName: formData.get('agentName') || '',
       agentPhone: formData.get('agentPhone') || '',
       agentEmail: formData.get('agentEmail') || '',
-      // bedrooms and bathrooms removed
       area: parseFloat(formData.get('area')) || 0,
+      NoOFCheck: formData.get('NoOFCheck') || '',
+      RentalPeriod: formData.get('RentalPeriod') || '',
       statusId,
       propertyTypeId: formData.get('propertyTypeId') || null,
       tagIds,
-      purposeTagId: tagId || null,
       images,
       features,
       isFeatured: formData.get('isFeatured') === 'true',
@@ -238,8 +182,10 @@ async function getFormData() {
     
     const [propertyTypes, statuses, tags] = await Promise.all([
       PropertyType.find({}).sort({ name: 1 }).lean(),
-      PropertyStatus.find({ isActive: true }).sort({ sortOrder: 1, name: 1 }).lean(),
-      Tag.find({ isActive: true }).sort({ category: 1, sortOrder: 1, name: 1 }).lean(),
+      // Remove isActive filter and sortOrder sorting
+      PropertyStatus.find({}).sort({ name: 1 }).lean(),
+      // Remove isActive filter and category/sortOrder sorting
+      Tag.find({}).sort({ name: 1 }).lean(),
     ]);
     
     return {

@@ -1,38 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Mail,
-  MessageCircle,
-  MapPin,
-  Home,
-  Star,
-  Search,
-  X,
-} from "lucide-react";
-import Image from "next/image";
+import { Mail, MessageCircle, MapPin, Home, Star, X } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
-/* ------------------ Dynamic Lucide Icon ------------------ */
-
-function LucideIcon({ name, size = 14, className = "" }) {
-  if (!name) return null;
-
-  const pascalName = name
-    .split("-")
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join("");
-
-  const Icon = LucideIcons[pascalName];
-  if (!Icon) return null;
-
-  return <Icon size={size} className={className} />;
-}
-
-/* ------------------ Component ------------------ */
+const formatPrice = (price) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(price);
 
 export default function PropertiesContent({
   initialProperties = [],
@@ -44,428 +23,332 @@ export default function PropertiesContent({
   const searchParams = useSearchParams();
 
   const [properties] = useState(initialProperties);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedTags, setSelectedTags] = useState([]);
-
-  /* ------------------ Sync URL ?type= param on mount & change ------------------ */
 
   useEffect(() => {
     const typeFromUrl = searchParams.get("type");
     if (typeFromUrl) {
       setSelectedType(typeFromUrl);
-      // Scroll down past hero so filter bar is visible
       setTimeout(() => {
-        const filterBar = document.getElementById("filter-bar");
-        if (filterBar) {
-          filterBar.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     } else {
       setSelectedType("all");
     }
   }, [searchParams]);
 
-  /* ------------------ Update URL when filter changes ------------------ */
-
   const handleTypeChange = (value) => {
     setSelectedType(value);
     const params = new URLSearchParams(searchParams.toString());
-    if (value && value !== "all") {
-      params.set("type", value);
-    } else {
-      params.delete("type");
-    }
+    if (value && value !== "all") params.set("type", value);
+    else params.delete("type");
     router.push(`/properties?${params.toString()}`, { scroll: false });
   };
-
-  /* ------------------ Tag toggle ------------------ */
 
   const toggleTag = (id) =>
     setSelectedTags((prev) =>
       prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
     );
 
-  /* ------------------ Filters ------------------ */
-
   const categories = [
     { value: "all", label: "All Types" },
-    ...propertyTypes.map((type) => ({
-      value: type.slug,
-      label: type.name,
-    })),
+    ...propertyTypes.map((type) => ({ value: type.slug, label: type.name })),
   ];
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       if (!property) return false;
-
-      const search = searchTerm.toLowerCase();
-
-      const matchesSearch =
-        searchTerm === "" ||
-        property.title?.toLowerCase().includes(search) ||
-        property.fullAddress?.toLowerCase().includes(search) ||
-        property.city?.toLowerCase().includes(search) ||
-        property.description?.toLowerCase().includes(search);
-
-      const matchesType =
-        selectedType === "all" ||
-        property.propertyType?.slug === selectedType;
-
-      const matchesStatus =
-        selectedStatus === "all" ||
-        property.status?._id === selectedStatus;
-
-      const matchesTags =
-        selectedTags.length === 0 ||
-        property.tags?.some((tag) => selectedTags.includes(tag._id));
-
-      return matchesSearch && matchesType && matchesStatus && matchesTags;
+      const matchesType = selectedType === "all" || property.propertyType?.slug === selectedType;
+      const matchesStatus = selectedStatus === "all" || property.status?._id === selectedStatus;
+      const matchesTags = selectedTags.length === 0 || property.tags?.some((tag) => selectedTags.includes(tag._id));
+      return matchesType && matchesStatus && matchesTags;
     });
-  }, [properties, searchTerm, selectedType, selectedStatus, selectedTags]);
+  }, [properties, selectedType, selectedStatus, selectedTags]);
 
-  /* ------------------ Helpers ------------------ */
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
-
-  const getStatusColor = (status) => {
-    const colors = {
-      gray:   "bg-gray-900 text-gray-300",
-      red:    "bg-red-900 text-red-300",
-      green:  "bg-green-900 text-green-300",
-      blue:   "bg-blue-900 text-blue-300",
-      yellow: "bg-yellow-900 text-yellow-300",
-      purple: "bg-purple-900 text-purple-300",
-      orange: "bg-orange-900 text-orange-300",
-    };
-    return colors[status?.color] || colors.gray;
-  };
-
-  const hasFilters =
-    searchTerm ||
-    selectedType !== "all" ||
-    selectedStatus !== "all" ||
-    selectedTags.length > 0;
+  const hasFilters = selectedType !== "all" || selectedStatus !== "all" || selectedTags.length > 0;
 
   const clearFilters = () => {
-    setSearchTerm("");
     setSelectedType("all");
     setSelectedStatus("all");
     setSelectedTags([]);
     router.push("/properties", { scroll: false });
   };
 
-  /* ------------------ UI ------------------ */
+  const getPrimaryImageUrl = (property) => {
+    if (!property.images?.length) return null;
+    const primary = property.images.find((img) => img.isPrimary) || property.images[0];
+    const raw = primary?.url || primary?.thumbnailUrl || null;
+    if (!raw) return null;
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+    return raw.startsWith("http") ? raw : `${API_BASE}${raw}`;
+  };
 
   return (
-    <div className="p-10">
+    <section className="bg-[#0c0c0c] min-h-screen py-20 px-5">
+      <div className="max-w-7xl mx-auto">
 
-      {/* HERO */}
+        {/* HEADER */}
+        <div className="text-center mb-14">
+          <div className="inline-block mb-4">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-[0.2em]">
+              Our Portfolio
+            </span>
+            <div className="h-px bg-white mt-2 mx-auto w-16" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-tight text-white">
+            ALL PROPERTIES
+          </h1>
+          <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
+            Browse our full collection of premium real estate listings.
+          </p>
+        </div>
 
-      <section className="py-16 text-center">
-        <h1 className="text-5xl font-bold text-white mb-4">
-          All Properties
-        </h1>
-        <p className="text-gray-400">
-          Discover our premium real estate collection
-        </p>
-      </section>
+        {/* FILTER BAR */}
+        <div id="filter-bar" className="flex flex-col items-center gap-5 mb-10">
 
-      {/* FILTER BAR */}
-
-      <div id="filter-bar" className="flex flex-col lg:flex-row gap-4 mb-4">
-
-        {/* SEARCH */}
-
-        <div className="relative flex-1">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-          />
-          <input
-            type="text"
-            placeholder="Search properties..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-10 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              <X size={16} />
-            </button>
+          {/* Type segmented control */}
+          {categories.length > 1 && (
+            <div className="inline-flex items-center bg-white/8 rounded-2xl p-1 gap-1">
+              {categories.map((cat) => (
+                <button
+                  key={cat.value}
+                  onClick={() => handleTypeChange(cat.value)}
+                  className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${selectedType === cat.value
+                      ? "bg-white/15 text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-200"
+                    }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           )}
-        </div>
 
-        {/* TYPE FILTER — now synced with URL */}
-
-        <select
-          value={selectedType}
-          onChange={(e) => handleTypeChange(e.target.value)}
-          className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300"
-        >
-          {categories.map((cat) => (
-            <option key={cat.value} value={cat.value}>
-              {cat.label}
-            </option>
-          ))}
-        </select>
-
-        {/* STATUS FILTER */}
-
-        <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300"
-        >
-          <option value="all">All Status</option>
-          {statuses.map((s) => (
-            <option key={s._id} value={s._id}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-
-        {hasFilters && (
-          <button
-            onClick={clearFilters}
-            className="px-4 py-2 bg-gray-700 rounded-lg text-white"
-          >
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* ACTIVE FILTER BADGE — shows which type is selected from header */}
-
-      {selectedType !== "all" && (
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-gray-400 text-sm">Filtered by:</span>
-          <span className="flex items-center gap-1 px-3 py-1 bg-white text-black text-xs font-medium rounded-full">
-            {categories.find((c) => c.value === selectedType)?.label || selectedType}
-            <button
-              onClick={() => handleTypeChange("all")}
-              className="ml-1 hover:opacity-70"
-            >
-              <X size={12} />
-            </button>
-          </span>
-        </div>
-      )}
-
-      {/* TAG PILLS */}
-
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {tags.map((tag) => {
-            const active = selectedTags.includes(tag._id);
-            return (
-              <button
-                key={tag._id}
-                onClick={() => toggleTag(tag._id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
-                  active
-                    ? "bg-white text-gray-900 border-white"
-                    : "bg-transparent text-gray-400 border-gray-700 hover:border-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {active && <span className="mr-1">✓</span>}
-                {tag.name}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* RESULTS COUNT */}
-
-      <div className="text-gray-400 mb-6">
-        Showing {filteredProperties.length} properties
-      </div>
-
-      {/* GRID */}
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProperties.map((property) => {
-
-          const primaryImage =
-            property.images?.find((img) => img.isPrimary) ||
-            property.images?.[0];
-
-          const imageUrl =
-            primaryImage?.webp?.medium?.url ||
-            primaryImage?.webp?.original?.url ||
-            primaryImage?.original?.url ||
-            null;
-
-          return (
-            <motion.div
-              key={property._id}
-              whileHover={{ y: -6 }}
-              className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-gray-500 cursor-pointer"
-              onClick={() => router.push(`/properties/${property._id}`)}
-            >
-
-              {/* IMAGE */}
-
-              <div className="relative h-48">
-                {imageUrl ? (
-                  <Image
-                    src={imageUrl}
-                    alt={property.title || "Property image"}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full bg-gray-900">
-                    <Home size={40} className="text-gray-600" />
-                  </div>
-                )}
-
-                {/* STATUS */}
-
-                {property.status && (
-                  <div
-                    className={`absolute top-3 left-3 px-3 py-1 text-xs rounded-full ${getStatusColor(
-                      property.status
-                    )}`}
+          {/* Status + Tags */}
+          <div className="flex flex-wrap justify-center items-center gap-2">
+            {statuses.length > 0 && (
+              <>
+                {/* <button
+                  onClick={() => setSelectedStatus("all")}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
+                    selectedStatus === "all"
+                      ? "bg-white text-black border-white shadow"
+                      : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                  }`}
+                >
+                  All Status
+                </button> */}
+                {statuses.map((s) => (
+                  <button
+                    key={s._id}
+                    onClick={() => setSelectedStatus(s._id)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${selectedStatus === s._id
+                        ? "bg-white text-black border-white shadow"
+                        : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                      }`}
                   >
-                    {property.status.label}
-                  </div>
-                )}
+                    {s.name ?? s.label}
+                  </button>
+                ))}
+                {/* {tags.length > 0 && <span className="w-px h-4 bg-white/10 mx-1 self-center" />} */}
+              </>
+            )}
 
-                {/* PRICE */}
+            {/* {tags.map((tag) => {
+              const active = selectedTags.includes(tag._id);
+              return (
+                <button
+                  key={tag._id}
+                  onClick={() => toggleTag(tag._id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
+                    active
+                      ? "bg-white text-black border-white"
+                      : "bg-white/5 text-gray-500 border-white/10 hover:border-white/30 hover:text-white"
+                  }`}
+                >
+                  {active && <span className="mr-1">✓</span>}
+                  {tag.name}
+                </button>
+              );
+            })} */}
+          </div>
 
-                <div className="absolute top-3 right-3 bg-black text-white px-3 py-1 rounded-full text-sm">
-                  {formatPrice(property.price)}
-                </div>
+          {/* Clear */}
 
-                {/* FEATURED */}
-
-                {property.isFeatured && (
-                  <div className="absolute bottom-3 left-3 bg-yellow-400 text-black px-2 py-1 text-xs rounded flex items-center gap-1">
-                    <Star size={12} /> Featured
-                  </div>
-                )}
-              </div>
-
-              {/* CONTENT */}
-
-              <div className="p-5">
-
-                <h3 className="text-lg font-bold text-white mb-1 line-clamp-1">
-                  {property.title}
-                </h3>
-
-                <div className="flex items-center text-gray-400 text-sm mb-3">
-                  <MapPin size={14} className="mr-1" />
-                  {property.fullAddress || "No address"}
-                </div>
-
-                <p className="text-gray-400 text-sm line-clamp-2 mb-4">
-                  {property.description}
-                </p>
-
-                {/* DETAILS */}
-
-                <div className="grid grid-cols-3 gap-2 text-center text-sm mb-4">
-                  {/* <div className="bg-gray-900 p-2 rounded">
-                    {property.bedrooms || 0} Beds
-                  </div>
-                  <div className="bg-gray-900 p-2 rounded">
-                    {property.bathrooms || 0} Baths
-                  </div> */}
-                  <div className="bg-gray-900 p-2 rounded">
-                    {property.area || 0} sqft
-                  </div>
-                </div>
-
-                {/* TAGS */}
-
-                {property.tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {property.tags.map((tag) => (
-                      <span
-                        key={tag._id}
-                        className={`px-2 py-0.5 rounded-full text-xs border transition-colors cursor-pointer ${
-                          selectedTags.includes(tag._id)
-                            ? "bg-white text-gray-900 border-white"
-                            : "bg-transparent text-gray-500 border-gray-700"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleTag(tag._id);
-                        }}
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* ACTIONS */}
-
-                <div className="flex gap-2">
-                  <Link
-                    href={`/properties/${property._id}`}
-                    className="flex-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button className="w-full bg-white text-black py-2 rounded-lg text-sm">
-                      View Details
-                    </button>
-                  </Link>
-
-                  <a
-                    href={`mailto:info@example.com`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="px-3 py-2 bg-black text-white rounded-lg"
-                  >
-                    <Mail size={16} />
-                  </a>
-
-                  <a
-                    href={`https://wa.me/971XXXXXXXXX`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="px-3 py-2 bg-black text-white rounded-lg"
-                  >
-                    <MessageCircle size={16} />
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* NO RESULTS */}
-
-      {filteredProperties.length === 0 && (
-        <div className="text-center py-20">
-          <Home size={48} className="mx-auto text-gray-700 mb-3" />
-          <p className="text-gray-400 text-xl mb-3">No properties found</p>
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="text-sm text-gray-500 underline hover:text-white transition-colors"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium text-gray-600 border border-dashed border-white/15 hover:border-red-500/50 hover:text-red-400 transition-colors"
             >
-              Clear filters
+              ✕ Clear filters
             </button>
           )}
+
         </div>
-      )}
-    </div>
+
+        {/* Result count */}
+        <p className="text-xs text-gray-500 mb-8 tracking-wide text-center">
+          Showing <span className="font-semibold text-gray-300">{filteredProperties.length}</span> properties
+        </p>
+
+        {/* GRID */}
+        {filteredProperties.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProperties.map((property, index) => {
+              const imageUrl = getPrimaryImageUrl(property);
+              const specs = [
+                property.area != null ? `${Number(property.area).toLocaleString()} sqft` : null,
+                property.NoOFCheck != null ? `${property.NoOFCheck} Checks` : null,
+                property.RentalPeriod ? property.RentalPeriod : null,
+              ].filter(Boolean);
+
+              return (
+                <div
+                  key={property._id}
+                  className="group bg-[#161616] rounded-2xl overflow-hidden border border-white/6 hover:border-white/15 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                  onClick={() => router.push(`/properties/${property._id}`)}
+                >
+                  {/* IMAGE */}
+                  <div className="relative h-52 overflow-hidden bg-[#1a1a1a]">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={property.title || "Property"}
+                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full bg-[#1f1f1f]">
+                        <Home size={36} className="text-gray-700" />
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Status badge */}
+                    <div className="absolute top-3 left-3">
+                      <span
+                        className="backdrop-blur-sm text-black px-3 py-1 text-[11px] font-bold rounded-full inline-block tracking-wide border border-white/20"
+                        style={{ backgroundColor: property.tags[0].color }}
+                      >
+                        {property.tags[0].name}
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10">
+                      {formatPrice(property.price)}
+                    </div>
+
+                    {/* Featured */}
+                    {property.isFeatured && (
+                      <div className="absolute bottom-3 left-3 bg-yellow-400 text-black px-2 py-0.5 text-[11px] font-bold rounded-md flex items-center gap-1">
+                        <Star size={10} fill="currentColor" /> Featured
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="p-5">
+                    <div className="mb-3">
+                      <span className="text-[11px] text-gray-500 font-semibold uppercase tracking-widest">
+                        {property.propertyType?.name ?? "Property"}
+                      </span>
+                      <h3 className="text-base font-bold mt-0.5 line-clamp-1 text-white">{property.title}</h3>
+                      <div className="flex items-center text-gray-600 mt-1.5 gap-1">
+                        <MapPin size={12} className="shrink-0 text-gray-600" />
+                        <span className="text-xs line-clamp-1 text-gray-500">{property.fullAddress || property.city || "No address"}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-600 text-xs mb-4 line-clamp-2 leading-relaxed">
+                      {property.description}
+                    </p>
+
+                    {specs.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-5">
+                        {specs.map((spec, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/8 text-[11px] text-gray-400 font-medium"
+                          >
+                            {spec}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {property.tags?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {property.tags.map((tag) => (
+                          <span
+                            key={tag._id}
+                            onClick={(e) => { e.stopPropagation(); toggleTag(tag._id); }}
+                            className={`px-2.5 py-0.5 rounded-full text-[11px] border cursor-pointer transition-all font-medium ${selectedTags.includes(tag._id)
+                                ? "bg-white text-black border-white"
+                                : "bg-transparent text-gray-600 border-white/10 hover:border-white/25 hover:text-gray-300"
+                              }`}
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-3 border-t border-white/5">
+                      <Link
+                        href={`/properties/${property._id}`}
+                        className="flex-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button className="w-full py-2.5 rounded-xl bg-white text-black text-xs font-semibold tracking-wide hover:bg-gray-100 transition-colors">
+                          View Details
+                        </button>
+                      </Link>
+
+                      <a
+                        href="mailto:info@example.com"
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3 py-2.5 rounded-xl border border-white/10 text-gray-600 hover:border-white/30 hover:text-white transition-colors"
+                      >
+                        <Mail size={15} />
+                      </a>
+
+                      <a
+                        href="https://wa.me/971XXXXXXXXX"
+                        target="_blank" rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3 py-2.5 rounded-xl border border-white/10 text-gray-600 hover:border-green-500/50 hover:text-green-400 transition-colors"
+                      >
+                        <MessageCircle size={15} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-24">
+            <div className="w-16 h-16 rounded-full bg-white/4 border border-white/8 flex items-center justify-center mx-auto mb-4">
+              <Home size={28} className="text-gray-700" />
+            </div>
+            <p className="text-gray-400 text-lg font-medium mb-2">No properties found</p>
+            <p className="text-gray-600 text-sm mb-5">Try adjusting your filters</p>
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-xs font-semibold text-gray-500 border border-white/10 px-4 py-2 rounded-full hover:border-white/30 hover:text-white transition-colors"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        )}
+
+      </div>
+    </section>
   );
 }

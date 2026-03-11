@@ -549,7 +549,7 @@ export default function PropertyStatusClient({
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="bg-[#111111] border border-gray-800 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#111111] border border-gray-800 rounded-xl overflow-y-auto" style={{width:'800px'}}>
             <div className="p-6 border-b border-gray-800">
               <h2 className="text-lg font-semibold text-white">
                 {editingStatus ? 'Edit Property Status' : 'Add Property Status'}
