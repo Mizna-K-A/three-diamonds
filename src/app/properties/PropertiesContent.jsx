@@ -116,8 +116,8 @@ export default function PropertiesContent({
                   key={cat.value}
                   onClick={() => handleTypeChange(cat.value)}
                   className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${selectedType === cat.value
-                      ? "bg-white/15 text-white shadow-sm"
-                      : "text-gray-500 hover:text-gray-200"
+                    ? "bg-white/15 text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-200"
                     }`}
                 >
                   {cat.label}
@@ -145,8 +145,8 @@ export default function PropertiesContent({
                     key={s._id}
                     onClick={() => setSelectedStatus(s._id)}
                     className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${selectedStatus === s._id
-                        ? "bg-white text-black border-white shadow"
-                        : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                      ? "bg-white text-black border-white shadow"
+                      : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
                       }`}
                   >
                     {s.name ?? s.label}
@@ -199,6 +199,7 @@ export default function PropertiesContent({
             {filteredProperties.map((property, index) => {
               const imageUrl = getPrimaryImageUrl(property);
               const specs = [
+                property.price != null ? `${formatPrice(property.price).toLocaleString()}` : null,
                 property.area != null ? `${Number(property.area).toLocaleString()} sqft` : null,
                 property.NoOFCheck != null ? `${property.NoOFCheck} Checks` : null,
                 property.RentalPeriod ? property.RentalPeriod : null,
@@ -237,8 +238,8 @@ export default function PropertiesContent({
                     </div>
 
                     {/* Price */}
-                    <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10">
-                      {formatPrice(property.price)}
+                    <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10" style={{ backgroundColor: property.status.color }}>
+                      {property.status.name}
                     </div>
 
                     {/* Featured */}
@@ -262,10 +263,6 @@ export default function PropertiesContent({
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-xs mb-4 line-clamp-2 leading-relaxed">
-                      {property.description}
-                    </p>
-
                     {specs.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-5">
                         {specs.map((spec, idx) => (
@@ -274,23 +271,6 @@ export default function PropertiesContent({
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/8 text-[11px] text-gray-400 font-medium"
                           >
                             {spec}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {property.tags?.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {property.tags.map((tag) => (
-                          <span
-                            key={tag._id}
-                            onClick={(e) => { e.stopPropagation(); toggleTag(tag._id); }}
-                            className={`px-2.5 py-0.5 rounded-full text-[11px] border cursor-pointer transition-all font-medium ${selectedTags.includes(tag._id)
-                                ? "bg-white text-black border-white"
-                                : "bg-transparent text-gray-600 border-white/10 hover:border-white/25 hover:text-gray-300"
-                              }`}
-                          >
-                            {tag.name}
                           </span>
                         ))}
                       </div>

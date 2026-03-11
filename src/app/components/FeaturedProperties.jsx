@@ -68,6 +68,8 @@ export default function FeaturedProperties({
 }) {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { amount: 0.2 });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
 
   const [selectedType, setSelectedType]     = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -111,153 +113,207 @@ export default function FeaturedProperties({
     setSelectedType("all");
     setSelectedStatus("all");
     setSelectedTags([]);
+    setIsFilterOpen(false);
+  };
+
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (selectedType !== "all") count++;
+    if (selectedStatus !== "all") count++;
+    count += selectedTags.length;
+    return count;
+  };
+
+  const getSelectedTypeLabel = () => {
+    if (selectedType === "all") return "All Types";
+    const type = propertyTypes.find(t => t.slug === selectedType);
+    return type?.name || "All Types";
+  };
+
+  const getSelectedStatusLabel = () => {
+    if (selectedStatus === "all") return "Any Status";
+    const status = statuses.find(s => s._id === selectedStatus);
+    return status?.name || status?.label || "Any Status";
   };
 
   return (
     <section id="properties" className="section-padding bg-white py-20 px-10" ref={sectionRef}>
       <div className="container-custom max-w-7xl mx-auto">
 
-        {/* ── HEADER ── */}
-        <motion.div
-          className="text-center mb-14"
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={headerVariants}
-        >
+        {/* ── HEADER WITH FILTER DROPDOWN ── */}
+        <div className="flex justify-between items-start mb-14">
           <motion.div
-            className="inline-block mb-4"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-left"
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            variants={headerVariants}
           >
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.2em]">
-              Featured Listings
-            </span>
             <motion.div
-              className="h-px bg-black mt-2 mx-auto"
-              initial={{ width: 0 }}
-              animate={isInView ? { width: 64 } : { width: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            />
+              className="inline-block mb-4"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.2em]">
+                Featured Listings
+              </span>
+              <motion.div
+                className="h-px bg-black mt-2"
+                initial={{ width: 0 }}
+                animate={isInView ? { width: 64 } : { width: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              />
+            </motion.div>
+
+            <motion.h2
+              className="text-4xl md:text-5xl font-bold mb-5 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              FEATURED PROPERTIES
+            </motion.h2>
+
+            <motion.p
+              className="text-gray-500 max-w-xl text-sm leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              Discover our handpicked selection of premium properties across Dubai.
+            </motion.p>
           </motion.div>
 
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-5 tracking-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+          {/* Filter Dropdown Button */}
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, y: -10 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+            transition={{ duration: 0.5, delay: 0.55 }}
+            ref={filterRef}
           >
-            FEATURED PROPERTIES
-          </motion.h2>
+            <motion.button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white hover:border-gray-400 transition-all duration-200 shadow-sm"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              <span className="text-sm font-medium">Filters</span>
+              {getActiveFilterCount() > 0 && (
+                <span className="bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {getActiveFilterCount()}
+                </span>
+              )}
+            </motion.button>
 
-          <motion.p
-            className="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            Discover our handpicked selection of premium properties across Dubai.
-          </motion.p>
-        </motion.div>
-
-        {/* ── FILTER BAR ── */}
-        <motion.div
-          className="flex flex-col items-center gap-5 mb-10"
-          initial={{ opacity: 0, y: 16 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.5, delay: 0.55 }}
-        >
-          {/* Type Pills — segmented tab style */}
-          {categories.length > 1 && (
-            <div className="inline-flex items-center bg-gray-100 rounded-2xl p-1 gap-1">
-              {categories.map((cat) => (
-                <motion.button
-                  key={cat.value}
-                  onClick={() => setSelectedType(cat.value)}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.15 }}
-                  className={`relative px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                    selectedType === cat.value
-                      ? "bg-white text-black shadow-sm"
-                      : "text-gray-500 hover:text-gray-800"
-                  }`}
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {isFilterOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
                 >
-                  {cat.label}
-                </motion.button>
-              ))}
-            </div>
-          )}
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="font-semibold text-sm">Filter Properties</h3>
+                  </div>
 
-          {/* Status + Tags — centered pill row */}
-          <div className="flex flex-wrap justify-center items-center gap-2">
-            {/* Status Pills */}
-            {statuses.length > 0 && (
-              <>
-                {statuses.map((s) => (
-                  <motion.button
-                    key={s._id}
-                    onClick={() => setSelectedStatus(s._id)}
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
-                      selectedStatus === s._id
-                        ? "bg-black text-white border-black shadow"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-black"
-                    }`}
-                  >
-                    {s.name ?? s.label}
-                  </motion.button>
-                ))}
+                  <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
+                    {/* Property Type */}
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                        Property Type
+                      </label>
+                      <select
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                      >
+                        {categories.map((cat) => (
+                          <option key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* Divider */}
-                {/* {tags.length > 0 && (
-                  <span className="w-px h-4 bg-gray-200 mx-1 self-center" />
-                )} */}
-              </>
-            )}
+                    {/* Status */}
+                    {statuses.length > 0 && (
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                          Status
+                        </label>
+                        <select
+                          value={selectedStatus}
+                          onChange={(e) => setSelectedStatus(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black"
+                        >
+                          <option value="all">Any Status</option>
+                          {statuses.map((s) => (
+                            <option key={s._id} value={s._id}>
+                              {s.name ?? s.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
-            {/* Tag Pills */}
-            {/* {tags.map((tag) => {
-              const active = selectedTags.includes(tag._id);
-              return (
-                <motion.button
-                  key={tag._id}
-                  onClick={() => toggleTag(tag._id)}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  transition={{ duration: 0.15 }}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
-                    active
-                      ? "bg-black text-white border-black"
-                      : "bg-white text-gray-400 border-gray-200 hover:border-gray-400 hover:text-black"
-                  }`}
-                >
-                  {active && <span className="mr-1">✓</span>}
-                  {tag.name}
-                </motion.button>
-              );
-            })} */}
-          </div>
+                    {/* Tags */}
+                    {/* {tags.length > 0 && (
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                          Tags
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {tags.map((tag) => {
+                            const active = selectedTags.includes(tag._id);
+                            return (
+                              <motion.button
+                                key={tag._id}
+                                onClick={() => toggleTag(tag._id)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${
+                                  active
+                                    ? "bg-black text-white border-black"
+                                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                                }`}
+                              >
+                                {active && <span className="mr-1">✓</span>}
+                                {tag.name}
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )} */}
+                  </div>
 
-          {/* Clear — centered, animated */}
-          <AnimatePresence>
-            {hasFilters && (
-              <motion.button
-                key="clear"
-                initial={{ opacity: 0, y: -6, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -6, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-                onClick={clearFilters}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 border border-dashed border-gray-300 hover:border-red-400 hover:text-red-500 transition-colors"
-              >
-                <span>✕</span> Clear filters
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </motion.div>
+                  {/* Footer */}
+                  <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                    <button
+                      onClick={clearFilters}
+                      className="text-xs text-gray-500 hover:text-black transition-colors"
+                    >
+                      Clear all
+                    </button>
+                    <button
+                      onClick={() => setIsFilterOpen(false)}
+                      className="px-4 py-2 bg-black text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
 
         {/* Result count */}
         <motion.p
@@ -298,8 +354,7 @@ export default function FeaturedProperties({
                   : null;
 
                 const specs = [
-                  property.bedrooms  != null ? `${property.bedrooms} Bed`        : null,
-                  property.bathrooms != null ? `${property.bathrooms} Bath`       : null,
+                  property.price      != null ? `${formatPrice(property.price).toLocaleString()}` : null,
                   property.area      != null ? `${Number(property.area).toLocaleString()} sqft` : null,
                   property.NoOFCheck != null ? `${property.NoOFCheck} Checks`     : null,
                   property.RentalPeriod      ? property.RentalPeriod              : null,
@@ -344,15 +399,13 @@ export default function FeaturedProperties({
                           transition={{ duration: 0.2 }}
                         >
                           {property.tags[0]?.name}
-                          {console.log(property,'rr')
-                          }
                         </motion.span>
                       </motion.div>
 
                       {/* Price badge */}
-                      {property.price != null && (
+                      {property.status != null && (
                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm">
-                          {formatPrice(property.price)}
+                          {property.status.name}
                         </div>
                       )}
                     </div>
@@ -377,16 +430,6 @@ export default function FeaturedProperties({
                           <span className="text-xs line-clamp-1">{property.fullAddress || property.city || "No address"}</span>
                         </div>
                       </motion.div>
-
-                      <motion.p
-                        className="text-gray-500 text-xs mb-4 line-clamp-2 leading-relaxed"
-                        initial={{ opacity: 0 }}
-                        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-                        transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
-                      >
-                        {property.description}
-                      </motion.p>
-
                       {/* Specs row */}
                       {specs.length > 0 && (
                         <motion.div
