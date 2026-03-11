@@ -35,6 +35,35 @@ export async function POST(request) {
             status: 'new',
         });
 
+        // Send Email Notifications
+        try {
+            const { sendMail, getProposalEmailTemplate, getAdminNotificationTemplate } = await import('../../../../lib/mail');
+
+            // 1. Send to Client
+            const clientMail = getProposalEmailTemplate(name, propertyTitle);
+            await sendMail({
+                to: email,
+                ...clientMail
+            });
+
+            // 2. Send to Admin
+            const adminMail = getAdminNotificationTemplate('Property Proposal Request', {
+                name,
+                email,
+                phone,
+                property: propertyTitle,
+                id: propertyId
+            });
+            if (process.env.ADMIN_EMAIL) {
+                await sendMail({
+                    to: process.env.ADMIN_EMAIL,
+                    ...adminMail
+                });
+            }
+        } catch (mailError) {
+            console.error('Email notification failed but request was saved:', mailError);
+        }
+
         return NextResponse.json({
             success: true,
             id: doc._id.toString(),

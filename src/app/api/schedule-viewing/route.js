@@ -47,6 +47,38 @@ export async function POST(request) {
       status: 'new',
     });
 
+    // Send Email Notifications
+    try {
+      const { sendMail, getViewingEmailTemplate, getAdminNotificationTemplate } = await import('../../../../lib/mail');
+
+      // 1. Send to Client
+      const clientMail = getViewingEmailTemplate(name, propertyTitle, preferredDate, preferredTime);
+      await sendMail({
+        to: email,
+        ...clientMail
+      });
+
+      // 2. Send to Admin
+      const adminMail = getAdminNotificationTemplate('Property Viewing Request', {
+        name,
+        email,
+        phone,
+        property: propertyTitle,
+        type: tourType,
+        date: preferredDate,
+        time: preferredTime,
+        message
+      });
+      if (process.env.ADMIN_EMAIL) {
+        await sendMail({
+          to: process.env.ADMIN_EMAIL,
+          ...adminMail
+        });
+      }
+    } catch (mailError) {
+      console.error('Email notification failed but viewing request was saved:', mailError);
+    }
+
     return NextResponse.json({
       success: true,
       id: doc._id.toString(),

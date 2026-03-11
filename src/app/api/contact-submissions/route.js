@@ -35,6 +35,40 @@ export async function POST(request) {
       message,
     });
 
+    // Send Email Notifications
+    try {
+      const { sendMail, getContactEmailTemplate, getAdminNotificationTemplate } = await import('../../../../lib/mail');
+
+      const isBrochure = source === 'brochure-download';
+      const typeLabel = isBrochure ? 'Brochure Request' : 'Contact Submission';
+
+      // 1. Send to Client
+      const clientMail = getContactEmailTemplate(name, typeLabel);
+      await sendMail({
+        to: email,
+        ...clientMail
+      });
+
+      // 2. Send to Admin
+      const adminMail = getAdminNotificationTemplate(typeLabel, {
+        name,
+        email,
+        phone,
+        company,
+        propertyType,
+        source: isBrochure ? 'Brochure Download' : 'Contact Form',
+        message
+      });
+      if (process.env.ADMIN_EMAIL) {
+        await sendMail({
+          to: process.env.ADMIN_EMAIL,
+          ...adminMail
+        });
+      }
+    } catch (mailError) {
+      console.error('Email notification failed but submission was saved:', mailError);
+    }
+
     return NextResponse.json({ success: true, id: doc._id.toString() });
   } catch (error) {
     console.error('Error creating contact submission:', error);
