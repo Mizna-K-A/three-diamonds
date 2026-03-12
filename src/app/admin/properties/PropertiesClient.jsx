@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Swal from 'sweetalert2';
 
 function LucideIcon({ name, size = 14, className = '' }) {
   if (!name) return null;
@@ -131,24 +132,86 @@ export default function PropertiesClient({
         setProperties(prev => [result.data, ...prev]);
       }
       handleCloseModal();
+      
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: `Property ${editingProperty ? 'updated' : 'created'} successfully.`,
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error('Error saving property:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || `Failed to ${editingProperty ? 'update' : 'create'} property.`
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this property?')) return;
+    // Find property for confirmation message
+    const property = properties.find(p => p._id === id);
+    
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: property?.title 
+        ? `You are about to delete "${property.title}". This action cannot be undone.`
+        : 'You are about to delete this property. This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      background: '#111111',
+      color: '#ffffff',
+      customClass: {
+        popup: 'border border-gray-800 rounded-xl',
+        title: 'text-white text-lg font-semibold',
+        htmlContainer: 'text-gray-300',
+        confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors',
+        cancelButton: 'bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setIsLoading(true);
     try {
-      const result = await deleteProperty(id);
-      if (result.error) throw new Error(result.error);
+      const deleteResult = await deleteProperty(id);
+      if (deleteResult.error) throw new Error(deleteResult.error);
+      
       setProperties(prev => prev.filter(p => p._id !== id));
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Property has been deleted successfully.',
+        timer: 2000,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } catch (error) {
       console.error('Error deleting property:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to delete property.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -159,21 +222,66 @@ export default function PropertiesClient({
       const result = await toggleFeature(id);
       if (result.error) throw new Error(result.error);
       setProperties(prev => prev.map(p => p._id === id ? { ...p, isFeatured: result.isFeatured } : p));
+      
+      // Optional: Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `Property ${result.isFeatured ? 'featured' : 'unfeatured'} successfully.`,
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } catch (error) {
       console.error('Error toggling feature:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to toggle feature status.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     }
   };
-  console.log(properties, 'ee');
 
   const handleTogglePublish = async (id) => {
     try {
       const result = await togglePublish(id);
       if (result.error) throw new Error(result.error);
       setProperties(prev => prev.map(p => p._id === id ? { ...p, isPublished: result.isPublished } : p));
+      
+      // Optional: Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `Property ${result.isPublished ? 'published' : 'unpublished'} successfully.`,
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } catch (error) {
       console.error('Error toggling publish:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to toggle publish status.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     }
   };
 
@@ -488,7 +596,7 @@ export default function PropertiesClient({
                     <Link
                       href={`/admin/properties/${property._id}/`}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                      title="Edit property"
+                      title="View property"
                     >
                       <Eye size={16} />
                     </Link>

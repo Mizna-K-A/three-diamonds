@@ -11,6 +11,7 @@ import {
   Check,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import Swal from 'sweetalert2';
 
 // ─── Icon Picker Setup ────────────────────────────────────────────────────────
 const EXCLUDED = new Set(['createLucideIcon', 'default', 'icons']);
@@ -402,28 +403,113 @@ export default function PropertyStatusClient({
 
       if (editingStatus) {
         setStatuses((s) => s.map((t) => (t._id === editingStatus._id ? result.data : t)));
+        
+        // Show success message for update
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: 'Property status has been updated successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          background: '#111111',
+          color: '#ffffff',
+          customClass: {
+            popup: 'border border-gray-800 rounded-xl'
+          }
+        });
       } else {
         setStatuses((s) => [...s, result.data]);
+        
+        // Show success message for creation
+        Swal.fire({
+          icon: 'success',
+          title: 'Created!',
+          text: 'Property status has been created successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          background: '#111111',
+          color: '#ffffff',
+          customClass: {
+            popup: 'border border-gray-800 rounded-xl'
+          }
+        });
       }
       handleCloseModal();
     } catch (error) {
       console.error('Error saving property status:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to save property status.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this property status?')) return;
+    const statusToDelete = statuses.find((s) => s._id === id);
+    
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: statusToDelete?.name 
+        ? `You are about to delete "${statusToDelete.name}" status. This action cannot be undone.`
+        : 'You are about to delete this property status. This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      background: '#111111',
+      color: '#ffffff',
+      customClass: {
+        popup: 'border border-gray-800 rounded-xl',
+        title: 'text-white text-lg font-semibold',
+        htmlContainer: 'text-gray-300',
+        confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors',
+        cancelButton: 'bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setIsLoading(true);
     try {
-      const result = await deletePropertyStatus(id);
-      if (result.error) throw new Error(result.error);
+      const deleteResult = await deletePropertyStatus(id);
+      if (deleteResult.error) throw new Error(deleteResult.error);
+      
       setStatuses((s) => s.filter((t) => t._id !== id));
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Property status has been deleted successfully.',
+        timer: 2000,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } catch (error) {
       console.error('Error deleting property status:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to delete property status.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }

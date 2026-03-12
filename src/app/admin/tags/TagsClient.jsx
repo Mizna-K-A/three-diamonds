@@ -7,6 +7,7 @@ import {
   ChevronDown, X, Check,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import Swal from 'sweetalert2';
 
 // ─── Icon Picker ──────────────────────────────────────────────────────────────
 const EXCLUDED = new Set(['createLucideIcon', 'default', 'icons']);
@@ -273,28 +274,122 @@ export default function TagsClient({
 
       if (editingTag) {
         setTags(prev => prev.map(t => t._id === editingTag._id ? result.data : t));
+        
+        // Show success message for update
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: 'Tag has been updated successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          background: '#111111',
+          color: '#ffffff',
+          customClass: {
+            popup: 'border border-gray-800 rounded-xl'
+          }
+        });
       } else {
         setTags(prev => [...prev, result.data]);
+        
+        // Show success message for creation
+        Swal.fire({
+          icon: 'success',
+          title: 'Created!',
+          text: 'Tag has been created successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          background: '#111111',
+          color: '#ffffff',
+          customClass: {
+            popup: 'border border-gray-800 rounded-xl'
+          }
+        });
       }
       handleCloseModal();
     } catch (error) {
       console.error('Error saving tag:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to save tag.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this tag?')) return;
+    const tagToDelete = tags.find(t => t._id === id);
+    const usageCount = usageCounts?.[id] || 0;
+    
+    let confirmMessage = tagToDelete?.name 
+      ? `You are about to delete "${tagToDelete.name}" tag.`
+      : 'You are about to delete this tag.';
+    
+    if (usageCount > 0) {
+      confirmMessage = `This tag is used by ${usageCount} propert${usageCount === 1 ? 'y' : 'ies'}. Deleting it will remove the tag from these properties. This action cannot be undone.`;
+    } else {
+      confirmMessage += ' This action cannot be undone.';
+    }
+
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: confirmMessage,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      background: '#111111',
+      color: '#ffffff',
+      customClass: {
+        popup: 'border border-gray-800 rounded-xl',
+        title: 'text-white text-lg font-semibold',
+        htmlContainer: 'text-gray-300',
+        confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors',
+        cancelButton: 'bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setIsLoading(true);
     try {
-      const result = await deleteTag(id);
-      if (result.error) throw new Error(result.error);
+      const deleteResult = await deleteTag(id);
+      if (deleteResult.error) throw new Error(deleteResult.error);
+      
       setTags(prev => prev.filter(t => t._id !== id));
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Tag has been deleted successfully.',
+        timer: 2000,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } catch (error) {
       console.error('Error deleting tag:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to delete tag.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -384,7 +479,7 @@ export default function TagsClient({
                   <button onClick={() => handleDelete(tag._id)}
                     disabled={usageCount > 0}
                     title={usageCount > 0 ? 'Tag is in use' : ''}
-                    className="p-1.5 hover:bg-red-900/30 rounded text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30">
+                    className="p-1.5 hover:bg-red-900/30 rounded text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30 disabled:hover:bg-transparent">
                     <Trash2 size={14} />
                   </button>
                 </div>

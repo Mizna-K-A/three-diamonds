@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import Swal from 'sweetalert2';
 
 // Known non-icon exports to exclude
 const EXCLUDED = new Set(['createLucideIcon', 'default', 'icons']);
@@ -234,13 +235,50 @@ export default function PropertyTypesClient({
         setPropertyTypes((types) =>
           types.map((t) => (t._id === editingType._id ? result.data : t))
         );
+        
+        // Show success message for update
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: 'Property type has been updated successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          background: '#111111',
+          color: '#ffffff',
+          customClass: {
+            popup: 'border border-gray-800 rounded-xl'
+          }
+        });
       } else {
         setPropertyTypes((types) => [...types, result.data]);
+        
+        // Show success message for creation
+        Swal.fire({
+          icon: 'success',
+          title: 'Created!',
+          text: 'Property type has been created successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          background: '#111111',
+          color: '#ffffff',
+          customClass: {
+            popup: 'border border-gray-800 rounded-xl'
+          }
+        });
       }
       handleCloseModal();
     } catch (error) {
       console.error('Error saving property type:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to save property type.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -248,25 +286,68 @@ export default function PropertyTypesClient({
 
   const handleDelete = async (id) => {
     const typeToDelete = propertyTypes.find((t) => t._id === id);
+    
+    let confirmMessage = 'Are you sure you want to delete this property type?';
+    let confirmButtonText = 'Yes, delete it';
+    
     if (typeToDelete?.propertyCount > 0) {
-      if (
-        !confirm(
-          `This property type has ${typeToDelete.propertyCount} properties. Deleting it will remove the type from these properties. Continue?`
-        )
-      )
-        return;
-    } else {
-      if (!confirm('Are you sure you want to delete this property type?')) return;
+      confirmMessage = `This property type has ${typeToDelete.propertyCount} properties associated with it. Deleting it will remove the type from these properties. This action cannot be undone.`;
+      confirmButtonText = 'Yes, delete anyway';
     }
+
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: confirmMessage,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: 'Cancel',
+      background: '#111111',
+      color: '#ffffff',
+      customClass: {
+        popup: 'border border-gray-800 rounded-xl',
+        title: 'text-white text-lg font-semibold',
+        htmlContainer: 'text-gray-300',
+        confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors',
+        cancelButton: 'bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+      }
+    });
+
+    if (!result.isConfirmed) return;
 
     setIsLoading(true);
     try {
-      const result = await deletePropertyType(id);
-      if (result.error) throw new Error(result.error);
+      const deleteResult = await deletePropertyType(id);
+      if (deleteResult.error) throw new Error(deleteResult.error);
+      
       setPropertyTypes((types) => types.filter((t) => t._id !== id));
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Property type has been deleted successfully.',
+        timer: 2000,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } catch (error) {
       console.error('Error deleting property type:', error);
-      alert(error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to delete property type.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
     } finally {
       setIsLoading(false);
     }

@@ -42,11 +42,10 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
       </label>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-          open
+        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${open
             ? "bg-white/15 text-white"
             : "bg-white/8 text-gray-300 hover:bg-white/12 hover:text-white"
-        }`}
+          }`}
       >
         <div className="flex items-center gap-2">
           {showDot && (
@@ -71,16 +70,14 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
               <button
                 key={val}
                 onClick={() => { onChange(val); setOpen(false); }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                  isSel
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${isSel
                     ? "bg-white text-black font-medium"
                     : "text-gray-400 hover:bg-white/8 hover:text-white"
-                }`}
+                  }`}
               >
                 {showDot && (
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${
-                    isSel ? "bg-black/30" : dotMap[val] ?? "bg-gray-600"
-                  }`} />
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${isSel ? "bg-black/30" : dotMap[val] ?? "bg-gray-600"
+                    }`} />
                 )}
                 {getLabel(opt)}
               </button>
@@ -315,7 +312,7 @@ export default function PropertiesContent({
                     {property.tags?.length > 0 && (
                       <div className="absolute top-3 left-3">
                         <span
-                          className="backdrop-blur-sm text-black px-3 py-1 text-[11px] font-bold rounded-full inline-block tracking-wide border border-white/20"
+                          className="backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full inline-block tracking-wide border border-white/20"
                           style={{ backgroundColor: property.tags[0].color || "#ffffff" }}
                         >
                           {property.tags[0].name}
@@ -349,7 +346,7 @@ export default function PropertiesContent({
                       <div className="flex items-center text-gray-600 mt-1.5 gap-1">
                         <MapPin size={12} className="shrink-0 text-gray-600" />
                         <span className="text-xs line-clamp-1 text-gray-500">
-                          {property.fullAddress || property.city || "No address"}
+                          {property.address || "No address"}
                         </span>
                       </div>
                     </div>
