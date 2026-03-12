@@ -537,7 +537,7 @@ export default async function PropertyDetailPage({ params }) {
                 <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
                   Description
                 </h2>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-gray-300 leading-relaxed whitespace-pre-line">
                   {property.description}
                 </p>
               </div>

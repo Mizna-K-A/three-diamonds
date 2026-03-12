@@ -112,9 +112,9 @@ const FormSelect = ({ label, icon: Icon, options, ...props }) => (
           ${Icon ? 'pl-10' : 'pl-4'} pr-10 py-2.5
         `}
       >
-        <option value="" className='text-black'>Select {label}</option>
+        <option value="" className='text-white'>Select {label}</option>
         {options.map(option => (
-          <option key={option._id} value={option._id} className='text-black'>
+          <option key={option._id} value={option._id} className='text-white'>
             {option.name}
           </option>
         ))}
@@ -693,7 +693,7 @@ export default function PropertyForm({
 
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -757,7 +757,7 @@ export default function PropertyForm({
       </div>
 
       {/* Form */}
-      <form id="property-form" onSubmit={handleSubmit} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <form id="property-form" onSubmit={handleSubmit} className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           {/* Basic Information */}
           {activeTab === 'basic' && (
@@ -783,7 +783,7 @@ export default function PropertyForm({
                     icon={Home}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={4}
+                    rows={10}
                     placeholder="Describe the property, its unique features, and selling points..."
                   />
                 </div>
@@ -950,7 +950,7 @@ export default function PropertyForm({
                   placeholder="City"
                 />
 
-                <FormInput
+                {/* <FormInput
                   label="State"
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
@@ -962,7 +962,7 @@ export default function PropertyForm({
                   value={formData.zipCode}
                   onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                   placeholder="ZIP Code"
-                />
+                /> */}
 
                 <FormInput
                   label="Map Link"
@@ -1030,7 +1030,7 @@ export default function PropertyForm({
                     onChange={(e) => setNewFeatureName(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addFeature()}
                     className="w-full px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
-                    placeholder="Enter feature name (e.g., Pool, Garage, Garden)"
+                    placeholder="Enter feature name"
                   />
                 </div>
                 <button
@@ -1045,7 +1045,7 @@ export default function PropertyForm({
               </div>
 
               {/* Feature suggestions */}
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <p className="text-sm text-gray-500 mb-2">Suggested features:</p>
                 <div className="flex flex-wrap gap-2">
                   {['Pool', 'Garage', 'Garden', 'Balcony', 'Fireplace', 'Central AC', 'Furnished', 'Gym', 'Parking', 'Storage'].map((suggestion) => (
@@ -1061,7 +1061,7 @@ export default function PropertyForm({
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 

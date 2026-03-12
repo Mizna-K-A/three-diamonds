@@ -355,7 +355,7 @@ export default async function PropertyDetailsPage({ params }) {
                   </div>
                 </div>
 
-                <p className="text-gray-300 text-sm mb-4">{property.description}</p>
+                <p className="text-gray-300 text-sm mb-4 whitespace-pre-line leading-relaxed">{property.description}</p>
 
                 {/* Key Stats */}
                 <div className="grid grid-cols-4 gap-4 py-4 border-t border-b border-gray-800">
@@ -399,35 +399,7 @@ export default async function PropertyDetailsPage({ params }) {
                 )}
               </div>
 
-              {/* Full Description */}
-              {property.fullDescription && (
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                  <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                    Detailed Description
-                  </h2>
-                  <p className="text-gray-300 leading-relaxed">
-                    {property.fullDescription}
-                  </p>
-                </div>
-              )}
-
-              {/* Features */}
-              {property.features?.length > 0 && (
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                  <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                    Key Features
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {property.features.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <Check size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-300">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              
               {/* Amenities */}
               {property.amenities?.length > 0 && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -457,20 +429,6 @@ export default async function PropertyDetailsPage({ params }) {
                         <span className="text-gray-400 text-lg">📍</span>
                         <span className="text-sm text-gray-300">{place}</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {property.tags?.length > 0 && (
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                  <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                    Tags
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {property.tags.map((tag) => (
-                      <TagPill key={tag._id} tag={tag} />
                     ))}
                   </div>
                 </div>
@@ -551,6 +509,21 @@ export default async function PropertyDetailsPage({ params }) {
                   </div>
                 </div>
               )}
+
+               {/* Tags */}
+              {property.tags?.length > 0 && (
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                  <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                    Tags
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {property.tags.map((tag) => (
+                      <TagPill key={tag._id} tag={tag} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Agent Information */}
               {(property.agent?.name || property.agent?.phone || property.agent?.email) && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -662,11 +635,6 @@ export default async function PropertyDetailsPage({ params }) {
                 </div>
               </div>
 
-              {/* Download Proposal */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-
-              </div>
-
               {/* Schedule Viewing Form */}
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -751,6 +719,23 @@ export default async function PropertyDetailsPage({ params }) {
                   </button>
                 </form>
               </div>
+              {/* Features */}
+              {property.features?.length > 0 && (
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                  <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                    Key Features
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {property.features.map((feature, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <Check size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>
