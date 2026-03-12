@@ -657,7 +657,7 @@ export default async function PropertyDetailsPage({ params }) {
                 </div>
 
                 {/* Contact Info */}
-                <form action="/api/schedule-viewing" method="POST">
+                <form action="" method="POST">
                   <input type="hidden" name="propertyId" value={property._id} />
 
                   {/* Date & Time */}
