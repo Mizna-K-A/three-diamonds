@@ -2,8 +2,91 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+
+/* ─────────────────────────────────────────────────────────────
+   SOFT DROPDOWN
+───────────────────────────────────────────────────────────── */
+const STATUS_COLORS = [
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-red-500",
+  "bg-blue-500",
+  "bg-purple-500",
+  "bg-pink-500",
+];
+
+function useDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, []);
+  return { open, setOpen, ref };
+}
+
+function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMap }) {
+  const { open, setOpen, ref } = useDropdown();
+  const selected = options.find((o) => getKey(o) === value);
+  const showDot = !!dotMap;
+
+  return (
+    <div ref={ref} className="relative flex-1 min-w-[140px]">
+      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+        {label}
+      </label>
+      <button
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+          open ? "bg-stone-200 text-stone-900" : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {showDot && (
+            <span className={`w-2 h-2 rounded-full shrink-0 ${dotMap[value] ?? "bg-gray-400"}`} />
+          )}
+          <span className="truncate">{getLabel(selected)}</span>
+        </div>
+        <svg
+          className={`w-4 h-4 text-stone-400 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 top-full mt-2 w-full bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden p-1.5 space-y-0.5">
+          {options.map((opt) => {
+            const val = getKey(opt);
+            const isSel = val === value;
+            return (
+              <button
+                key={val}
+                onClick={() => { onChange(val); setOpen(false); }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                  isSel ? "bg-stone-900 text-white font-medium" : "text-stone-700 hover:bg-stone-50"
+                }`}
+              >
+                {showDot && (
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    isSel ? "bg-white/60" : dotMap[val] ?? "bg-gray-300"
+                  }`} />
+                )}
+                {getLabel(opt)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─────────────────────────────────────────────────────────────
    ANIMATION VARIANTS
@@ -68,12 +151,19 @@ export default function FeaturedProperties({
 }) {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { amount: 0.2 });
-  const [isFilterOpen, setIsFilterOpen] = useState(true); // Set to true by default
-  const filterRef = useRef(null);
 
   const [selectedType, setSelectedType] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedTags, setSelectedTags] = useState([]);
+
+  // Build statusDots dynamically from the statuses prop
+  const statusDotMap = useMemo(() => {
+    const map = { all: "bg-gray-400" };
+    statuses.forEach((s, i) => {
+      map[s._id] = STATUS_COLORS[i % STATUS_COLORS.length];
+    });
+    return map;
+  }, [statuses]);
 
   const toggleTag = (id) =>
     setSelectedTags((prev) =>
@@ -85,23 +175,22 @@ export default function FeaturedProperties({
     ...propertyTypes.map((t) => ({ value: t.slug, label: t.name })),
   ];
 
+  const statusOptions = [
+    { _id: "all", name: "Any Status" },
+    ...statuses,
+  ];
+
   const filteredProperties = useMemo(() => {
     return initialProperties
       .filter((property) => {
         if (!property) return false;
-
         const matchesType =
-          selectedType === "all" ||
-          property.propertyType?.slug === selectedType;
-
+          selectedType === "all" || property.propertyType?.slug === selectedType;
         const matchesStatus =
-          selectedStatus === "all" ||
-          property.status?._id === selectedStatus;
-
+          selectedStatus === "all" || property.status?._id === selectedStatus;
         const matchesTags =
           selectedTags.length === 0 ||
           property.tags?.some((tag) => selectedTags.includes(tag._id));
-
         return matchesType && matchesStatus && matchesTags;
       })
       .slice(0, 4);
@@ -115,23 +204,15 @@ export default function FeaturedProperties({
     setSelectedTags([]);
   };
 
-  const getActiveFilterCount = () => {
-    let count = 0;
-    if (selectedType !== "all") count++;
-    if (selectedStatus !== "all") count++;
-    count += selectedTags.length;
-    return count;
-  };
-
-
   return (
     <section id="properties" className="section-padding bg-white py-20 px-10" ref={sectionRef}>
-      <div className="container-custom max-w-7xl mx-auto">
+      <div className="container-custom">
 
         {/* ── HEADER ── */}
         <div className="flex flex-col items-center mb-8 relative">
-          {/* Header content with filter positioned absolutely */}
           <div className="relative w-full flex justify-center">
+
+            {/* Title block */}
             <motion.div
               className="text-center"
               initial="hidden"
@@ -174,82 +255,50 @@ export default function FeaturedProperties({
               </motion.p>
             </motion.div>
 
-            {/* ── FILTER DROPDOWN (Positioned absolutely to the right) ── */}
+            {/* ── FILTERS (absolute right) ── */}
             <motion.div
               className="absolute right-0 top-1/2 -translate-y-1/2"
               initial={{ opacity: 0, x: 20 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
               transition={{ duration: 0.5, delay: 0.55 }}
             >
+              <div className="flex items-end gap-3">
+                <SoftDropdown
+                  label="Property Type"
+                  options={categories}
+                  value={selectedType}
+                  onChange={setSelectedType}
+                  getKey={(o) => o.value}
+                  getLabel={(o) => o?.label}
+                />
 
-              {/* Dropdown Panel */}
-              <AnimatePresence>
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className=" right-0 bg-white overflow-hidden z-50"
-                >
-                  <div className="flex items-end gap-6">
-                    {/* Property Type */}
-                    <div className="flex-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                        Property Type
-                      </label>
-                      <select
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white"
-                      >
-                        {categories.map((cat) => (
-                          <option key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                {statuses.length > 0 && (
+                  <SoftDropdown
+                    label="Status"
+                    options={statusOptions}
+                    value={selectedStatus}
+                    onChange={setSelectedStatus}
+                    getKey={(o) => o._id}
+                    getLabel={(o) => o?.name ?? o?.label}
+                    dotMap={statusDotMap}
+                  />
+                )}
 
-                    {/* Status */}
-                    {statuses.length > 0 && (
-                      <div className="flex-1">
-                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                          Status
-                        </label>
-                        <select
-                          value={selectedStatus}
-                          onChange={(e) => setSelectedStatus(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white"
-                        >
-                          <option value="all">Any Status</option>
-                          {statuses.map((s) => (
-                            <option key={s._id} value={s._id}>
-                              {s.name ?? s.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-3 pb-[2px]">
-                      <button
-                        onClick={clearFilters}
-                        className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-black transition-colors border border-gray-200 rounded-xl hover:border-gray-400"
-                      >
-                        Clear
-                      </button>
-                    </div>
+                {/* {hasFilters && (
+                  <div className="pb-[2px]">
+                    <button
+                      onClick={clearFilters}
+                      className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:text-black transition-colors border border-gray-200 rounded-xl hover:border-gray-400 whitespace-nowrap"
+                    >
+                      Clear
+                    </button>
                   </div>
-
-
-                </motion.div>
-              </AnimatePresence>
+                )} */}
+              </div>
             </motion.div>
+
           </div>
         </div>
-
-
 
         {/* Result count */}
         <motion.p
@@ -283,7 +332,6 @@ export default function FeaturedProperties({
                   primaryImage?.original?.url ||
                   null;
 
-                // Prepend API base for relative paths like /uploads/...
                 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
                 const imageUrl = rawUrl
                   ? rawUrl.startsWith("http") ? rawUrl : `${API_BASE}${rawUrl}`
@@ -319,10 +367,8 @@ export default function FeaturedProperties({
                         </div>
                       )}
 
-                      {/* Hover gradient */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                      {/* Status badge */}
                       <motion.div
                         className="absolute top-3 left-3"
                         initial={{ x: -50, opacity: 0 }}
@@ -338,7 +384,6 @@ export default function FeaturedProperties({
                         </motion.span>
                       </motion.div>
 
-                      {/* Price badge */}
                       {property.status != null && (
                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm">
                           {property.status.name}
@@ -366,7 +411,7 @@ export default function FeaturedProperties({
                           <span className="text-xs line-clamp-1">{property.fullAddress || property.city || "No address"}</span>
                         </div>
                       </motion.div>
-                      {/* Specs row */}
+
                       {specs.length > 0 && (
                         <motion.div
                           className="flex flex-wrap gap-1.5 mb-5"
@@ -388,7 +433,6 @@ export default function FeaturedProperties({
                         </motion.div>
                       )}
 
-                      {/* CTAs */}
                       <motion.div
                         className="flex gap-2"
                         initial={{ opacity: 0, y: 10 }}
@@ -405,7 +449,6 @@ export default function FeaturedProperties({
                             View Details
                           </motion.button>
                         </Link>
-
                       </motion.div>
                     </div>
                   </motion.div>

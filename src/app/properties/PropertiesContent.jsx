@@ -1,11 +1,100 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, MessageCircle, MapPin, Home, Star, X } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import { Mail, MessageCircle, MapPin, Home, Star } from "lucide-react";
 
+/* ─────────────────────────────────────────────────────────────
+   DARK SOFT DROPDOWN
+───────────────────────────────────────────────────────────── */
+const STATUS_COLORS = [
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-red-500",
+  "bg-blue-500",
+  "bg-purple-500",
+  "bg-pink-500",
+];
+
+function useDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, []);
+  return { open, setOpen, ref };
+}
+
+function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMap }) {
+  const { open, setOpen, ref } = useDropdown();
+  const selected = options.find((o) => getKey(o) === value);
+  const showDot = !!dotMap;
+
+  return (
+    <div ref={ref} className="relative flex-1 min-w-[160px]">
+      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+        {label}
+      </label>
+      <button
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+          open
+            ? "bg-white/15 text-white"
+            : "bg-white/8 text-gray-300 hover:bg-white/12 hover:text-white"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {showDot && (
+            <span className={`w-2 h-2 rounded-full shrink-0 ${dotMap[value] ?? "bg-gray-500"}`} />
+          )}
+          <span className="truncate">{getLabel(selected)}</span>
+        </div>
+        <svg
+          className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 ${open ? "rotate-180 text-gray-300" : ""}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 top-full mt-2 w-full bg-[#1e1e1e] border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden p-1.5 space-y-0.5">
+          {options.map((opt) => {
+            const val = getKey(opt);
+            const isSel = val === value;
+            return (
+              <button
+                key={val}
+                onClick={() => { onChange(val); setOpen(false); }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                  isSel
+                    ? "bg-white text-black font-medium"
+                    : "text-gray-400 hover:bg-white/8 hover:text-white"
+                }`}
+              >
+                {showDot && (
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    isSel ? "bg-black/30" : dotMap[val] ?? "bg-gray-600"
+                  }`} />
+                )}
+                {getLabel(opt)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────────────────── */
 const formatPrice = (price) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -13,6 +102,9 @@ const formatPrice = (price) =>
     maximumFractionDigits: 0,
   }).format(price);
 
+/* ─────────────────────────────────────────────────────────────
+   COMPONENT
+───────────────────────────────────────────────────────────── */
 export default function PropertiesContent({
   initialProperties = [],
   propertyTypes = [],
@@ -26,6 +118,15 @@ export default function PropertiesContent({
   const [selectedType, setSelectedType] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedTags, setSelectedTags] = useState([]);
+
+  // Build dot color map dynamically from statuses prop
+  const statusDotMap = useMemo(() => {
+    const map = { all: "bg-gray-500" };
+    statuses.forEach((s, i) => {
+      map[s._id] = STATUS_COLORS[i % STATUS_COLORS.length];
+    });
+    return map;
+  }, [statuses]);
 
   useEffect(() => {
     const typeFromUrl = searchParams.get("type");
@@ -55,6 +156,11 @@ export default function PropertiesContent({
   const categories = [
     { value: "all", label: "All Types" },
     ...propertyTypes.map((type) => ({ value: type.slug, label: type.name })),
+  ];
+
+  const statusOptions = [
+    { _id: "all", name: "Any Status" },
+    ...statuses,
   ];
 
   const filteredProperties = useMemo(() => {
@@ -87,7 +193,7 @@ export default function PropertiesContent({
 
   return (
     <section className="bg-[#0c0c0c] min-h-screen py-20 px-5">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
 
         {/* HEADER */}
         <div className="text-center mb-8">
@@ -105,78 +211,65 @@ export default function PropertiesContent({
           </p>
         </div>
 
-        {/* FILTER BAR - Below Heading */}
+        {/* FILTER BAR */}
         <div id="filter-bar" className="flex justify-center mb-10">
-          <div className="overflow-hidden p-6 w-full max-w-4xl">
+          <div className="p-6 w-full max-w-4xl">
             <div className="flex flex-wrap items-end gap-4">
+
               {/* Property Type */}
-              <div className="flex-1 min-w-[200px]">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                  Property Type
-                </label>
-                <select
-                  value={selectedType}
-                  onChange={(e) => handleTypeChange(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white text-black"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat.value} value={cat.value} className="text-black">
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SoftDropdown
+                label="Property Type"
+                options={categories}
+                value={selectedType}
+                onChange={handleTypeChange}
+                getKey={(o) => o.value}
+                getLabel={(o) => o?.label}
+              />
 
               {/* Status */}
               {statuses.length > 0 && (
-                <div className="flex-1 min-w-[180px]">
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                    Status
-                  </label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black bg-white text-black"
-                  >
-                    <option value="all">Any Status</option>
-                    {statuses.map((s) => (
-                      <option key={s._id} value={s._id} className="text-black">
-                        {s.name ?? s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SoftDropdown
+                  label="Status"
+                  options={statusOptions}
+                  value={selectedStatus}
+                  onChange={setSelectedStatus}
+                  getKey={(o) => o._id}
+                  getLabel={(o) => o?.name ?? o?.label}
+                  dotMap={statusDotMap}
+                />
               )}
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 pb-[2px]">
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-2.5 text-xs font-medium text-white hover:text-black transition-colors border border-gray-200 rounded-xl hover:border-gray-400"
-                >
-                  Clear
-                </button>
-              </div>
+              {/* Clear — only when filters active */}
+              {/* {hasFilters && (
+                <div className="pb-[2px]">
+                  <button
+                    onClick={clearFilters}
+                    className="px-4 py-2.5 text-xs font-medium text-gray-400 hover:text-white transition-colors border border-white/10 rounded-xl hover:border-white/30 whitespace-nowrap"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )} */}
             </div>
 
-            {/* Active Filters Summary (optional) */}
-            {hasFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
-                <span className="text-xs text-gray-500">Active filters:</span>
+            {/* Active Filters Summary */}
+            {/* {hasFilters && (
+              <div className="mt-4 pt-4 border-t border-white/8 flex items-center gap-2">
+                <span className="text-xs text-gray-600">Active filters:</span>
                 <div className="flex flex-wrap gap-2">
                   {selectedType !== "all" && (
-                    <span className="bg-black text-white text-xs px-2 py-1 rounded-full">
-                      Type: {categories.find(c => c.value === selectedType)?.label}
+                    <span className="bg-white/10 text-gray-300 text-xs px-2 py-1 rounded-full border border-white/10">
+                      Type: {categories.find((c) => c.value === selectedType)?.label}
                     </span>
                   )}
                   {selectedStatus !== "all" && (
-                    <span className="bg-black text-white text-xs px-2 py-1 rounded-full">
-                      Status: {statuses.find(s => s._id === selectedStatus)?.name}
+                    <span className="bg-white/10 text-gray-300 text-xs px-2 py-1 rounded-full border border-white/10">
+                      Status: {statuses.find((s) => s._id === selectedStatus)?.name}
                     </span>
                   )}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -188,7 +281,7 @@ export default function PropertiesContent({
         {/* GRID */}
         {filteredProperties.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProperties.map((property, index) => {
+            {filteredProperties.map((property) => {
               const imageUrl = getPrimaryImageUrl(property);
               const specs = [
                 property.price != null ? `${formatPrice(property.price)}` : null,
@@ -219,27 +312,26 @@ export default function PropertiesContent({
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Tags */}
-                    {property.tags && property.tags.length > 0 && (
+                    {property.tags?.length > 0 && (
                       <div className="absolute top-3 left-3">
                         <span
                           className="backdrop-blur-sm text-black px-3 py-1 text-[11px] font-bold rounded-full inline-block tracking-wide border border-white/20"
-                          style={{ backgroundColor: property.tags[0].color || '#ffffff' }}
+                          style={{ backgroundColor: property.tags[0].color || "#ffffff" }}
                         >
                           {property.tags[0].name}
                         </span>
                       </div>
                     )}
 
-                    {/* Status */}
                     {property.status && (
-                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10"
-                        style={{ backgroundColor: property.status.color || '#000000' }}>
+                      <div
+                        className="absolute top-3 right-3 backdrop-blur-sm text-white px-3 py-1 text-[11px] font-bold rounded-full border border-white/10"
+                        style={{ backgroundColor: property.status.color || "#000000" }}
+                      >
                         {property.status.name}
                       </div>
                     )}
 
-                    {/* Featured */}
                     {property.isFeatured && (
                       <div className="absolute bottom-3 left-3 bg-yellow-400 text-black px-2 py-0.5 text-[11px] font-bold rounded-md flex items-center gap-1">
                         <Star size={10} fill="currentColor" /> Featured
@@ -256,7 +348,9 @@ export default function PropertiesContent({
                       <h3 className="text-base font-bold mt-0.5 line-clamp-1 text-white">{property.title}</h3>
                       <div className="flex items-center text-gray-600 mt-1.5 gap-1">
                         <MapPin size={12} className="shrink-0 text-gray-600" />
-                        <span className="text-xs line-clamp-1 text-gray-500">{property.fullAddress || property.city || "No address"}</span>
+                        <span className="text-xs line-clamp-1 text-gray-500">
+                          {property.fullAddress || property.city || "No address"}
+                        </span>
                       </div>
                     </div>
 
@@ -273,7 +367,6 @@ export default function PropertiesContent({
                       </div>
                     )}
 
-                    {/* Actions */}
                     <div className="flex gap-2 pt-3 border-t border-white/5">
                       <Link
                         href={`/properties/${property.slug || property._id}`}

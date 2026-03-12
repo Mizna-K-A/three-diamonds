@@ -292,8 +292,8 @@ export default async function PropertyDetailsPage({ params }) {
       {/* Main content with proper padding to account for fixed header */}
       <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100 pt-16">
         {/* Sub-header - Now properly positioned below the main header */}
-        <div className="sticky top-16 z-40 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="mt-8 z-40 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
+          <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             <Link
               href="/properties"
               className="inline-flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-800 hover:bg-gray-900 transition-colors"
@@ -311,7 +311,7 @@ export default async function PropertyDetailsPage({ params }) {
         </div>
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8">
 
             {/* Left Column - Main Content */}

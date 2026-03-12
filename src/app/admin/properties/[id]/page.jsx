@@ -406,7 +406,7 @@ export default async function PropertyDetailPage({ params }) {
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <Link
             href="/admin/properties"
             className="inline-flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-800 hover:bg-gray-900 transition-colors"
@@ -443,7 +443,7 @@ export default async function PropertyDetailPage({ params }) {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Main Content - Left 2 columns */}

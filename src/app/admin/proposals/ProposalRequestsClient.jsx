@@ -153,11 +153,11 @@ export default function ProposalRequestsClient({ initialProposals }) {
     }
 
     return (
-        <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 rounded-2xl shadow-2xl overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="bg-gray-900/80 border-b border-gray-800">
+                        <tr className="bg-gray-900 border-b border-gray-800">
                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Property & Agent</th>
                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
@@ -165,7 +165,7 @@ export default function ProposalRequestsClient({ initialProposals }) {
                             <th className="px-6 py-4 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-800/60">
+                    <tbody className="divide-y divide-gray-800">
                         {proposals.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="px-6 py-16 text-center text-gray-400">
@@ -223,19 +223,22 @@ export default function ProposalRequestsClient({ initialProposals }) {
 
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => notifyAgent(v.id)}
-                                                disabled={notifyingId === v.id || !v.agentEmail}
-                                                title={v.agentEmail ? `Notify ${v.agentName || v.agentEmail}` : 'No agent assigned'}
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition-all border border-emerald-500/20 disabled:opacity-30 disabled:cursor-not-allowed"
-                                            >
-                                                {notifyingId === v.id ? (
-                                                    <Loader2 size={14} className="animate-spin" />
-                                                ) : (
-                                                    <Mail size={14} />
-                                                )}
-                                                <span className="text-xs font-medium">Notify Agent</span>
-                                            </button>
+                                            <a href={`mailto:${v.agentEmail}`}>
+
+                                                <button
+                                                    // onClick={() => notifyAgent(v.id)}
+                                                    disabled={notifyingId === v.id || !v.agentEmail}
+                                                    title={v.agentEmail ? `Notify ${v.agentName || v.agentEmail}` : 'No agent assigned'}
+                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition-all border border-emerald-500/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                                                >
+                                                    {notifyingId === v.id ? (
+                                                        <Loader2 size={14} className="animate-spin" />
+                                                    ) : (
+                                                        <Mail size={14} />
+                                                    )}
+                                                    <span className="text-xs font-medium">Notify Agent</span>
+                                                </button>
+                                            </a>
 
                                             <button
                                                 onClick={() => generatePDF(v)}
