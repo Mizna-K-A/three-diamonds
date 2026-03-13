@@ -555,7 +555,7 @@ export default function PropertiesClient({
                       return (
                         <button
                           key={tagId}
-                          onClick={() => toggleTag(tagId)}
+                          // onClick={() => toggleTag(tagId)}
                           className={`px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition-all duration-150 border ${active
                               ? 'text-white border-transparent'
                               : 'text-gray-300 hover:text-white'

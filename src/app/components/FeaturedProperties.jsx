@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { Mail, MessageCircle } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────
    SOFT DROPDOWN
@@ -42,9 +43,8 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
       </label>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-          open ? "bg-stone-200 text-stone-900" : "bg-stone-100 text-stone-700 hover:bg-stone-200"
-        }`}
+        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${open ? "bg-stone-200 text-stone-900" : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+          }`}
       >
         <div className="flex items-center gap-2">
           {showDot && (
@@ -69,14 +69,12 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
               <button
                 key={val}
                 onClick={() => { onChange(val); setOpen(false); }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                  isSel ? "bg-stone-900 text-white font-medium" : "text-stone-700 hover:bg-stone-50"
-                }`}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${isSel ? "bg-stone-900 text-white font-medium" : "text-stone-700 hover:bg-stone-50"
+                  }`}
               >
                 {showDot && (
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${
-                    isSel ? "bg-white/60" : dotMap[val] ?? "bg-gray-300"
-                  }`} />
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${isSel ? "bg-white/60" : dotMap[val] ?? "bg-gray-300"
+                    }`} />
                 )}
                 {getLabel(opt)}
               </button>
@@ -102,7 +100,7 @@ const headerVariants = {
 
 const gridVariants = {
   hidden: { opacity: 1 }, // Start visible to prevent flicker
-  visible: { 
+  visible: {
     opacity: 1,
     transition: { duration: 0.3 }
   },
@@ -168,34 +166,34 @@ export default function FeaturedProperties({
     ...statuses,
   ];
 
- const filteredProperties = useMemo(() => {
-  // First filter properties based on selected filters
-  const filtered = initialProperties
-    .filter((property) => {
-      if (!property) return false;
-      const matchesType =
-        selectedType === "all" || property.propertyType?.slug === selectedType;
-      const matchesStatus =
-        selectedStatus === "all" || property.status?._id === selectedStatus;
-      const matchesTags =
-        selectedTags.length === 0 ||
-        property.tags?.some((tag) => selectedTags.includes(tag._id));
-      return matchesType && matchesStatus && matchesTags;
+  const filteredProperties = useMemo(() => {
+    // First filter properties based on selected filters
+    const filtered = initialProperties
+      .filter((property) => {
+        if (!property) return false;
+        const matchesType =
+          selectedType === "all" || property.propertyType?.slug === selectedType;
+        const matchesStatus =
+          selectedStatus === "all" || property.status?._id === selectedStatus;
+        const matchesTags =
+          selectedTags.length === 0 ||
+          property.tags?.some((tag) => selectedTags.includes(tag._id));
+        return matchesType && matchesStatus && matchesTags;
+      });
+
+    // Then sort to show featured properties first
+    const sorted = [...filtered].sort((a, b) => {
+      const aHasFeatured = a.tags?.some(tag => tag.name?.toLowerCase() === 'featured');
+      const bHasFeatured = b.tags?.some(tag => tag.name?.toLowerCase() === 'featured');
+
+      if (aHasFeatured && !bHasFeatured) return -1;
+      if (!aHasFeatured && bHasFeatured) return 1;
+      return 0;
     });
 
-  // Then sort to show featured properties first
-  const sorted = [...filtered].sort((a, b) => {
-    const aHasFeatured = a.tags?.some(tag => tag.name?.toLowerCase() === 'featured');
-    const bHasFeatured = b.tags?.some(tag => tag.name?.toLowerCase() === 'featured');
-    
-    if (aHasFeatured && !bHasFeatured) return -1;
-    if (!aHasFeatured && bHasFeatured) return 1;
-    return 0;
-  });
-
-  // Finally slice to show only 4 properties
-  return sorted.slice(0, 4);
-}, [initialProperties, selectedType, selectedStatus, selectedTags]);
+    // Finally slice to show only 4 properties
+    return sorted.slice(0, 4);
+  }, [initialProperties, selectedType, selectedStatus, selectedTags]);
 
   const hasFilters = selectedType !== "all" || selectedStatus !== "all" || selectedTags.length > 0;
 
@@ -410,6 +408,23 @@ export default function FeaturedProperties({
                               View Details
                             </button>
                           </Link>
+
+                          <a
+                            href="mailto:info@example.com"
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-3 py-2.5 rounded-xl border border-white/10 text-gray-600 hover:border-white/30 hover:text-black transition-colors"
+                          >
+                            <Mail size={15} />
+                          </a>
+
+                          <a
+                            href="https://wa.me/971XXXXXXXXX"
+                            target="_blank" rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-3 py-2.5 rounded-xl border border-white/10 text-gray-600 hover:border-white/30 hover:text-black transition-colors"
+                          >
+                            <MessageCircle size={15} />
+                          </a>
                         </div>
                       </div>
                     </div>
