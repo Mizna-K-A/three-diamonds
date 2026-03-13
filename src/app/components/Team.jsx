@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
@@ -33,7 +34,7 @@ const labelVariant = {
 
 // Card container
 const cardVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     y: 60,
     scale: 0.95
@@ -42,7 +43,7 @@ const cardVariant = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { 
+    transition: {
       duration: 0.8,
       ease: [0.22, 1, 0.36, 1]
     }
@@ -51,7 +52,7 @@ const cardVariant = {
 
 // Avatar animation
 const avatarVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     scale: 0,
     rotate: -180
@@ -60,7 +61,7 @@ const avatarVariant = {
     opacity: 1,
     scale: 1,
     rotate: 0,
-    transition: { 
+    transition: {
       type: "spring",
       stiffness: 200,
       damping: 15
@@ -70,14 +71,14 @@ const avatarVariant = {
 
 // Name/role slide in from left
 const nameVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     x: -30
   },
   show: {
     opacity: 1,
     x: 0,
-    transition: { 
+    transition: {
       duration: 0.6,
       ease: "easeOut"
     }
@@ -86,14 +87,14 @@ const nameVariant = {
 
 // Badge scale in
 const badgeVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     scale: 0
   },
   show: {
     opacity: 1,
     scale: 1,
-    transition: { 
+    transition: {
       type: "spring",
       stiffness: 300,
       damping: 20
@@ -103,14 +104,14 @@ const badgeVariant = {
 
 // Description fade in
 const descriptionVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     y: 20
   },
   show: {
     opacity: 1,
     y: 0,
-    transition: { 
+    transition: {
       duration: 0.6,
       ease: "easeOut"
     }
@@ -128,14 +129,14 @@ const specialtiesContainer = {
 };
 
 const specialtyVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     scale: 0
   },
   show: {
     opacity: 1,
     scale: 1,
-    transition: { 
+    transition: {
       type: "spring",
       stiffness: 400,
       damping: 20
@@ -145,14 +146,14 @@ const specialtyVariant = {
 
 // Bottom section
 const bottomSectionVariant = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     y: 40
   },
   show: {
     opacity: 1,
     y: 0,
-    transition: { 
+    transition: {
       duration: 0.8,
       ease: "easeOut"
     }
@@ -160,26 +161,27 @@ const bottomSectionVariant = {
 };
 
 export default function Team() {
-  const teamMembers = [
-    {
-      name: 'MR. SAJIKUMAR',
-      role: 'FOUNDER & MANAGING DIRECTOR',
-      experience: '15+ Years',
-      description: 'With over 15 years transforming UAE\'s real estate landscape, Kumar launched Three Diamonds in 2021 with a mission to deliver exceptional service and propel the company to top 10 position in Dubai.',
-      specialties: ['Commercial Real Estate', 'Business Strategy', 'Client Relations', 'Market Analysis'],
-      image: '/founder.png',
-      alt: 'Mr. Sajikumar - Founder & Managing Director of Three Diamonds'
-    },
-    {
-      name: 'MRS. INDULEKHA',
-      role: 'CO-FOUNDER & MANAGING PARTNER',
-      experience: '17+ Years',
-      description: 'Embodies the Dubai dream with 17 years of experience. Her journey from property consultant to leadership roles in prestigious firms like Al Ghurair fuels Three Diamonds\' strategic vision.',
-      specialties: ['Residential Properties', 'Leasing', 'Development', 'Team Leadership'],
-      image: '/co-founder.png',
-      alt: 'Mrs. Indulekha - Co-Founder & Managing Partner of Three Diamonds'
-    }
-  ];
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        const res = await fetch('/api/team');
+        const data = await res.json();
+        setTeamMembers(data);
+      } catch (error) {
+        console.error("Failed to fetch team:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTeam();
+  }, []);
+
+  if (loading) return null; // Or a skeleton
+  if (teamMembers.length === 0) return null;
+
 
   return (
     <section id="team" className="section-padding bg-white p-5">
@@ -187,7 +189,7 @@ export default function Team() {
         {/* HEADER SECTION */}
         <div className="text-center mb-12">
           {/* LABEL */}
-          <motion.div 
+          <motion.div
             variants={labelVariant}
             initial="hidden"
             whileInView="show"
@@ -199,7 +201,7 @@ export default function Team() {
           </motion.div>
 
           {/* TITLE */}
-          <motion.h2 
+          <motion.h2
             variants={titleVariant}
             initial="hidden"
             whileInView="show"
@@ -210,7 +212,7 @@ export default function Team() {
           </motion.h2>
 
           {/* SUBTITLE */}
-          <motion.p 
+          <motion.p
             variants={subtitleVariant}
             initial="hidden"
             whileInView="show"
@@ -224,7 +226,7 @@ export default function Team() {
         {/* TEAM CARDS */}
         <div className="grid lg:grid-cols-2 gap-8">
           {teamMembers.map((member, index) => (
-            <motion.div 
+            <motion.div
               key={member.name}
               variants={cardVariant}
               initial="hidden"
@@ -240,7 +242,7 @@ export default function Team() {
               <div className="flex flex-col md:flex-row gap-6">
                 {/* AVATAR - with actual image */}
                 <div className="flex-shrink-0">
-                  <motion.div 
+                  <motion.div
                     variants={avatarVariant}
                     initial="hidden"
                     whileInView="show"
@@ -255,9 +257,9 @@ export default function Team() {
                       className="object-cover"
                       priority={index === 0} // Load first image with priority
                     />
-                    
+
                     {/* Optional overlay on hover */}
-                    <motion.div 
+                    <motion.div
                       className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors duration-300"
                       whileHover={{ backgroundColor: "rgba(0,0,0,0.1)" }}
                     />
@@ -277,8 +279,8 @@ export default function Team() {
                       <h3 className="text-2xl font-bold">{member.name}</h3>
                       <p className="text-gray-500 font-medium">{member.role}</p>
                     </motion.div>
-                    
-                    <motion.span 
+
+                    <motion.span
                       variants={badgeVariant}
                       initial="hidden"
                       whileInView="show"
@@ -288,9 +290,9 @@ export default function Team() {
                       {member.experience}
                     </motion.span>
                   </div>
-                  
+
                   {/* DESCRIPTION */}
-                  <motion.p 
+                  <motion.p
                     variants={descriptionVariant}
                     initial="hidden"
                     whileInView="show"
@@ -299,10 +301,10 @@ export default function Team() {
                   >
                     {member.description}
                   </motion.p>
-                  
+
                   {/* SPECIALTIES */}
                   <div>
-                    <motion.h4 
+                    <motion.h4
                       variants={descriptionVariant}
                       initial="hidden"
                       whileInView="show"
@@ -311,8 +313,8 @@ export default function Team() {
                     >
                       Areas of Expertise
                     </motion.h4>
-                    
-                    <motion.div 
+
+                    <motion.div
                       variants={specialtiesContainer}
                       initial="hidden"
                       whileInView="show"
@@ -320,7 +322,7 @@ export default function Team() {
                       className="flex flex-wrap gap-2"
                     >
                       {member.specialties.map((specialty, idx) => (
-                        <motion.span 
+                        <motion.span
                           key={idx}
                           variants={specialtyVariant}
                           whileHover={{
@@ -343,7 +345,7 @@ export default function Team() {
         </div>
 
         {/* BOTTOM CTA SECTION */}
-        <motion.div 
+        <motion.div
           variants={bottomSectionVariant}
           initial="hidden"
           whileInView="show"
@@ -353,7 +355,7 @@ export default function Team() {
           <div className="bg-gray-50 rounded-xl p-8 inline-block">
             <h3 className="text-2xl font-bold mb-4">Our Dedicated Team</h3>
             <p className="text-gray-600 max-w-2xl mb-6">
-              Backed by a team of passionate professionals including property consultants, legal experts, 
+              Backed by a team of passionate professionals including property consultants, legal experts,
               and customer service specialists committed to your success.
             </p>
             <a href="#contact" className="btn-primary">

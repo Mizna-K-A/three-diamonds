@@ -31,6 +31,7 @@ const navigation = [
   { name: 'Viewing Requests', href: '/admin/viewings', icon: CalendarDays },
   { name: 'Proposal Requests', href: '/admin/proposals', icon: FileText },
   { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
+  { name: 'Team Members', href: '/admin/team', icon: Users },
 ];
 
 export const Sidebar = ({ mobileOpen, onMobileClose }) => {
