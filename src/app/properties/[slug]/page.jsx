@@ -292,7 +292,7 @@ export default async function PropertyDetailsPage({ params }) {
       {/* Main content with proper padding to account for fixed header */}
       <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-100 pt-16">
         {/* Sub-header - Now properly positioned below the main header */}
-        <div className="mt-8 z-40 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
+        <div className="mt-8 z-40 bg-gray-950/95 backdrop-blur-md border-b border-gray-800 px-52">
           <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             <Link
               href="/properties"
@@ -311,8 +311,8 @@ export default async function PropertyDetailsPage({ params }) {
         </div>
 
         {/* Content */}
-        <div className="px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="px-4 sm:px-6 lg:px-8 py-8 ">
+          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8 px-36">
 
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 order-1 space-y-6">

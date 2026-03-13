@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Mail, MessageCircle } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────
-   SOFT DROPDOWN
+   SOFT DROPDOWN (only for tags)
 ───────────────────────────────────────────────────────────── */
 const STATUS_COLORS = [
   "bg-emerald-500",
@@ -99,7 +99,7 @@ const headerVariants = {
 };
 
 const gridVariants = {
-  hidden: { opacity: 1 }, // Start visible to prevent flicker
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
     transition: { duration: 0.3 }
@@ -138,7 +138,6 @@ export default function FeaturedProperties({
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { amount: 0.2, once: true });
 
-  const [selectedType, setSelectedType] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedTags, setSelectedTags] = useState([]);
 
@@ -156,13 +155,8 @@ export default function FeaturedProperties({
       prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
     );
 
-  const categories = [
-    { value: "all", label: "All Types" },
-    ...propertyTypes.map((t) => ({ value: t.slug, label: t.name })),
-  ];
-
   const statusOptions = [
-    { _id: "all", name: "Any Status" },
+    { _id: "all", name: "All Status" },
     ...statuses,
   ];
 
@@ -171,14 +165,12 @@ export default function FeaturedProperties({
     const filtered = initialProperties
       .filter((property) => {
         if (!property) return false;
-        const matchesType =
-          selectedType === "all" || property.propertyType?.slug === selectedType;
         const matchesStatus =
           selectedStatus === "all" || property.status?._id === selectedStatus;
         const matchesTags =
           selectedTags.length === 0 ||
           property.tags?.some((tag) => selectedTags.includes(tag._id));
-        return matchesType && matchesStatus && matchesTags;
+        return matchesStatus && matchesTags;
       });
 
     // Then sort to show featured properties first
@@ -193,12 +185,11 @@ export default function FeaturedProperties({
 
     // Finally slice to show only 4 properties
     return sorted.slice(0, 4);
-  }, [initialProperties, selectedType, selectedStatus, selectedTags]);
+  }, [initialProperties, selectedStatus, selectedTags]);
 
-  const hasFilters = selectedType !== "all" || selectedStatus !== "all" || selectedTags.length > 0;
+  const hasFilters = selectedStatus !== "all" || selectedTags.length > 0;
 
   const clearFilters = () => {
-    setSelectedType("all");
     setSelectedStatus("all");
     setSelectedTags([]);
   };
@@ -208,85 +199,84 @@ export default function FeaturedProperties({
       <div className="container-custom">
 
         {/* ── HEADER ── */}
-        <div className="flex flex-col items-center mb-8 relative">
-          <div className="relative w-full flex justify-center">
-
-            {/* Title block */}
+        <div className="flex flex-col items-center mb-8">
+          <motion.div
+            className="text-center"
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            variants={headerVariants}
+          >
             <motion.div
-              className="text-center"
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
-              variants={headerVariants}
+              className="inline-block mb-4"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.2em]">
+                Featured Listings
+              </span>
               <motion.div
-                className="inline-block mb-4"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.2em]">
-                  Featured Listings
-                </span>
-                <motion.div
-                  className="h-px bg-black mx-auto mt-2"
-                  initial={{ width: 0 }}
-                  animate={isInView ? { width: 64 } : { width: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                />
-              </motion.div>
-
-              <motion.h2
-                className="text-4xl md:text-5xl font-bold mb-5 tracking-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                FEATURED PROPERTIES
-              </motion.h2>
-
-              <motion.p
-                className="text-gray-500 max-w-xl text-sm leading-relaxed mx-auto"
-                initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                Discover our handpicked selection of premium properties across Dubai.
-              </motion.p>
+                className="h-px bg-black mx-auto mt-2"
+                initial={{ width: 0 }}
+                animate={isInView ? { width: 64 } : { width: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              />
             </motion.div>
 
-            {/* ── FILTERS (absolute right) ── */}
-            <motion.div
-              className="absolute right-0 top-1/2 -translate-y-1/2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
-              transition={{ duration: 0.5, delay: 0.55 }}
+            <motion.h2
+              className="text-4xl md:text-5xl font-bold mb-5 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <div className="flex items-end gap-3">
-                <SoftDropdown
-                  label="Property Type"
-                  options={categories}
-                  value={selectedType}
-                  onChange={setSelectedType}
-                  getKey={(o) => o.value}
-                  getLabel={(o) => o?.label}
-                />
+              FEATURED PROPERTIES
+            </motion.h2>
 
-                {statuses.length > 0 && (
-                  <SoftDropdown
-                    label="Status"
-                    options={statusOptions}
-                    value={selectedStatus}
-                    onChange={setSelectedStatus}
-                    getKey={(o) => o._id}
-                    getLabel={(o) => o?.name ?? o?.label}
-                    dotMap={statusDotMap}
-                  />
-                )}
-              </div>
-            </motion.div>
-
-          </div>
+            <motion.p
+              className="text-gray-500 max-w-xl text-sm leading-relaxed mx-auto"
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              Discover our handpicked selection of premium properties across Dubai.
+            </motion.p>
+          </motion.div>
         </div>
+
+        {/* ── STATUS BUTTONS ── */}
+        {statuses.length > 0 && (
+          <motion.div
+            className="flex flex-wrap justify-center gap-2 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.55 }}
+          >
+            <button
+              onClick={() => setSelectedStatus("all")}
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedStatus === "all"
+                  ? "bg-black text-white shadow-md"
+                  : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+              }`}
+            >
+              All Status
+            </button>
+            {statuses.map((status) => (
+              <button
+                key={status._id}
+                onClick={() => setSelectedStatus(status._id)}
+                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                  selectedStatus === status._id
+                    ? "bg-black text-white shadow-md"
+                    : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${statusDotMap[status._id]}`} />
+                {status.name}
+              </button>
+            ))}
+          </motion.div>
+        )}
 
         {/* Result count with fade animation */}
         <motion.p
@@ -304,7 +294,7 @@ export default function FeaturedProperties({
           <motion.div
             key={filteredProperties.length > 0 ? 'grid' : 'empty'}
             variants={gridVariants}
-            initial="visible" // Start visible to prevent entrance animation
+            initial="visible"
             animate="visible"
             exit="exit"
             className="min-h-[400px]"
@@ -364,9 +354,9 @@ export default function FeaturedProperties({
                           </span>
                         </div>
 
-                        {property.status != null && (
+                        {property.propertyType?.name != null && (
                           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm">
-                            {property.status.name}
+                            {property.propertyType?.name ?? "Property"}
                           </div>
                         )}
                       </div>

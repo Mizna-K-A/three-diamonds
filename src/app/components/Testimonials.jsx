@@ -9,44 +9,32 @@ export default function Testimonials() {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { amount: 0.2 });
 
-  const testimonials = [
-    {
-      name: 'Ahmed Al Mansoori',
-      company: 'Tech Startup Founder',
-      content: 'Three Diamonds helped us find the perfect commercial space in Al Quoz. Their professionalism and attention to detail made the entire process seamless.',
-      rating: 5,
-      avatar: '👨‍💼'
-    },
-    {
-      name: 'Sarah Johnson',
-      company: 'Boutique Owner',
-      content: 'As a first-time business owner in Dubai, I was overwhelmed. The team at Three Diamonds guided me through every step and found me a beautiful showroom space.',
-      rating: 5,
-      avatar: '👩‍💼'
-    },
-    {
-      name: 'Mohammed Ali',
-      company: 'Property Investor',
-      content: 'Their property management services have been exceptional. I can finally relax knowing my investments are in good hands.',
-      rating: 5,
-      avatar: '🧑‍💼'
-    },
-    {
-      name: 'Elena Rodriguez',
-      company: 'Art Gallery Director',
-      content: 'Finding the right space for our gallery was challenging until we worked with Three Diamonds. Their knowledge of the market is impressive.',
-      rating: 5,
-      avatar: '👩‍🎨'
-    }
-  ];
-
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [direction, setDirection] = useState(0);
 
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch('/api/testimonials');
+        const data = await res.json();
+        if (data && Array.isArray(data)) {
+          setTestimonials(data);
+        }
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
   // Auto-rotate testimonials
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || testimonials.length === 0) return;
 
     const interval = setInterval(() => {
       setDirection(1);
@@ -55,6 +43,14 @@ export default function Testimonials() {
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, testimonials.length]);
+
+  if (loading) {
+    return <div className="py-24 text-center text-gray-400 bg-black">Loading testimonials...</div>;
+  }
+
+  if (testimonials.length === 0) {
+    return null;
+  }
 
   const renderStars = (rating) => {
     return (
@@ -113,7 +109,7 @@ export default function Testimonials() {
       ref={sectionRef}
     >
       {/* Sophisticated animated background elements - pure gray */}
-      <motion.div
+      <div
         className="absolute top-20 right-20 w-96 h-96 bg-gray-700/5 rounded-full blur-3xl"
         animate={{
           scale: [1, 1.2, 1],
@@ -125,7 +121,7 @@ export default function Testimonials() {
           ease: "linear"
         }}
       />
-      <motion.div
+      <div
         className="absolute bottom-20 left-20 w-96 h-96 bg-gray-600/5 rounded-full blur-3xl"
         animate={{
           scale: [1, 1.3, 1],
@@ -145,13 +141,13 @@ export default function Testimonials() {
 
       <div className="container-custom relative z-10">
         {/* Header - Pure gray scale */}
-        <motion.div
+        <div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div
+          <div
             className="inline-block mb-4"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
@@ -160,30 +156,30 @@ export default function Testimonials() {
             <span className="text-sm font-semibold text-gray-300 uppercase tracking-wider bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-700">
               Client Testimonials
             </span>
-          </motion.div>
+          </div>
 
-          <motion.h2
+          <h2
             className="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             WHAT OUR CLIENTS SAY
-          </motion.h2>
+          </h2>
 
-          <motion.p
+          <p
             className="text-gray-400 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             Hear from business owners and investors who have trusted us with their real estate needs.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
         <div className="max-w-5xl mx-auto">
           {/* Main Testimonial Card - Pure black/gray gradient */}
-          <motion.div
+          <div
             className="bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl p-8 md:p-12 mb-8 relative overflow-hidden border border-gray-800"
             initial={{ opacity: 0, y: 50 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
@@ -194,18 +190,18 @@ export default function Testimonials() {
             }}
           >
             {/* Decorative quote icon - Subtle gray */}
-            <motion.div
+            <div
               className="absolute top-8 left-8 text-8xl text-gray-700/30"
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.5 }}
             >
               "
-            </motion.div>
+            </div>
 
             <div className="relative z-10">
               <AnimatePresence initial={false} custom={direction} mode="wait">
-                <motion.div
+                <div
                   key={activeTestimonial}
                   custom={direction}
                   variants={variants}
@@ -227,13 +223,13 @@ export default function Testimonials() {
 
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <motion.div
+                      <div
                         className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center text-3xl border border-gray-600"
                         whileHover={{ rotate: 360, scale: 1.1 }}
                         transition={{ duration: 0.5 }}
                       >
                         {testimonials[activeTestimonial].avatar}
-                      </motion.div>
+                      </div>
                       <div>
                         <h4 className="font-bold text-xl text-white">{testimonials[activeTestimonial].name}</h4>
                         <p className="text-gray-500">{testimonials[activeTestimonial].company}</p>
@@ -260,19 +256,19 @@ export default function Testimonials() {
                       </motion.button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </AnimatePresence>
             </div>
 
             {/* Progress bar - Pure gray */}
-            <motion.div
+            <div
               className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-gray-500 to-gray-700"
               initial={{ width: '0%' }}
               animate={{ width: isAutoPlaying ? '100%' : '0%' }}
               transition={{ duration: 5, ease: "linear" }}
               key={activeTestimonial}
             />
-          </motion.div>
+          </div>
 
           {/* Testimonial Navigation Dots - Pure gray */}
           <div className="flex justify-center gap-3 mb-16">
@@ -326,7 +322,7 @@ export default function Testimonials() {
                 color: 'from-gray-700/20 to-gray-900/20'
               }
             ].map((stat, index) => (
-              <motion.div
+              <div
                 key={stat.label}
                 className="bg-gradient-to-br from-gray-900 to-black rounded-xl p-6 text-center relative overflow-hidden group border border-gray-800"
                 initial={{ opacity: 0, y: 30 }}
@@ -338,26 +334,26 @@ export default function Testimonials() {
                   transition: { duration: 0.3 }
                 }}
               >
-                <motion.div
+                <div
                   className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
                 />
-                <motion.div
+                <div
                   className="text-4xl mb-3 text-gray-300"
                   initial={{ scale: 0, rotate: -180 }}
                   animate={isInView ? { scale: 1, rotate: 0 } : { scale: 0, rotate: -180 }}
                   transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
                 >
                   {stat.icon}
-                </motion.div>
+                </div>
                 <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
                 <div className="text-gray-300 font-medium mb-2">{stat.label}</div>
                 <div className="text-gray-500 text-sm">{stat.description}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
 
           {/* CTA Section - Pure black/gray gradient */}
-          <motion.div
+          <div
             className="bg-gradient-to-r from-gray-900 via-gray-950 to-black rounded-2xl p-8 relative overflow-hidden border border-gray-800"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
@@ -367,7 +363,7 @@ export default function Testimonials() {
               boxShadow: '0 25px 50px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.1)'
             }}
           >
-            <motion.div
+            <div
               className="absolute top-0 right-0 w-64 h-64 bg-gray-700/5 rounded-full blur-3xl"
               animate={{
                 scale: [1, 1.2, 1],
@@ -406,7 +402,7 @@ export default function Testimonials() {
                 </motion.svg>
               </motion.a>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
