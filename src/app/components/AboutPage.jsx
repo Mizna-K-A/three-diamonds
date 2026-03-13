@@ -111,7 +111,7 @@ export default function AboutPage() {
                         Let's turn your Dubai dreams into a sparkling reality with Three Diamonds Real Estate.
                     </p>
                     <a
-                        href="#contact"
+                        href="/contact"
                         className="inline-flex items-center px-8 py-4 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
                     >
                         Contact Us Today

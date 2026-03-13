@@ -330,7 +330,7 @@ export default function Portfolio() {
               transition={{ delay: 0.6, duration: 0.6 }}
             >
               <motion.a 
-                href="#contact"
+                href="/contact"
                 className="btn-primary text-white inline-flex items-center gap-2"
                 variants={buttonVariants}
                 whileHover="hover"
