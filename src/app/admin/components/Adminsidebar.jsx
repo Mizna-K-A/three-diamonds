@@ -19,6 +19,7 @@ import {
   CalendarDays,
   Mail,
   ImageIcon,
+  Newspaper,
 } from 'lucide-react';
 
 const navigation = [
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Property Types', href: '/admin/property-types', icon: Building2 },
   { name: 'Property Statuses', href: '/admin/property-statuses', icon: Tag },
   { name: 'Property Tags', href: '/admin/tags', icon: Tags },
+  { name: 'Insights', href: '/admin/insights', icon: Newspaper },
   { name: 'Viewing Requests', href: '/admin/viewings', icon: CalendarDays },
   { name: 'Proposal Requests', href: '/admin/proposals', icon: FileText },
   { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
