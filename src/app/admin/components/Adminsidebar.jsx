@@ -35,6 +35,7 @@ const navigation = [
   { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
   { name: 'Team Members', href: '/admin/team', icon: Users },
   { name: 'Testimonials', href: '/admin/testimonials', icon: FileText },
+  { name: 'Site Settings', href: '/admin/site-settings', icon: Settings },
 ];
 
 export const Sidebar = ({ mobileOpen, onMobileClose }) => {

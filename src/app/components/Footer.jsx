@@ -4,73 +4,133 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { MapPin, Navigation, Phone, Mail } from 'lucide-react';
+import { MapPin, Navigation, Phone, Mail, Facebook, Instagram, Twitter, Linkedin, Youtube, MessageCircle, Plus, ArrowRight } from 'lucide-react';
 
-export default function Footer() {
+const SocialIcon = ({ platform, size = 20, className = "" }) => {
+  switch (platform.toLowerCase()) {
+    case 'facebook': return <Facebook size={size} className={className} />;
+    case 'instagram': return <Instagram size={size} className={className} />;
+    case 'twitter':
+    case 'x': return <Twitter size={size} className={className} />;
+    case 'linkedin': return <Linkedin size={size} className={className} />;
+    case 'youtube': return <Youtube size={size} className={className} />;
+    case 'whatsapp': return <MessageCircle size={size} className={className} />;
+    default: return <Plus size={size} className={className} />;
+  }
+};
+
+export default function Footer({ settings }) {
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [activeLocationIdx, setActiveLocationIdx] = useState(0);
 
-  // Office coordinates for Three Diamonds Real Estate
-  const officeLocation = {
+  // Office locations (sanitized by server action)
+  const locations = settings?.locations || [];
+  const activeLocation = locations[activeLocationIdx] || locations[0] || {
+    title: 'Main Office',
     lat: 25.1345,
     lng: 55.2356,
-    address: "Al Quoz Industrial Area 3, Dubai, UAE"
+    address: "Al Quoz Industrial Area 3, Dubai, UAE",
+    mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3610.1781845735043!2d55.2334!3d25.1345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDA4JzA0LjIiTiA1NcKwMTQnMDEuMCJF!5e0!3m2!1sen!2sae!4v1234567890!5m2!1sen!2sae"
   };
 
-  // Google Maps embed URL
-  const mapEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3610.1781845735043!2d55.2334!3d25.1345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDA4JzA0LjIiTiA1NcKwMTQnMDEuMCJF!5e0!3m2!1sen!2sae!4v1234567890!5m2!1sen!2sae";
+  const phoneNumbers = settings?.phoneNumbers || ['052 939 8258', '056 777 0905'];
+  const emails = settings?.emails || ['info@threediamonds.ae'];
+  const socialLinks = settings?.socialLinks || [];
 
   const openDirections = () => {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${officeLocation.lat},${officeLocation.lng}`, '_blank');
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${activeLocation.lat},${activeLocation.lng}`, '_blank');
   };
 
   return (
     <footer className="bg-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4 md:px-6">
         {/* Main Footer Content */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div className="mb-6 md:mb-0">
-            <div className="flex items-center space-x-2 mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+          <div className="mb-8 md:mb-0">
+            <div className="flex items-center space-x-3 mb-4">
               <Image
                 src="/threediamond.png"
                 alt="Three Diamonds Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8 object-contain"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain"
               />
-              <span className="text-2xl font-bold">THREE DIAMONDS</span>
+              <span className="text-2xl font-bold tracking-tight">THREE DIAMONDS</span>
             </div>
-            <p className="text-gray-400">Real Estate Brokerage & Property Management</p>
+            <p className="text-gray-400 max-w-sm">Real Estate Brokerage & Property Management. Transforming Dubai's Real Estate Landscape since 2021.</p>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center space-x-3">
-              <span className="text-gray-400 w-8">📞:</span>
-              <a href="tel:0529398258" className="text-white hover:text-gray-300">0529398258,0567770905</a>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 group">
+                <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <Phone size={18} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Call Us</p>
+                  <a href={`tel:${phoneNumbers[0]}`} className="text-sm text-white hover:text-gray-300 transition-colors">{phoneNumbers[0]}</a>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 group">
+                <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <Mail size={18} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Email Us</p>
+                  <a href={`mailto:${emails[0]}`} className="text-sm text-white hover:text-gray-300 transition-colors">{emails[0]}</a>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <span className="text-gray-400 w-8">📧:</span>
-              <a href="mailto:info@threediamonds.ae" className="text-white hover:text-gray-300">info@threediamonds.ae</a>
-            </div>
-            <div className="flex items-center space-x-3">
-              <span className="text-gray-400 w-8">ⓕ:</span>
-              <a href="#" className="text-white hover:text-gray-300">threediamondsreal-estate</a>
+
+            <div className="flex flex-col justify-end">
+              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-3">Follow Us</p>
+              <div className="flex gap-3">
+                {socialLinks.map((social, idx) => (
+                  <motion.a
+                    key={idx}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -3, scale: 1.1 }}
+                    className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 hover:text-gray-200 transition-all border border-white/10"
+                    title={social.platform}
+                  >
+                    <SocialIcon platform={social.platform} size={18} />
+                  </motion.a>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Map Section - Styled like property details page */}
+        {/* Map Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="mb-12"
+          className="mb-16"
         >
-          <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-800">
-            {/* Map Container */}
-            <div className="relative w-full h-[300px] md:h-[350px] group">
+          <div className="bg-[#111] rounded-3xl overflow-hidden border border-white/5">
+            {/* Location Selector if multiple */}
+            {locations.length > 1 && (
+              <div className="flex overflow-x-auto gap-1 p-2 bg-black/40 border-b border-white/5 scrollbar-hide">
+                {locations.map((loc, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => { setActiveLocationIdx(idx); setMapLoaded(false); }}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${activeLocationIdx === idx ? 'bg-white text-black' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                      }`}
+                  >
+                    {loc.title || `Location ${idx + 1}`}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="relative w-full h-[350px] md:h-[400px] group">
               {!mapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm z-10">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-md z-10">
                   <div className="text-center">
                     <div className="w-10 h-10 border-4 border-gray-700 border-t-white rounded-full animate-spin mx-auto mb-3"></div>
                     <p className="text-gray-400 text-sm">Loading map...</p>
@@ -79,7 +139,7 @@ export default function Footer() {
               )}
 
               <iframe
-                src={mapEmbedUrl}
+                src={activeLocation.mapEmbedUrl}
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -88,120 +148,114 @@ export default function Footer() {
                 referrerPolicy="no-referrer-when-downgrade"
                 onLoad={() => setMapLoaded(true)}
                 className="w-full h-full"
-                title="Three Diamonds Real Estate Location"
+                title={activeLocation.title || "Three Diamonds Real Estate Location"}
               />
 
-              {/* Map Overlay Controls */}
-              <div className="absolute bottom-3 right-3 flex gap-2">
+              {/* Map Controls */}
+              <div className="absolute bottom-4 right-4 flex gap-2">
                 <motion.button
                   onClick={openDirections}
-                  className="bg-black/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-black transition-colors border border-gray-700 flex items-center gap-1.5"
+                  className="bg-black/90 backdrop-blur-md text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-black transition-all border border-white/10 flex items-center gap-2 shadow-2xl"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Navigation className="w-3.5 h-3.5" />
-                  Directions
+                  <Navigation className="w-4 h-4" />
+                  Get Directions
                 </motion.button>
               </div>
 
-              {/* Mini Location Info Card */}
+              {/* Info Card */}
               <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                viewport={{ once: true }}
-                className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm rounded-lg p-2 border border-gray-700 max-w-[200px]"
+                key={activeLocationIdx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="absolute top-4 left-4 bg-black/90 backdrop-blur-md rounded-2xl p-4 border border-white/10 max-w-[260px] shadow-2xl"
               >
-                <div className="flex items-start gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-red-500" />
+                  </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-white">Three Diamonds</h4>
-                    <p className="text-[10px] text-gray-300 leading-tight">{officeLocation.address}</p>
+                    <h4 className="text-sm font-bold text-white mb-1">{activeLocation.title}</h4>
+                    <p className="text-[11px] text-gray-400 leading-relaxed line-clamp-2">{activeLocation.address}</p>
                   </div>
                 </div>
               </motion.div>
             </div>
 
             {/* Map Footer */}
-            <div className="px-4 py-2 border-t border-gray-800 flex flex-wrap items-center justify-between gap-2 bg-gray-900/30">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
+            <div className="px-6 py-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-4 bg-black/40">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-400">Interactive Map</span>
+                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Active Database View</span>
                 </div>
-                <span className="text-gray-700 text-xs">|</span>
-                <span className="text-xs text-gray-500">
-                  {officeLocation.lat.toFixed(4)}° N, {officeLocation.lng.toFixed(4)}° E
-                </span>
+                {activeLocation.lat && activeLocation.lng && (
+                  <span className="text-[10px] text-gray-600 font-medium">
+                    {activeLocation.lat.toFixed(4)}° N, {activeLocation.lng.toFixed(4)}° E
+                  </span>
+                )}
               </div>
 
               <motion.a
-                href={`https://www.google.com/maps/search/?api=1&query=${officeLocation.lat},${officeLocation.lng}`}
+                href={`https://www.google.com/maps/search/?api=1&query=${activeLocation.lat},${activeLocation.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
-                whileHover={{ x: 2 }}
+                className="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-2 font-bold"
+                whileHover={{ x: 3 }}
               >
-                <span>View Larger Map</span>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
+                <span>Google Maps View</span>
+                <ArrowRight size={14} className="group-hover:translate-x-1" />
               </motion.a>
             </div>
           </div>
         </motion.div>
 
         {/* Footer Links Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8 pt-8 border-t border-gray-800">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Our Services</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href='/services/property-management' >Property Management</a></li>
-              <li><a href='/services/maintenance' >Maintenance</a></li>
-              <li><a href='/services/research-consultancy' >Research & Consultancy</a></li>
-              <li><a href='/services/capital-markets' >Capital Markets</a></li>
-              <li><a href='/services/tenant-representation' >Tenant Representation</a></li>
-              <li><a href='/services/landlord-agency' >Landlord Agency</a></li>
-              <li><a href='/services/technical-service' >Techinical Services</a></li>
-
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mt-12 py-12 border-t border-white/5">
+          <div className="md:col-span-1">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Our Expertise</h3>
+            <ul className="space-y-3 text-sm text-gray-500 font-medium">
+              <li><a href='/services/property-management' className="hover:text-white transition-colors">Property Management</a></li>
+              <li><a href='/services/maintenance' className="hover:text-white transition-colors">Maintenance</a></li>
+              <li><a href='/services/research-consultancy' className="hover:text-white transition-colors">Research & Consultancy</a></li>
+              <li><a href='/services/capital-markets' className="hover:text-white transition-colors">Capital Markets</a></li>
+              <li><a href='/services/tenant-representation' className="hover:text-white transition-colors">Tenant Representation</a></li>
+              <li><a href='/services/technical-service' className="hover:text-white transition-colors">Technical Services</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
-              <li><a href="/properties" className="hover:text-white transition-colors">Our Properties</a></li>
-              <li><a href="/services" className="hover:text-white transition-colors">Services</a></li>
-              <li><a href="/insights" className="hover:text-white transition-colors">Insights</a></li>
-              <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Explore</h3>
+            <ul className="space-y-3 text-sm text-gray-500 font-medium">
+              <li><a href="/about" className="hover:text-white transition-colors">About Story</a></li>
+              <li><a href="/properties" className="hover:text-white transition-colors">Property Portfolio</a></li>
+              <li><a href="/services" className="hover:text-white transition-colors">Our Services</a></li>
+              <li><a href="/insights" className="hover:text-white transition-colors">Market Insights</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Get in Touch</a></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Goshi Warehouses City</h3>
-            <p className="text-gray-400 mb-2 flex items-start gap-2">
-              <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
-              <span>Al Quoz Industrial Area - 3, Dubai - U.A.E</span>
-            </p>
-            <div className="space-y-1 mt-3">
-              <p className="text-gray-400 text-sm flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-gray-500" />
-                <span>052-939 8258 · 056-777 0905</span>
-              </p>
-              <p className="text-gray-400 text-sm flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-gray-500" />
-                <span>info@threediamonds.ae</span>
-              </p>
+          <div className="md:col-span-2">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6 px-1">Connect with us</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {locations.map((loc, idx) => (
+                <div key={idx} className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <h4 className="text-xs font-bold text-white mb-2 uppercase tracking-wide flex items-center gap-2">
+                    <MapPin size={14} className="text-red-500" />
+                    {loc.title}
+                  </h4>
+                  <p className="text-xs text-gray-400 leading-relaxed mb-3">{loc.address}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-gray-500 mt-3 text-xs">Managed by Three Diamonds Real Estate</p>
           </div>
         </div>
 
         {/* Copyright Section */}
-        <div className="mt-8 pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-gray-500 text-xs">
-          <p>© {new Date().getFullYear()} Three Diamonds Real Estate. All rights reserved</p>
-          <p className="mt-2 md:mt-0">Dubai's most trusted Real Estate partner since 2021</p>
+        <div className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-gray-500 text-[10px] uppercase font-bold tracking-[0.2em]">
+          <p>© {new Date().getFullYear()} Three Diamonds Real Estate Brokerage L.L.C</p>
+          <p className="mt-4 md:mt-0 text-white/40">Since 2021 · Dubai, UAE</p>
         </div>
       </div>
     </footer>

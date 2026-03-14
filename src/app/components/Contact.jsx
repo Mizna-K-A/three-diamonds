@@ -2,10 +2,23 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, MessageSquare, Instagram, Facebook } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, Instagram, Facebook, Twitter, Linkedin, Youtube, MessageCircle, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function Contact() {
+const SocialIcon = ({ platform, size = 24, className = "" }) => {
+  switch (platform.toLowerCase()) {
+    case 'facebook': return <Facebook size={size} className={className} />;
+    case 'instagram': return <Instagram size={size} className={className} />;
+    case 'twitter':
+    case 'x': return <Twitter size={size} className={className} />;
+    case 'linkedin': return <Linkedin size={size} className={className} />;
+    case 'youtube': return <Youtube size={size} className={className} />;
+    case 'whatsapp': return <MessageCircle size={size} className={className} />;
+    default: return <Plus size={size} className={className} />;
+  }
+};
+
+export default function Contact({ settings }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -67,29 +80,41 @@ export default function Contact() {
     });
   };
 
+  const phoneNumbers = settings?.phoneNumbers || ['052 939 8258', '056 777 0905'];
+  const emails = settings?.emails || ['info@threediamonds.ae', 'sales@threediamonds.ae'];
+  const locations = settings?.locations?.length > 0 ? settings.locations : [{
+    title: 'Main Office',
+    address: 'Al Quoz Industrial Area - 3, Dubai, U.A.E'
+  }];
+  const businessHours = settings?.businessHours || ['Mon - Fri: 9:00 AM - 6:00 PM', 'Sat: 10:00 AM - 4:00 PM'];
+  const socialLinks = settings?.socialLinks || [
+    { platform: 'facebook', url: 'https://facebook.com/threediamondsreal-estate' },
+    { platform: 'instagram', url: 'https://instagram.com/threediamondsrealestate' }
+  ];
+
   const contactInfo = [
     {
       icon: Phone,
       title: 'Phone Numbers',
-      details: ['052 939 8258', '056 777 0905'],
+      details: phoneNumbers,
       color: 'bg-blue-50 text-blue-600'
     },
     {
       icon: Mail,
       title: 'Email Address',
-      details: ['info@threediamonds.ae', 'sales@threediamonds.ae'],
+      details: emails,
       color: 'bg-green-50 text-green-600'
     },
     {
       icon: MapPin,
-      title: 'Our Location',
-      details: ['Al Quoz Industrial Area - 3', 'Dubai, U.A.E'],
+      title: 'Our Locations',
+      details: locations.map(l => `${l.title}: ${l.address}`),
       color: 'bg-red-50 text-red-600'
     },
     {
       icon: Clock,
       title: 'Business Hours',
-      details: ['Mon - Fri: 9:00 AM - 6:00 PM', 'Sat: 10:00 AM - 4:00 PM'],
+      details: businessHours,
       color: 'bg-purple-50 text-purple-600'
     }
   ];
@@ -173,7 +198,7 @@ export default function Contact() {
             CONTACT US
           </motion.h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Ready to find your perfect property? Contact us today for personalized assistance.
+            Ready to find your perfect property? Contact us today for personalized assistance across our offices.
           </p>
         </div>
 
@@ -211,7 +236,7 @@ export default function Contact() {
                     <div>
                       <h4 className="font-bold text-gray-800 mb-1">{info.title}</h4>
                       {info.details.map((detail, idx) => (
-                        <p key={idx} className="text-gray-600">{detail}</p>
+                        <p key={idx} className="text-gray-600 text-sm leading-relaxed mb-1">{detail}</p>
                       ))}
                     </div>
                   </motion.div>
@@ -220,28 +245,22 @@ export default function Contact() {
 
               {/* Social Media */}
               <div className="mt-8 pt-8 border-t border-gray-200">
-                <h4 className="font-bold text-gray-800 mb-4">Follow Us</h4>
-                <div className="flex gap-4">
-                  <motion.a
-                    href="https://facebook.com/threediamondsreal-estate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
-                  >
-                    <Facebook className="w-6 h-6 text-white" />
-                  </motion.a>
-                  <motion.a
-                    href="https://instagram.com/threediamondsrealestate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
-                  >
-                    <Instagram className="w-6 h-6 text-white" />
-                  </motion.a>
+                <h4 className="font-bold text-gray-800 mb-4 uppercase text-xs tracking-widest">Follow Us</h4>
+                <div className="flex flex-wrap gap-4">
+                  {socialLinks.map((social, idx) => (
+                    <motion.a
+                      key={idx}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-black transition-all duration-300 border border-gray-700 shadow-lg"
+                      title={social.platform}
+                    >
+                      <SocialIcon platform={social.platform} className="text-white" />
+                    </motion.a>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -256,7 +275,7 @@ export default function Contact() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <motion.div
-              className="bg-white rounded-2xl border border-gray-200 p-8"
+              className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm"
               variants={cardHover}
               whileHover="hover"
             >
@@ -268,7 +287,7 @@ export default function Contact() {
                 >
                   <MessageSquare size={20} />
                 </motion.div>
-                <h3 className="text-2xl font-bold">Send us a Message</h3>
+                <h3 className="text-2xl font-bold italic tracking-tight">Send us a Message</h3>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -326,7 +345,7 @@ export default function Contact() {
                       name="propertyType"
                       value={formData.propertyType}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black transition-all duration-300 bg-white"
                     >
                       <option value="">Select property type</option>
                       <option value="commercial">Commercial</option>
@@ -356,7 +375,7 @@ export default function Contact() {
                   <motion.button
                     type="submit"
                     disabled={isSubmitting}
-                    className="btn-primary flex items-center gap-2"
+                    className="flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-bold group overflow-hidden relative"
                     variants={buttonHover}
                     whileHover="hover"
                     whileTap="tap"
@@ -367,9 +386,10 @@ export default function Contact() {
                         Sending...
                       </>
                     ) : (
-                      <span className='border-2 p-3'>
+                      <>
                         Send Message
-                      </span>
+                        <Plus size={18} className="rotate-45 group-hover:rotate-0 transition-transform" />
+                      </>
                     )}
                   </motion.button>
                   <p className="text-sm text-gray-500">
