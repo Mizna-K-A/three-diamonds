@@ -123,10 +123,17 @@ export default function SiteSettingsAdmin() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
             });
-            if (!res.ok) throw new Error();
+            const payload = await res.json().catch(() => null);
+            if (!res.ok) {
+                const msg = payload?.error || 'Failed to save settings';
+                throw new Error(msg);
+            }
+            if (payload && typeof payload === 'object') {
+                setSettings(payload);
+            }
             showSwalToast('success', 'Settings saved successfully!');
-        } catch {
-            showSwalToast('error', 'Failed to save settings');
+        } catch (e) {
+            showSwalToast('error', e?.message || 'Failed to save settings');
         } finally {
             setSaving(false);
         }

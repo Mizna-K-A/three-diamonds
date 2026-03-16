@@ -62,25 +62,35 @@ export async function PUT(req) {
     try {
         await connectDB();
         const data = await req.json();
-        let settings = await SiteSettings.findOne();
 
-        if (!settings) {
-            settings = new SiteSettings(data);
-        } else {
-            // Clean up socialLinks before assigning
-            if (Array.isArray(data.socialLinks)) {
-                data.socialLinks = data.socialLinks.filter(link => link.platform && link.url);
-            }
-
-            // Handle locations array if provided
-            if (Array.isArray(data.locations)) {
-                data.locations = data.locations.filter(loc => loc.address);
-            }
-
-            Object.assign(settings, data);
+        // Never allow clients to overwrite internal/immutable fields
+        if (data && typeof data === 'object') {
+            delete data._id;
+            delete data.__v;
+            delete data.createdAt;
+            delete data.updatedAt;
         }
 
-        await settings.save();
+        // Clean up inputs
+        if (Array.isArray(data.socialLinks)) {
+            data.socialLinks = data.socialLinks.filter(link => link?.platform && link?.url);
+        }
+        if (Array.isArray(data.locations)) {
+            data.locations = data.locations.filter(loc => loc?.address);
+        }
+
+        // Atomic update avoids __v/version race conditions
+        const settings = await SiteSettings.findOneAndUpdate(
+            {},
+            { $set: data },
+            {
+                new: true,
+                upsert: true,
+                runValidators: true,
+                setDefaultsOnInsert: true
+            }
+        ).lean();
+
         return NextResponse.json(settings);
     } catch (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
