@@ -12,12 +12,18 @@ import { getProperties } from './admin/properties/page';
 import { getPropertyTypes } from './admin/property-types/page';
 import { getPropertyStatuses } from './admin/property-statuses/page';
 import { getTags } from './admin/tags/page';
+import dbConnect from '../../lib/mongodb';
+import SiteSettings from '../../lib/models/SiteSettings';
 
 export default async function Home() {
   const properties = await getProperties()
   const propertyTypes = await getPropertyTypes();
   const statuses = await getPropertyStatuses();
   const tags = await getTags();
+
+  await dbConnect();
+  const settings = await SiteSettings.findOne().lean();
+  const serializedSettings = settings ? JSON.parse(JSON.stringify(settings)) : null;
   return (
     <Loader>
       <main className="min-h-screen">
@@ -32,8 +38,8 @@ export default async function Home() {
           tags={tags}               // [{ _id, name }]
         />
         <Testimonials />
-        <Contact />
-        <Footer />
+        <Contact contactSettings={serializedSettings} />
+        <Footer contactSettings={serializedSettings} />
       </main>
     </Loader>
   );

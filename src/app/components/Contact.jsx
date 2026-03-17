@@ -2,10 +2,23 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, MessageSquare, Instagram, Facebook } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, Instagram, Facebook, Linkedin, Youtube, Globe, MessageCircle, Twitter } from 'lucide-react';
+
+const SocialIcon = ({ platform, className = "w-6 h-6" }) => {
+  switch (platform.toLowerCase()) {
+    case 'facebook': return <Facebook className={className} />;
+    case 'instagram': return <Instagram className={className} />;
+    case 'linkedin': return <Linkedin className={className} />;
+    case 'whatsapp': return <MessageCircle className={className} />;
+    case 'youtube': return <Youtube className={className} />;
+    case 'twitter':
+    case 'x': return <Twitter className={className} />;
+    default: return <Globe className={className} />;
+  }
+};
 import { motion } from 'framer-motion';
 
-export default function Contact() {
+export default function Contact({ contactSettings }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,6 +28,17 @@ export default function Contact() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fallback settings
+  const settings = contactSettings || {
+    phoneNumbers: ['052 939 8258', '056 777 0905'],
+    emails: ['info@threediamonds.ae'],
+    locations: [{ address: 'Al Quoz Industrial Area - 3, Dubai, U.A.E' }],
+    socialLinks: [
+      { platform: 'facebook', url: 'https://facebook.com/threediamondsreal-estate' },
+      { platform: 'instagram', url: 'https://instagram.com/threediamondsrealestate' }
+    ]
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,8 +51,8 @@ export default function Contact() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          source: 'contact-page',
-          pagePath: '/contact',
+          source: 'contact-section',
+          pagePath: '/',
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
@@ -67,29 +91,34 @@ export default function Contact() {
     });
   };
 
+  // Process locations to handle both single object and array of objects
+  const locations = Array.isArray(settings.locations) 
+    ? settings.locations 
+    : settings.locations ? [settings.locations] : [];
+
   const contactInfo = [
     {
       icon: Phone,
       title: 'Phone Numbers',
-      details: ['052 939 8258', '056 777 0905'],
+      details: settings.phoneNumbers || [],
       color: 'bg-blue-50 text-blue-600'
     },
     {
       icon: Mail,
       title: 'Email Address',
-      details: ['info@threediamonds.ae', 'sales@threediamonds.ae'],
+      details: settings.emails || [],
       color: 'bg-green-50 text-green-600'
     },
     {
       icon: MapPin,
-      title: 'Our Location',
-      details: ['Al Quoz Industrial Area - 3', 'Dubai, U.A.E'],
+      title: 'Our Locations',
+      details: locations.map(loc => loc.address).filter(Boolean),
       color: 'bg-red-50 text-red-600'
     },
     {
       icon: Clock,
       title: 'Business Hours',
-      details: ['Mon - Fri: 9:00 AM - 6:00 PM', 'Sat: 10:00 AM - 4:00 PM'],
+      details: settings.businessHours || ['Mon - Fri: 9:00 AM - 6:00 PM', 'Sat: 10:00 AM - 4:00 PM'],
       color: 'bg-purple-50 text-purple-600'
     }
   ];
@@ -211,7 +240,12 @@ export default function Contact() {
                     <div>
                       <h4 className="font-bold text-gray-800 mb-1">{info.title}</h4>
                       {info.details.map((detail, idx) => (
-                        <p key={idx} className="text-gray-600">{detail}</p>
+                        <p key={idx} className="text-gray-600">
+                          {detail}
+                          {info.icon === MapPin && idx < info.details.length - 1 && (
+                            <span className="block mt-1 text-xs text-gray-400">Branch {idx + 1}</span>
+                          )}
+                        </p>
                       ))}
                     </div>
                   </motion.div>
@@ -221,27 +255,21 @@ export default function Contact() {
               {/* Social Media */}
               <div className="mt-8 pt-8 border-t border-gray-200">
                 <h4 className="font-bold text-gray-800 mb-4">Follow Us</h4>
-                <div className="flex gap-4">
-                  <motion.a
-                    href="https://facebook.com/threediamondsreal-estate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
-                  >
-                    <Facebook className="w-6 h-6 text-white" />
-                  </motion.a>
-                  <motion.a
-                    href="https://instagram.com/threediamondsrealestate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
-                  >
-                    <Instagram className="w-6 h-6 text-white" />
-                  </motion.a>
+                <div className="flex flex-wrap gap-4">
+                  {settings.socialLinks?.map((social, idx) => (
+                    <motion.a
+                      key={idx}
+                      href={social.platform === 'whatsapp' ? `https://wa.me/${social.url.replace(/\D/g, '')}` : social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
+                      title={social.platform}
+                    >
+                      <SocialIcon platform={social.platform} className="w-6 h-6 text-white" />
+                    </motion.a>
+                  ))}
                 </div>
               </div>
             </motion.div>
