@@ -3,6 +3,8 @@
 
 import { useState } from 'react';
 import { Phone, Mail, MapPin, Clock, MessageSquare, Instagram, Facebook, Linkedin, Youtube, Globe, MessageCircle, Twitter } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Swal from 'sweetalert2';
 
 const SocialIcon = ({ platform, className = "w-6 h-6" }) => {
   switch (platform.toLowerCase()) {
@@ -16,7 +18,6 @@ const SocialIcon = ({ platform, className = "w-6 h-6" }) => {
     default: return <Globe className={className} />;
   }
 };
-import { motion } from 'framer-motion';
 
 export default function Contact({ contactSettings }) {
   const [formData, setFormData] = useState({
@@ -44,6 +45,19 @@ export default function Contact({ contactSettings }) {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Show loading alert
+    Swal.fire({
+      title: 'Sending...',
+      text: 'Please wait while we send your message',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const res = await fetch('/api/contact-submissions', {
         method: 'POST',
@@ -67,8 +81,35 @@ export default function Contact({ contactSettings }) {
         throw new Error(data?.message || "Submission failed");
       }
 
-      alert("Thank you! We'll contact you shortly.");
+      // Close loading alert
+      Swal.close();
 
+      // Show success alert
+      await Swal.fire({
+        title: 'Thank You!',
+        html: `
+          <div class="text-center">
+            <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-lg mb-2">We've received your message!</p>
+            <p class="text-gray-600">Our team will contact you shortly.</p>
+          </div>
+        `,
+        icon: 'success',
+        confirmButtonColor: '#000000',
+        confirmButtonText: 'Great!',
+        timer: 5000,
+        timerProgressBar: true,
+        showClass: {
+          popup: 'animate__animated animate__fadeInUp'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutDown'
+        }
+      });
+
+      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -78,7 +119,31 @@ export default function Contact({ contactSettings }) {
       });
 
     } catch (error) {
-      alert(error.message || "Something went wrong");
+      // Close loading alert
+      Swal.close();
+
+      // Show error alert
+      await Swal.fire({
+        title: 'Oops...',
+        html: `
+          <div class="text-center">
+            <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-lg mb-2">Something went wrong!</p>
+            <p class="text-gray-600">${error.message || "Please try again later."}</p>
+          </div>
+        `,
+        icon: 'error',
+        confirmButtonColor: '#000000',
+        confirmButtonText: 'Try Again',
+        showClass: {
+          popup: 'animate__animated animate__fadeInUp'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutDown'
+        }
+      });
     }
 
     setIsSubmitting(false);
@@ -170,18 +235,6 @@ export default function Contact({ contactSettings }) {
         type: "spring",
         stiffness: 400,
         damping: 25
-      }
-    }
-  };
-
-  const socialIconHover = {
-    hover: {
-      scale: 1.15,
-      rotate: 5,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 10
       }
     }
   };
