@@ -12,14 +12,12 @@ import { getProperties } from './admin/properties/page';
 import { getPropertyTypes } from './admin/property-types/page';
 import { getPropertyStatuses } from './admin/property-statuses/page';
 import { getTags } from './admin/tags/page';
-import { getSiteSettings } from '../../lib/actions/settings';
 
 export default async function Home() {
   const properties = await getProperties()
   const propertyTypes = await getPropertyTypes();
   const statuses = await getPropertyStatuses();
   const tags = await getTags();
-  const settings = await getSiteSettings();
   return (
     <Loader>
       <main className="min-h-screen">
@@ -34,8 +32,8 @@ export default async function Home() {
           tags={tags}               // [{ _id, name }]
         />
         <Testimonials />
-        <Contact settings={settings} />
-        <Footer settings={settings} />
+        <Contact />
+        <Footer />
       </main>
     </Loader>
   );
