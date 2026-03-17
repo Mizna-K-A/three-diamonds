@@ -1,5 +1,5 @@
-import connectDB from '../../../lib/mongodb';
-import Insight from '../../../lib/models/Insight';
+import connectDB from '../../../../lib/mongodb';
+import Insight from '../../../../lib/models/Insight';
 import Header from '../../components/Header';
 import { Calendar, Clock, User, ArrowLeft, Tag } from 'lucide-react';
 import Link from 'next/link';
