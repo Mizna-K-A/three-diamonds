@@ -6,7 +6,7 @@ import {
   Phone, Mail, MapPin, Globe, Facebook, MessageSquare,
   Download, Send, User, Building2, FileText, CheckCircle,
   AlertCircle, X, Navigation, Maximize2, Minimize2,
-  Instagram, Linkedin, Youtube, Twitter
+  Instagram, Linkedin, Youtube, Twitter, MessageCircle
 } from "lucide-react";
 import Header from "../components/Header";
 
@@ -148,6 +148,24 @@ const modalContent = {
     y: 20,
     transition: { duration: 0.2 }
   }
+};
+
+// Helper function to extract src from iframe HTML string
+const extractSrcFromIframe = (iframeString) => {
+  if (!iframeString) return null;
+  
+  // Try to extract src attribute from iframe HTML
+  const srcMatch = iframeString.match(/src="([^"]+)"/);
+  if (srcMatch && srcMatch[1]) {
+    return srcMatch[1];
+  }
+  
+  // If it's already a URL, return as is
+  if (typeof iframeString === 'string' && (iframeString.startsWith('http') || iframeString.startsWith('//'))) {
+    return iframeString;
+  }
+  
+  return null;
 };
 
 // Toast Component
@@ -379,8 +397,15 @@ export default function ContactClient({ contactSettings }) {
     ]
   };
 
+  // Process locations to handle iframe HTML in mapEmbedUrl
+  const processedLocations = (settings.locations || []).map(loc => ({
+    ...loc,
+    // Extract the actual URL from iframe HTML if needed
+    mapEmbedUrl: extractSrcFromIframe(loc.mapEmbedUrl) || loc.mapEmbedUrl
+  }));
+
   const [activeLocationIdx, setActiveLocationIdx] = useState(0);
-  const activeLocation = settings.locations?.[activeLocationIdx] || settings.locations?.[0] || {
+  const activeLocation = processedLocations[activeLocationIdx] || processedLocations[0] || {
     lat: 25.1345,
     lng: 55.2356,
     address: "Al Quoz Industrial Area - 3, Dubai - U.A.E",
@@ -651,12 +676,15 @@ export default function ContactClient({ contactSettings }) {
               </motion.div>
               <h3 className="text-2xl font-bold mb-2 text-white">VISIT US</h3>
               <p className="text-gray-400">{activeLocation.address}</p>
-              {settings.locations?.length > 1 && (
+              {processedLocations.length > 1 && (
                 <div className="flex flex-wrap justify-center gap-2 mt-4">
-                  {settings.locations.map((loc, idx) => (
+                  {processedLocations.map((loc, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setActiveLocationIdx(idx)}
+                      onClick={() => {
+                        setActiveLocationIdx(idx);
+                        setMapLoaded(false); // Reset map loaded state when changing location
+                      }}
                       className={`text-[10px] uppercase font-bold px-2 py-1 rounded border transition-all ${activeLocationIdx === idx ? 'bg-white text-black border-white' : 'border-gray-700 text-gray-500 hover:border-gray-500'}`}
                     >
                       {loc.title || `Office ${idx + 1}`}
@@ -665,28 +693,6 @@ export default function ContactClient({ contactSettings }) {
                 </div>
               )}
             </motion.div>
-
-            {/* Website Card */}
-            {/* <motion.a
-              href="https://www.threediamonds.ae"
-              target="_blank"
-              rel="noopener noreferrer"
-              variants={scaleUp}
-              whileHover="hover"
-              whileTap="tap"
-              custom={4}
-              className="p-8 bg-gray-900 rounded-xl flex flex-col items-center text-center group cursor-pointer border border-gray-800 hover:border-gray-600 transition-all duration-300 shadow-xl"
-            >
-              <motion.div 
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="w-16 h-16 bg-gradient-to-br from-gray-800 to-gray-700 rounded-full flex items-center justify-center mb-4 group-hover:from-gray-700 group-hover:to-gray-600 transition-all duration-300"
-              >
-                <Globe className="w-8 h-8 text-white" />
-              </motion.div>
-              <h3 className="text-2xl font-bold mb-2 text-white">WEBSITE</h3>
-              <p className="text-gray-400">www.threediamonds.ae</p>
-            </motion.a> */}
           </motion.div>
 
           {/* Main Content Grid - Form and Brochure */}
@@ -1014,27 +1020,34 @@ export default function ContactClient({ contactSettings }) {
           >
             {/* Map Container */}
             <div className="relative w-full h-[400px] md:h-[500px] group">
-              {!mapLoaded && (
+              {/* {!mapLoaded && mapEmbedUrl && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-800/50 backdrop-blur-sm z-10">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-gray-600 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-400">Loading map...</p>
                   </div>
                 </div>
-              )}
+              )} */}
 
-              <iframe
-                src={mapEmbedUrl}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                onLoad={() => setMapLoaded(true)}
-                className="w-full h-full"
-                title="Three Diamonds Real Estate Location"
-              />
+              {mapEmbedUrl ? (
+                <iframe
+                  key={`map-${activeLocationIdx}`}
+                  src={mapEmbedUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  onLoad={() => setMapLoaded(true)}
+                  className="w-full h-full"
+                  title={`Three Diamonds Real Estate Location - ${activeLocation.title || 'Main Office'}`}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-800/50">
+                  <p className="text-gray-500">Map location not available</p>
+                </div>
+              )}
 
               {/* Map Overlay Controls */}
               <div className="absolute bottom-4 right-4 flex gap-2">
@@ -1043,6 +1056,7 @@ export default function ContactClient({ contactSettings }) {
                   className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors border border-gray-700 flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  disabled={!activeLocation.lat || !activeLocation.lng}
                 >
                   <Navigation className="w-4 h-4" />
                   Get Directions

@@ -1066,7 +1066,7 @@ export default function PropertyForm({
                   />
 
                   <FormInput
-                    label="Map Link"
+                    label="Map Embed Link"
                     value={formData.mapLink}
                     onChange={(e) => setFormData({ ...formData, mapLink: e.target.value })}
                     placeholder="Google Maps URL"

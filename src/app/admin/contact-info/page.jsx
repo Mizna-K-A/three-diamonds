@@ -322,7 +322,7 @@ export default function ContactInfoAdmin() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1 block">Map Embed URL (src)</label>
+                                        <label className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1 block">Map Embed URL</label>
                                         <input
                                             value={loc.mapEmbedUrl}
                                             onChange={e => handleObjectArrayChange('locations', idx, 'mapEmbedUrl', e.target.value)}
@@ -330,7 +330,7 @@ export default function ContactInfoAdmin() {
                                             placeholder="https://google.com/maps/embed?..."
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    {/* <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1 block">Latitude</label>
                                             <input
@@ -351,7 +351,7 @@ export default function ContactInfoAdmin() {
                                                 className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-white text-sm focus:border-gray-600 outline-none"
                                             />
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             ))}
                         </div>

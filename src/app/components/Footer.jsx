@@ -19,6 +19,24 @@ const SocialIcon = ({ platform, className = "w-4 h-4" }) => {
   }
 };
 
+// Helper function to extract src from iframe HTML string
+const extractSrcFromIframe = (iframeString) => {
+  if (!iframeString) return null;
+  
+  // Try to extract src attribute from iframe HTML
+  const srcMatch = iframeString.match(/src="([^"]+)"/);
+  if (srcMatch && srcMatch[1]) {
+    return srcMatch[1];
+  }
+  
+  // If it's already a URL, return as is
+  if (typeof iframeString === 'string' && (iframeString.startsWith('http') || iframeString.startsWith('//'))) {
+    return iframeString;
+  }
+  
+  return null;
+};
+
 export default function Footer({ contactSettings }) {
   const [mapLoaded, setMapLoaded] = useState({});
   const [activeLocationIndex, setActiveLocationIndex] = useState(0);
@@ -46,12 +64,16 @@ export default function Footer({ contactSettings }) {
     ? settings.locations.map((loc, index) => ({
         ...loc,
         name: loc.title || loc.name || `Branch ${index + 1}`, // Use title first, then name, then fallback
-        uniqueId: `location-${index}-${loc._id || loc.address?.substring(0, 10) || index}`
+        uniqueId: `location-${index}-${loc._id || loc.address?.substring(0, 10) || index}`,
+        // Extract the actual URL from iframe HTML if needed
+        mapEmbedUrl: extractSrcFromIframe(loc.mapEmbedUrl) || loc.mapEmbedUrl
       }))
     : settings.locations ? [{
         ...settings.locations,
         name: settings.locations.title || settings.locations.name || "Main Office",
-        uniqueId: 'location-main'
+        uniqueId: 'location-main',
+        // Extract the actual URL from iframe HTML if needed
+        mapEmbedUrl: extractSrcFromIframe(settings.locations.mapEmbedUrl) || settings.locations.mapEmbedUrl
       }] : [];
 
   const activeLocation = locations[activeLocationIndex] || locations[0] || {
@@ -210,7 +232,7 @@ export default function Footer({ contactSettings }) {
 
             {/* Map Container */}
             <div className="relative w-full h-[300px] md:h-[350px] group">
-              {!mapLoaded[activeLocationIndex] && (
+              {!mapLoaded[activeLocationIndex] && activeLocation.mapEmbedUrl && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm z-10">
                   <div className="text-center">
                     <div className="w-10 h-10 border-4 border-gray-700 border-t-white rounded-full animate-spin mx-auto mb-3"></div>
@@ -219,7 +241,7 @@ export default function Footer({ contactSettings }) {
                 </div>
               )}
 
-              {activeLocation.mapEmbedUrl && activeLocation.mapEmbedUrl !== "wsdx" ? (
+              {activeLocation.mapEmbedUrl ? (
                 <iframe
                   key={`map-${activeLocation.uniqueId || activeLocationIndex}`}
                   src={activeLocation.mapEmbedUrl}
@@ -279,12 +301,12 @@ export default function Footer({ contactSettings }) {
                   <span className="text-xs text-gray-400">Interactive Map</span>
                 </div>
                 <span className="text-gray-700 text-xs">|</span>
-                <span className="text-xs text-gray-500">
+                {/* <span className="text-xs text-gray-500">
                   {activeLocation.lat && activeLocation.lat !== 0 ? activeLocation.lat.toFixed(4) : 'N/A'}° N, {activeLocation.lng && activeLocation.lng !== 0 ? activeLocation.lng.toFixed(4) : 'N/A'}° E
-                </span>
+                </span> */}
               </div>
 
-              {activeLocation.lat && activeLocation.lng && activeLocation.lat !== 0 && (
+              {/* {activeLocation.lat && activeLocation.lng && activeLocation.lat !== 0 && (
                 <motion.a
                   key={`map-link-${activeLocation.uniqueId || activeLocationIndex}`}
                   href={`https://www.google.com/maps/search/?api=1&query=${activeLocation.lat},${activeLocation.lng}`}
@@ -298,7 +320,7 @@ export default function Footer({ contactSettings }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </motion.a>
-              )}
+              )} */}
             </div>
           </div>
         </motion.div>

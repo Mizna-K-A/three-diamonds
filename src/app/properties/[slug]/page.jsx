@@ -210,6 +210,24 @@ const extractCoordinatesFromMapLink = (mapLink) => {
   return null;
 };
 
+// Extract src attribute from iframe HTML string
+const extractSrcFromIframe = (iframeString) => {
+  if (!iframeString) return null;
+  
+  // Try to extract src attribute from iframe HTML
+  const srcMatch = iframeString.match(/src="([^"]+)"/);
+  if (srcMatch && srcMatch[1]) {
+    return srcMatch[1];
+  }
+  
+  // If it's already a URL, return as is
+  if (iframeString.startsWith('http')) {
+    return iframeString;
+  }
+  
+  return null;
+};
+
 // Generate embed URL for iframe
 const getEmbedMapUrl = (mapLink) => {
   if (!mapLink) return null;
@@ -278,8 +296,11 @@ export default async function PropertyDetailsPage({ params }) {
   if (!property) notFound();
 
   const pricePerSqft = property.area ? Math.round(property.price / property.area).toLocaleString() : null;
-  const coordinates = property.mapLink ? extractCoordinatesFromMapLink(property.mapLink) : null;
-  const embedMapUrl = property.mapLink ? getEmbedMapUrl(property.mapLink) : null;
+  
+  // Extract the actual URL from the iframe HTML if needed
+  const mapUrl = property.mapLink ? extractSrcFromIframe(property.mapLink) : null;
+  const coordinates = mapUrl ? extractCoordinatesFromMapLink(mapUrl) : null;
+  const embedMapUrl = mapUrl ? getEmbedMapUrl(mapUrl) : null;
 
   const availableTimes = ['10:00 AM', '11:00 AM', '12:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
 
@@ -443,15 +464,17 @@ export default async function PropertyDetailsPage({ params }) {
                         Location Map
                       </h2>
                     </div>
-                    <a
-                      href={property.mapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
-                    >
-                      <ExternalLink size={12} />
-                      Open in Maps
-                    </a>
+                    {mapUrl && (
+                      <a
+                        href={mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                      >
+                        <ExternalLink size={12} />
+                        Open in Maps
+                      </a>
+                    )}
                   </div>
 
                   {embedMapUrl && (
