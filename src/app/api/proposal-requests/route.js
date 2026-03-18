@@ -2,9 +2,6 @@ import { NextResponse } from 'next/server';
 import connectDB from '../../../../lib/mongodb';
 import ProposalRequest from '../../../../lib/models/ProposalRequest';
 import Property from '../../../../lib/models/Property';
-import PropertyType from '../../../../lib/models/PropertyType';
-import PropertyStatus from '../../../../lib/models/PropertyStatus';
-import Tag from '../../../../lib/models/Tag';
 
 export async function POST(request) {
     try {

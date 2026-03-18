@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Swal from 'sweetalert2';
 import {
   Plus,
   Trash2,
@@ -27,7 +28,8 @@ import {
   Upload,
   Loader2,
   List,
-  HomeIcon
+  HomeIcon,
+  AlertCircle
 } from 'lucide-react';
 
 function generateSlug(title) {
@@ -134,7 +136,7 @@ const SectionHeader = ({ title, icon: Icon }) => (
   </div>
 );
 
-// Tag Button Component - Updated to handle multiple tag selection
+// Tag Button Component
 const TagButton = ({ tag, isSelected, onClick }) => (
   <button
     type="button"
@@ -179,7 +181,7 @@ const FeatureCard = ({ feature, index, onUpdate, onRemove }) => (
   </div>
 );
 
-// Image Card Component - Updated for simplified schema
+// Image Card Component
 const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrimary }) => {
   const [imageUrl, setImageUrl] = useState(null);
 
@@ -259,7 +261,7 @@ const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrima
   );
 };
 
-// File Upload Area Component
+// File Upload Area Component with size validation UI
 const FileUploadArea = ({ onFilesSelected, isUploading }) => {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -283,6 +285,8 @@ const FileUploadArea = ({ onFilesSelected, isUploading }) => {
   const handleFileInput = (e) => {
     const files = Array.from(e.target.files);
     onFilesSelected(files);
+    // Clear input so same file can be selected again
+    e.target.value = '';
   };
 
   return (
@@ -318,13 +322,95 @@ const FileUploadArea = ({ onFilesSelected, isUploading }) => {
             <Upload size={40} className="mx-auto text-gray-600" />
             <div>
               <p className="text-gray-300 font-medium">Drop images here or click to upload</p>
-              <p className="text-sm text-gray-500 mt-1">Supports: JPG, PNG, GIF, WebP (up to 10MB each)</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Supports: JPG, PNG, GIF, WebP (max 15MB each)
+              </p>
+            </div>
+            {/* Add size warning indicator */}
+            <div className="flex items-center justify-center gap-1 text-xs text-gray-600 mt-2">
+              <AlertCircle size={12} />
+              <span>Maximum file size: 15MB per image</span>
             </div>
           </>
         )}
       </div>
     </div>
   );
+};
+
+// SweetAlert2 configuration
+const showAlert = (type, message, title = '') => {
+  const config = {
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer);
+      toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+  };
+
+  if (type === 'success') {
+    Swal.fire({
+      ...config,
+      icon: 'success',
+      title: 'Success',
+      text: message,
+      background: '#1a1a1a',
+      color: '#fff',
+      iconColor: '#22c55e',
+    });
+  } else if (type === 'error') {
+    Swal.fire({
+      ...config,
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      background: '#1a1a1a',
+      color: '#fff',
+      iconColor: '#ef4444',
+    });
+  } else if (type === 'warning') {
+    Swal.fire({
+      ...config,
+      icon: 'warning',
+      title: 'Warning',
+      text: message,
+      background: '#1a1a1a',
+      color: '#fff',
+      iconColor: '#f59e0b',
+    });
+  } else if (type === 'info') {
+    Swal.fire({
+      ...config,
+      icon: 'info',
+      title: 'Info',
+      text: message,
+      background: '#1a1a1a',
+      color: '#fff',
+      iconColor: '#3b82f6',
+    });
+  }
+};
+
+// Confirmation dialog
+const showConfirmation = async (title, text, confirmButtonText = 'Yes, delete it!') => {
+  const result = await Swal.fire({
+    title: title,
+    text: text,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: confirmButtonText,
+    background: '#1a1a1a',
+    color: '#fff',
+    iconColor: '#f59e0b',
+    reverseButtons: true,
+  });
+  return result.isConfirmed;
 };
 
 export default function PropertyForm({
@@ -357,7 +443,7 @@ export default function PropertyForm({
     RentalPeriod: '',
     statusId: '',
     propertyTypeId: '',
-    tagIds: [], // Changed from tagId to tagIds array
+    tagIds: [],
     images: [],
     features: [],
     isFeatured: false,
@@ -366,7 +452,7 @@ export default function PropertyForm({
     mapLink: '',
   });
 
-  const [selectedTags, setSelectedTags] = useState([]); // Changed to array
+  const [selectedTags, setSelectedTags] = useState([]);
   const [newFeatureName, setNewFeatureName] = useState('');
 
   // Group tags by category
@@ -377,6 +463,19 @@ export default function PropertyForm({
     acc[tag.category].push(tag);
     return acc;
   }, {});
+
+  // Image size validation function
+  const validateImageSize = (file) => {
+    const maxSizeInMB = 15;
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+    
+    if (file.size > maxSizeInBytes) {
+      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+      showAlert('error', `Image "${file.name}" is ${sizeInMB}MB. Maximum allowed size is ${maxSizeInMB}MB`);
+      return false;
+    }
+    return true;
+  };
 
   // Process existing property images
   useEffect(() => {
@@ -450,6 +549,7 @@ export default function PropertyForm({
 
     if (!validateForm()) {
       setActiveTab('basic');
+      showAlert('error', 'Please fill in all required fields');
       return;
     }
 
@@ -521,11 +621,15 @@ export default function PropertyForm({
           throw new Error(result.error);
         }
 
-        if (result.redirect) {
-          router.push(result.redirect);
-        } else if (result.success) {
-          router.push('/admin/properties');
-        }
+        showAlert('success', property ? 'Property updated successfully!' : 'Property created successfully!');
+
+        setTimeout(() => {
+          if (result.redirect) {
+            router.push(result.redirect);
+          } else if (result.success) {
+            router.push('/admin/properties');
+          }
+        }, 1500);
       }
 
     } catch (error) {
@@ -535,7 +639,7 @@ export default function PropertyForm({
       }
 
       console.error('Error saving property:', error);
-      alert(error.message || 'Error saving property');
+      showAlert('error', error.message || 'Error saving property');
     } finally {
       setIsLoading(false);
     }
@@ -560,13 +664,34 @@ export default function PropertyForm({
     setSelectedTags(newSelectedTags);
   };
 
+  // Updated file upload handler with size validation
   const handleFileUpload = async (files) => {
+    // Filter files by size
+    const validFiles = [];
+    const invalidFiles = [];
+
+    Array.from(files).forEach(file => {
+      if (validateImageSize(file)) {
+        validFiles.push(file);
+      } else {
+        invalidFiles.push(file);
+      }
+    });
+
+    if (invalidFiles.length > 0) {
+      showAlert('error', `${invalidFiles.length} image(s) skipped due to size > 15MB`);
+    }
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
     setIsUploading(true);
 
     try {
-      const newImages = await Promise.all(files.map(async (file, index) => {
+      const newImages = await Promise.all(validFiles.map(async (file, index) => {
         const preview = URL.createObjectURL(file);
-
+        
         return {
           id: `new-${Date.now()}-${index}-${Math.random()}`,
           file,
@@ -581,9 +706,17 @@ export default function PropertyForm({
         ...prev,
         images: [...prev.images, ...newImages]
       }));
+
+      // Show success alert
+      if (validFiles.length === 1) {
+        showAlert('success', '1 image uploaded successfully');
+      } else if (validFiles.length > 1) {
+        showAlert('success', `${validFiles.length} images uploaded successfully`);
+      }
+
     } catch (error) {
       console.error('Error processing files:', error);
-      alert('Error processing files. Please try again.');
+      showAlert('error', 'Error processing files. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -599,6 +732,7 @@ export default function PropertyForm({
         }]
       });
       setNewFeatureName('');
+      showAlert('success', 'Feature added');
     }
   };
 
@@ -608,11 +742,20 @@ export default function PropertyForm({
     setFormData({ ...formData, features: newFeatures });
   };
 
-  const removeFeature = (index) => {
-    setFormData({
-      ...formData,
-      features: formData.features.filter((_, i) => i !== index)
-    });
+  const removeFeature = async (index) => {
+    const confirmed = await showConfirmation(
+      'Remove Feature',
+      'Are you sure you want to remove this feature?',
+      'Yes, remove it!'
+    );
+    
+    if (confirmed) {
+      setFormData({
+        ...formData,
+        features: formData.features.filter((_, i) => i !== index)
+      });
+      showAlert('success', 'Feature removed');
+    }
   };
 
   const updateImage = (index, field, value) => {
@@ -621,20 +764,29 @@ export default function PropertyForm({
     setFormData({ ...formData, images: newImages });
   };
 
-  const removeImage = (index) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
+  const removeImage = async (index) => {
+    const confirmed = await showConfirmation(
+      'Remove Image',
+      'Are you sure you want to remove this image?',
+      'Yes, remove it!'
+    );
 
-    // Revoke object URL if it's a new image
-    if (formData.images[index].preview) {
-      URL.revokeObjectURL(formData.images[index].preview);
+    if (confirmed) {
+      const newImages = formData.images.filter((_, i) => i !== index);
+
+      // Revoke object URL if it's a new image
+      if (formData.images[index].preview) {
+        URL.revokeObjectURL(formData.images[index].preview);
+      }
+
+      // If we removed the primary image, set the first one as primary
+      if (formData.images[index].isPrimary && newImages.length > 0) {
+        newImages[0].isPrimary = true;
+      }
+
+      setFormData({ ...formData, images: newImages });
+      showAlert('success', 'Image removed');
     }
-
-    // If we removed the primary image, set the first one as primary
-    if (formData.images[index].isPrimary && newImages.length > 0) {
-      newImages[0].isPrimary = true;
-    }
-
-    setFormData({ ...formData, images: newImages });
   };
 
   const setPrimaryImage = (index) => {
@@ -645,6 +797,7 @@ export default function PropertyForm({
         isPrimary: i === index
       }))
     });
+    showAlert('success', 'Primary image updated');
   };
 
   const moveImage = (index, direction) => {
@@ -674,477 +827,405 @@ export default function PropertyForm({
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: Home },
     { id: 'location', label: 'Location', icon: MapPin },
-    // { id: 'tags', label: 'Tags', icon: Tag },
     { id: 'features', label: 'Features', icon: Check },
     { id: 'images', label: 'Images', icon: ImageIcon },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] p-6 rounded-2xl shadow-2xl border border-gray-800">
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-600 border-t-white"></div>
-            <p className="text-gray-400 mt-4">Saving property...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-gray-800">
-        <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/admin/properties"
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all"
-              >
-                <ArrowLeft size={20} />
-              </Link>
-              <div>
-                <h1 className="text-xl font-semibold text-white">
-                  {property ? 'Edit Property' : 'Add New Property'}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  {property ? 'Update property details' : 'Create a new property listing'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/admin/properties"
-                className="px-4 py-2 border border-gray-700 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                form="property-form"
-                disabled={isLoading}
-                className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:hover:bg-gray-800"
-              >
-                {isLoading ? 'Saving...' : buttonText}
-              </button>
+    <>
+      <div className="min-h-screen bg-[#0a0a0a] text-white">
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-[#1a1a1a] p-6 rounded-2xl shadow-2xl border border-gray-800">
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-600 border-t-white"></div>
+              <p className="text-gray-400 mt-4">Saving property...</p>
             </div>
           </div>
+        )}
 
-          {/* Tabs */}
-          <div className="flex items-center gap-1 mt-4 overflow-x-auto pb-1 scrollbar-hide">
-            {tabs.map((tab, index) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap
-                  transition-all duration-200
-                  ${activeTab === tab.id
-                    ? 'bg-gray-800 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-                  }
-                `}
-              >
-                <tab.icon size={16} />
-                {tab.label}
-                {index < tabs.length - 1 && (
-                  <ChevronRight size={16} className="text-gray-600 ml-2 hidden sm:block" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Form */}
-      <form id="property-form" onSubmit={handleSubmit} className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Basic Information */}
-          {activeTab === 'basic' && (
-            <div className="space-y-6 animate-fadeIn">
-              <SectionHeader title="Basic Information" icon={Home} />
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="lg:col-span-2">
-                  <FormInput
-                    label="Title"
-                    icon={Home}
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                    error={errors.title}
-                    placeholder="e.g., Luxury Apartment in Downtown"
-                  />
-                </div>
-
-                <div className="lg:col-span-2">
-                  <FormTextarea
-                    label="Description"
-                    icon={Home}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={10}
-                    placeholder="Describe the property, its unique features, and selling points..."
-                  />
-                </div>
-
-                <FormInput
-                  label="Price"
-                  icon={DollarSign}
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  required
-                  error={errors.price}
-                  placeholder="0.00"
-                />
-
-                <FormSelect
-                  label="Status"
-                  icon={Eye}
-                  value={formData.statusId}
-                  onChange={(e) => setFormData({ ...formData, statusId: e.target.value })}
-                  options={statuses}
-                  required
-                  error={errors.statusId}
-                />
-
-                <FormSelect
-                  label="Property Type"
-                  icon={Home}
-                  value={formData.propertyTypeId}
-                  onChange={(e) => setFormData({ ...formData, propertyTypeId: e.target.value })}
-                  options={propertyTypes}
-                />
-
-                <FormInput
-                  label="Area (sqft)"
-                  icon={Ruler}
-                  type="number"
-                  value={formData.area}
-                  onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                  placeholder="0"
-                />
-                <FormInput
-                  label="No Of Check"
-                  icon={List}
-                  value={formData.NoOFCheck}
-                  onChange={(e) => setFormData({ ...formData, NoOFCheck: e.target.value })}
-                  placeholder="No Of Check"
-                />
-                <FormInput
-                  label="Rental Period"
-                  icon={HomeIcon}
-                  value={formData.RentalPeriod}
-                  onChange={(e) => setFormData({ ...formData, RentalPeriod: e.target.value })}
-                  placeholder="Rental Period"
-                />
-              </div>
-              <div className="space-y-6 animate-fadeIn">
-                <SectionHeader title="Tags" icon={Tag} />
-
-                <div className="space-y-6">
-                  {Object.entries(tagsByCategory).map(([category, categoryTags]) => (
-                    <div key={category} className="space-y-3">
-                      <div className="flex flex-wrap gap-2">
-                        {categoryTags.map(tag => (
-                          <TagButton
-                            key={tag._id}
-                            tag={tag}
-                            isSelected={selectedTags.some(t => t._id === tag._id)}
-                            onClick={() => handleTagToggle(tag)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {selectedTags.length > 0 && (
-                  <div className="mt-6 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                    <p className="text-sm text-gray-400 mb-2">Selected Tags:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedTags.map(tag => (
-                        <span
-                          key={tag._id}
-                          className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2"
-                        >
-                          {tag.name}
-                          <button
-                            type="button"
-                            onClick={() => handleTagToggle(tag)}
-                            className="hover:bg-blue-700 rounded p-0.5"
-                          >
-                            <X size={14} />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              {/* Settings */}
-              {/* <div className="mt-8 p-6 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                <h4 className="text-md font-medium text-gray-300 mb-4">Additional Settings</h4>
-                <div className="flex flex-wrap items-center gap-6">
-                  <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-blue-600"
-                    />
-                    <span className="flex items-center gap-2">
-                      <Star size={16} className={formData.isFeatured ? 'text-yellow-500' : 'text-gray-600'} />
-                      Featured Property
-                    </span>
-                  </label>
-
-                  <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.isPublished}
-                      onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-green-600"
-                    />
-                    <span className="flex items-center gap-2">
-                      <Eye size={16} className={formData.isPublished ? 'text-green-500' : 'text-gray-600'} />
-                      Published
-                    </span>
-                  </label>
-
-                  <div className="flex items-center gap-3">
-                    <Calendar size={16} className="text-gray-600" />
-                    <input
-                      type="date"
-                      value={formData.expiresAt}
-                      onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
-                      className="px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
-                    />
-                  </div>
-                </div>
-              </div> */}
-            </div>
-          )}
-
-          {/* Location */}
-          {activeTab === 'location' && (
-            <div className="space-y-6 animate-fadeIn">
-              <SectionHeader title="Location" icon={MapPin} />
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="lg:col-span-2">
-                  <FormInput
-                    label="Address"
-                    icon={MapPin}
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Street address"
-                  />
-                </div>
-
-                <FormInput
-                  label="City"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="City"
-                />
-
-                {/* <FormInput
-                  label="State"
-                  value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  placeholder="State"
-                />
-
-                <FormInput
-                  label="ZIP Code"
-                  value={formData.zipCode}
-                  onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                  placeholder="ZIP Code"
-                /> */}
-
-                <FormInput
-                  label="Map Link"
-                  value={formData.mapLink}
-                  onChange={(e) => setFormData({ ...formData, mapLink: e.target.value })}
-                  placeholder="Google Maps URL"
-                />
-              </div>
-
-              {/* Agent Information */}
-              <div className="mt-8">
-                <h4 className="text-md font-medium text-gray-300 mb-4">Agent Information</h4>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <FormInput
-                    label="Agent Name"
-                    icon={User}
-                    value={formData.agentName}
-                    onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
-                    placeholder="Full name"
-                  />
-                  <FormInput
-                    label="Agent Phone"
-                    icon={Phone}
-                    value={formData.agentPhone}
-                    onChange={(e) => setFormData({ ...formData, agentPhone: e.target.value })}
-                    placeholder="Phone number"
-                  />
-                  <FormInput
-                    label="Agent Email"
-                    icon={Mail}
-                    type="email"
-                    value={formData.agentEmail}
-                    onChange={(e) => setFormData({ ...formData, agentEmail: e.target.value })}
-                    placeholder="Email address"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tags - Updated for multiple selection */}
-
-          {/* Features */}
-          {activeTab === 'features' && (
-            <div className="space-y-6 animate-fadeIn">
-              <SectionHeader title="Features" icon={Check} />
-
-              <div className="space-y-3">
-                {formData.features.map((feature, index) => (
-                  <FeatureCard
-                    key={feature.id || index}
-                    feature={feature}
-                    index={index}
-                    onUpdate={updateFeature}
-                    onRemove={removeFeature}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center gap-3 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={newFeatureName}
-                    onChange={(e) => setNewFeatureName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addFeature()}
-                    className="w-full px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
-                    placeholder="Enter feature name"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={addFeature}
-                  disabled={!newFeatureName.trim()}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
+        {/* Header */}
+        <div className="sticky top-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-gray-800">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/admin/properties"
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all"
                 >
-                  <Plus size={18} />
-                  Add Feature
+                  <ArrowLeft size={20} />
+                </Link>
+                <div>
+                  <h1 className="text-xl font-semibold text-white">
+                    {property ? 'Edit Property' : 'Add New Property'}
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    {property ? 'Update property details' : 'Create a new property listing'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin/properties"
+                  className="px-4 py-2 border border-gray-700 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  form="property-form"
+                  disabled={isLoading}
+                  className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:hover:bg-gray-800"
+                >
+                  {isLoading ? 'Saving...' : buttonText}
                 </button>
               </div>
-
-              {/* Feature suggestions */}
-              {/* <div className="mt-4">
-                <p className="text-sm text-gray-500 mb-2">Suggested features:</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Pool', 'Garage', 'Garden', 'Balcony', 'Fireplace', 'Central AC', 'Furnished', 'Gym', 'Parking', 'Storage'].map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => {
-                        setNewFeatureName(suggestion);
-                      }}
-                      className="px-3 py-1 bg-[#252525] text-gray-400 rounded-lg text-sm hover:bg-gray-700 hover:text-white transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              </div> */}
             </div>
-          )}
 
-          {/* Images - Updated for simplified schema */}
-          {activeTab === 'images' && (
-            <div className="space-y-6 animate-fadeIn">
-              <SectionHeader title="Images" icon={ImageIcon} />
+            {/* Tabs */}
+            <div className="flex items-center gap-1 mt-4 overflow-x-auto pb-1 scrollbar-hide">
+              {tabs.map((tab, index) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap
+                    transition-all duration-200
+                    ${activeTab === tab.id
+                      ? 'bg-gray-800 text-white shadow-lg'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                    }
+                  `}
+                >
+                  <tab.icon size={16} />
+                  {tab.label}
+                  {index < tabs.length - 1 && (
+                    <ChevronRight size={16} className="text-gray-600 ml-2 hidden sm:block" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
-              <FileUploadArea
-                onFilesSelected={handleFileUpload}
-                isUploading={isUploading}
-              />
+        {/* Form */}
+        <form id="property-form" onSubmit={handleSubmit} className="px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-8">
+            {/* Basic Information */}
+            {activeTab === 'basic' && (
+              <div className="space-y-6 animate-fadeIn">
+                <SectionHeader title="Basic Information" icon={Home} />
 
-              {formData.images.length > 0 && (
-                <>
-                  <div className="space-y-3 mt-6">
-                    <h4 className="text-sm font-medium text-gray-400">Uploaded Images</h4>
-                    {formData.images.map((image, index) => (
-                      <ImageCard
-                        key={image.id || index}
-                        image={image}
-                        index={index}
-                        total={formData.images.length}
-                        onUpdate={updateImage}
-                        onRemove={removeImage}
-                        onMove={moveImage}
-                        onSetPrimary={setPrimaryImage}
-                      />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="lg:col-span-2">
+                    <FormInput
+                      label="Title"
+                      icon={Home}
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                      error={errors.title}
+                      placeholder="e.g., Luxury Apartment in Downtown"
+                    />
+                  </div>
+
+                  <div className="lg:col-span-2">
+                    <FormTextarea
+                      label="Description"
+                      icon={Home}
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={10}
+                      placeholder="Describe the property, its unique features, and selling points..."
+                    />
+                  </div>
+
+                  <FormInput
+                    label="Price"
+                    icon={DollarSign}
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
+                    error={errors.price}
+                    placeholder="0.00"
+                  />
+
+                  <FormSelect
+                    label="Status"
+                    icon={Eye}
+                    value={formData.statusId}
+                    onChange={(e) => setFormData({ ...formData, statusId: e.target.value })}
+                    options={statuses}
+                    required
+                    error={errors.statusId}
+                  />
+
+                  <FormSelect
+                    label="Property Type"
+                    icon={Home}
+                    value={formData.propertyTypeId}
+                    onChange={(e) => setFormData({ ...formData, propertyTypeId: e.target.value })}
+                    options={propertyTypes}
+                  />
+
+                  <FormInput
+                    label="Area (sqft)"
+                    icon={Ruler}
+                    type="number"
+                    value={formData.area}
+                    onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                    placeholder="0"
+                  />
+                  <FormInput
+                    label="No Of Check"
+                    icon={List}
+                    value={formData.NoOFCheck}
+                    onChange={(e) => setFormData({ ...formData, NoOFCheck: e.target.value })}
+                    placeholder="No Of Check"
+                  />
+                  <FormInput
+                    label="Rental Period"
+                    icon={HomeIcon}
+                    value={formData.RentalPeriod}
+                    onChange={(e) => setFormData({ ...formData, RentalPeriod: e.target.value })}
+                    placeholder="Rental Period"
+                  />
+                </div>
+
+                {/* Tags Section */}
+                <div className="space-y-6 animate-fadeIn">
+                  <SectionHeader title="Tags" icon={Tag} />
+
+                  <div className="space-y-6">
+                    {Object.entries(tagsByCategory).map(([category, categoryTags]) => (
+                      <div key={category} className="space-y-3">
+                        <h4 className="text-sm font-medium text-gray-400">{category}</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {categoryTags.map(tag => (
+                            <TagButton
+                              key={tag._id}
+                              tag={tag}
+                              isSelected={selectedTags.some(t => t._id === tag._id)}
+                              onClick={() => handleTagToggle(tag)}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
 
-                  <div className="mt-8">
-                    <h4 className="text-sm font-medium text-gray-400 mb-3">Preview</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {formData.images.map((image, index) => {
-                        let imageSrc = null;
-
-                        if (image.url) {
-                          imageSrc = image.url;
-                        } else if (image.preview) {
-                          imageSrc = image.preview;
-                        }
-
-                        return (
-                          <div
-                            key={image.id || index}
-                            className={`
-                              relative aspect-square rounded-lg overflow-hidden border-2
-                              ${image.isPrimary ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-800'}
-                            `}
+                  {selectedTags.length > 0 && (
+                    <div className="mt-6 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
+                      <p className="text-sm text-gray-400 mb-2">Selected Tags:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedTags.map(tag => (
+                          <span
+                            key={tag._id}
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2"
                           >
-                            {imageSrc ? (
-                              <img
-                                src={imageSrc}
-                                alt={image.alt || 'Property image'}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
-                                <ImageIcon size={24} className="text-gray-700" />
-                              </div>
-                            )}
-                            {image.isPrimary && (
-                              <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-lg shadow-lg">
-                                Primary
-                              </div>
-                            )}
-                            {image.file && (
-                              <div className="absolute bottom-2 right-2 px-2 py-1 bg-green-600 text-white text-xs rounded-lg">
-                                New
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                            {tag.name}
+                            <button
+                              type="button"
+                              onClick={() => handleTagToggle(tag)}
+                              className="hover:bg-blue-700 rounded p-0.5"
+                            >
+                              <X size={14} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
                     </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Location */}
+            {activeTab === 'location' && (
+              <div className="space-y-6 animate-fadeIn">
+                <SectionHeader title="Location" icon={MapPin} />
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="lg:col-span-2">
+                    <FormInput
+                      label="Address"
+                      icon={MapPin}
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Street address"
+                    />
                   </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </form>
+
+                  <FormInput
+                    label="City"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    placeholder="City"
+                  />
+
+                  <FormInput
+                    label="Map Link"
+                    value={formData.mapLink}
+                    onChange={(e) => setFormData({ ...formData, mapLink: e.target.value })}
+                    placeholder="Google Maps URL"
+                  />
+                </div>
+
+                {/* Agent Information */}
+                <div className="mt-8">
+                  <h4 className="text-md font-medium text-gray-300 mb-4">Agent Information</h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <FormInput
+                      label="Agent Name"
+                      icon={User}
+                      value={formData.agentName}
+                      onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
+                      placeholder="Full name"
+                    />
+                    <FormInput
+                      label="Agent Phone"
+                      icon={Phone}
+                      value={formData.agentPhone}
+                      onChange={(e) => setFormData({ ...formData, agentPhone: e.target.value })}
+                      placeholder="Phone number"
+                    />
+                    <FormInput
+                      label="Agent Email"
+                      icon={Mail}
+                      type="email"
+                      value={formData.agentEmail}
+                      onChange={(e) => setFormData({ ...formData, agentEmail: e.target.value })}
+                      placeholder="Email address"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Features */}
+            {activeTab === 'features' && (
+              <div className="space-y-6 animate-fadeIn">
+                <SectionHeader title="Features" icon={Check} />
+
+                <div className="space-y-3">
+                  {formData.features.map((feature, index) => (
+                    <FeatureCard
+                      key={feature.id || index}
+                      feature={feature}
+                      index={index}
+                      onUpdate={updateFeature}
+                      onRemove={removeFeature}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={newFeatureName}
+                      onChange={(e) => setNewFeatureName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addFeature()}
+                      className="w-full px-3 py-2 bg-[#252525] border border-gray-700 rounded-lg text-white"
+                      placeholder="Enter feature name"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addFeature}
+                    disabled={!newFeatureName.trim()}
+                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
+                  >
+                    <Plus size={18} />
+                    Add Feature
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Images */}
+            {activeTab === 'images' && (
+              <div className="space-y-6 animate-fadeIn">
+                <SectionHeader title="Images" icon={ImageIcon} />
+
+                <FileUploadArea
+                  onFilesSelected={handleFileUpload}
+                  isUploading={isUploading}
+                />
+
+                {formData.images.length > 0 && (
+                  <>
+                    <div className="space-y-3 mt-6">
+                      <h4 className="text-sm font-medium text-gray-400">Uploaded Images</h4>
+                      {formData.images.map((image, index) => (
+                        <ImageCard
+                          key={image.id || index}
+                          image={image}
+                          index={index}
+                          total={formData.images.length}
+                          onUpdate={updateImage}
+                          onRemove={removeImage}
+                          onMove={moveImage}
+                          onSetPrimary={setPrimaryImage}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="mt-8">
+                      <h4 className="text-sm font-medium text-gray-400 mb-3">Preview</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        {formData.images.map((image, index) => {
+                          let imageSrc = null;
+
+                          if (image.url) {
+                            imageSrc = image.url;
+                          } else if (image.preview) {
+                            imageSrc = image.preview;
+                          }
+
+                          return (
+                            <div
+                              key={image.id || index}
+                              className={`
+                                relative aspect-square rounded-lg overflow-hidden border-2
+                                ${image.isPrimary ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-800'}
+                              `}
+                            >
+                              {imageSrc ? (
+                                <img
+                                  src={imageSrc}
+                                  alt={image.alt || 'Property image'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                                  <ImageIcon size={24} className="text-gray-700" />
+                                </div>
+                              )}
+                              {image.isPrimary && (
+                                <div className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-lg shadow-lg">
+                                  Primary
+                                </div>
+                              )}
+                              {image.file && (
+                                <div className="absolute bottom-2 right-2 px-2 py-1 bg-green-600 text-white text-xs rounded-lg">
+                                  New
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </form>
+      </div>
 
       <style jsx>{`
         @keyframes fadeIn {
@@ -1165,6 +1246,6 @@ export default function PropertyForm({
           scrollbar-width: none;
         }
       `}</style>
-    </div>
+    </>
   );
 }

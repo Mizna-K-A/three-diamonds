@@ -91,7 +91,7 @@ export default function HeroSlidesAdmin() {
                     title: 'New Slide',
                     subtitle: 'Add subtitle here',
                     cta: 'Learn More',
-                    image: '/d11.webp',
+                    image: '/d11.webp', // Changed to .webp extension
                     order: maxOrder,
                     active: true,
                 }),
@@ -105,19 +105,27 @@ export default function HeroSlidesAdmin() {
         }
     };
 
-    // Upload image for a slide
+    // Upload image for a slide - automatically converts to WebP
     const uploadImage = async (slideId, file) => {
         setUploading(slideId);
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
-            if (!res.ok) throw new Error();
+            const res = await fetch('/api/admin/upload', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || 'Upload failed');
+            }
+            
             const { url } = await res.json();
             updateField(slideId, 'image', url);
-            showToast('success', 'Image uploaded!');
-        } catch {
-            showToast('error', 'Image upload failed');
+            showToast('success', 'Image uploaded and converted to WebP!');
+        } catch (error) {
+            showToast('error', error.message || 'Image upload failed');
         } finally {
             setUploading(null);
         }
@@ -134,16 +142,27 @@ export default function HeroSlidesAdmin() {
         // Reassign order values
         const reordered = updated.map((s, i) => ({ ...s, order: i, _dirty: true }));
         setSlides(reordered);
+        
+        // Show saving indicator
+        setSaving('order');
+        
         // Persist all order changes
-        for (const s of reordered) {
-            await fetch('/api/admin/hero-slides', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: s._id, order: s.order }),
-            });
+        try {
+            for (const s of reordered) {
+                await fetch('/api/admin/hero-slides', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: s._id, order: s.order }),
+                });
+            }
+            setSlides(reordered.map(s => ({ ...s, _dirty: false })));
+            showToast('success', 'Order updated');
+        } catch {
+            showToast('error', 'Failed to update order');
+            fetchSlides(); // Revert to original order
+        } finally {
+            setSaving(null);
         }
-        setSlides(reordered.map(s => ({ ...s, _dirty: false })));
-        showToast('success', 'Order updated');
     };
 
     return (
@@ -151,10 +170,11 @@ export default function HeroSlidesAdmin() {
             {/* Toast */}
             {toast && (
                 <div
-                    className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium transition-all duration-300 ${toast.type === 'success'
+                    className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium transition-all duration-300 ${
+                        toast.type === 'success'
                             ? 'bg-gray-900 border-green-700 text-green-400'
                             : 'bg-gray-900 border-red-700 text-red-400'
-                        }`}
+                    }`}
                 >
                     {toast.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
                     {toast.msg}
@@ -165,7 +185,7 @@ export default function HeroSlidesAdmin() {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Home Slides</h1>
-                    <p className="text-gray-500 text-sm mt-1">Manage homepage Home carousel slides</p>
+                    <p className="text-gray-500 text-sm mt-1">Manage homepage carousel slides</p>
                 </div>
                 <button
                     onClick={addSlide}
@@ -196,8 +216,9 @@ export default function HeroSlidesAdmin() {
                     {slides.map((slide, idx) => (
                         <div
                             key={slide._id}
-                            className={`bg-[#111111] rounded-2xl border transition-all duration-200 overflow-hidden ${slide._dirty ? 'border-gray-600' : 'border-gray-800'
-                                }`}
+                            className={`bg-[#111111] rounded-2xl border transition-all duration-200 overflow-hidden ${
+                                slide._dirty ? 'border-gray-600' : 'border-gray-800'
+                            }`}
                         >
                             <div className="flex gap-4 p-5">
                                 {/* Order Controls */}
@@ -205,7 +226,7 @@ export default function HeroSlidesAdmin() {
                                     <span className="text-gray-600 text-xs font-semibold mb-1">#{idx + 1}</span>
                                     <button
                                         onClick={() => moveSlide(slide._id, -1)}
-                                        disabled={idx === 0}
+                                        disabled={idx === 0 || saving === 'order'}
                                         className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                         title="Move up"
                                     >
@@ -213,7 +234,7 @@ export default function HeroSlidesAdmin() {
                                     </button>
                                     <button
                                         onClick={() => moveSlide(slide._id, 1)}
-                                        disabled={idx === slides.length - 1}
+                                        disabled={idx === slides.length - 1 || saving === 'order'}
                                         className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                         title="Move down"
                                     >
@@ -242,7 +263,8 @@ export default function HeroSlidesAdmin() {
                                             ) : (
                                                 <>
                                                     <Upload size={18} className="text-white" />
-                                                    <span className="text-white text-xs font-medium">Change</span>
+                                                    <span className="text-white text-xs font-medium">Change Image</span>
+                                                    <span className="text-gray-400 text-[10px]">(Auto-converts to WebP)</span>
                                                 </>
                                             )}
                                         </div>
@@ -259,12 +281,14 @@ export default function HeroSlidesAdmin() {
                                             e.target.value = '';
                                         }}
                                     />
-                                    <p className="text-gray-600 text-[10px] text-center mt-1.5">Click to change</p>
+                                    <p className="text-gray-600 text-[10px] text-center mt-1.5">
+                                        {slide.image.includes('.webp') ? 'WebP format' : 'Click to change'}
+                                    </p>
                                 </div>
 
                                 {/* Fields */}
                                 <div className="flex-1 grid grid-cols-1 gap-3">
-                                   {/* <div>
+                                    <div>
                                         <label className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1 block">Title</label>
                                         <input
                                             value={slide.title}
@@ -272,7 +296,7 @@ export default function HeroSlidesAdmin() {
                                             placeholder="Slide title"
                                             className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-gray-600 transition-colors"
                                         />
-                                    </div> */}
+                                    </div>
                                     <div>
                                         <label className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1 block">Subtitle</label>
                                         <input
@@ -299,10 +323,11 @@ export default function HeroSlidesAdmin() {
                                     <button
                                         onClick={() => updateField(slide._id, 'active', !slide.active)}
                                         title={slide.active ? 'Visible on site' : 'Hidden on site'}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${slide.active
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+                                            slide.active
                                                 ? 'bg-green-500/10 text-green-400 border border-green-700/40'
                                                 : 'bg-gray-800 text-gray-500 border border-gray-700'
-                                            }`}
+                                        }`}
                                     >
                                         {slide.active ? <Eye size={12} /> : <EyeOff size={12} />}
                                         {slide.active ? 'Visible' : 'Hidden'}
@@ -312,10 +337,11 @@ export default function HeroSlidesAdmin() {
                                     <button
                                         onClick={() => saveSlide(slide)}
                                         disabled={saving === slide._id || !slide._dirty}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${slide._dirty
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                                            slide._dirty
                                                 ? 'bg-white text-black hover:bg-gray-200'
                                                 : 'bg-gray-900 text-gray-600 border border-gray-800 cursor-default'
-                                            }`}
+                                        }`}
                                     >
                                         {saving === slide._id ? (
                                             <div className="w-3 h-3 rounded-full border border-gray-400 border-t-black animate-spin" />

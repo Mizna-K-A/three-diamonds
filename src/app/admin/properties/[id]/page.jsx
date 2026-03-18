@@ -432,12 +432,6 @@ export default async function PropertyDetailPage({ params }) {
               <Pencil size={16} />
               Edit
             </Link>
-            <button className="p-2 text-gray-400 hover:text-white rounded-lg border border-gray-800 hover:bg-gray-900 transition-colors">
-              <Copy size={16} />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-red-400 rounded-lg border border-gray-800 hover:bg-red-950/30 hover:border-red-800 transition-colors">
-              <Trash2 size={16} />
-            </button>
           </div>
         </div>
       </header>
