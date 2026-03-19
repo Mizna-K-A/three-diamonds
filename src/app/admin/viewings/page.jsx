@@ -2,16 +2,19 @@ import connectDB from '../../../../lib/mongodb';
 import ScheduleViewing from '../../../../lib/models/ScheduleViewing';
 import Link from 'next/link';
 
-async function getViewings() {
+async function getViewings(page = 1, limit = 10) {
   try {
     await connectDB();
-    const docs = await ScheduleViewing.find({})
-      .sort({ createdAt: -1 })
-      .limit(500)
-      .lean();
+    const skip = (page - 1) * limit;
 
-    // Get counts for stats
-    const totalCount = await ScheduleViewing.countDocuments();
+    const [docs, totalCount] = await Promise.all([
+      ScheduleViewing.find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      ScheduleViewing.countDocuments()
+    ]);
     const todayCount = await ScheduleViewing.countDocuments({
       createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
     });
@@ -44,13 +47,15 @@ async function getViewings() {
           acc[_id || 'unknown'] = count;
           return acc;
         }, {})
-      }
+      },
+      totalPages: Math.ceil(totalCount / limit) || 1
     };
   } catch (error) {
     console.error('Error fetching viewing requests:', error);
     return {
       viewings: [],
-      stats: { total: 0, today: 0, shown: 0, byStatus: {} }
+      stats: { total: 0, today: 0, shown: 0, byStatus: {} },
+      totalPages: 1
     };
   }
 }
@@ -96,8 +101,12 @@ function TourTypeBadge({ type }) {
   );
 }
 
-export default async function ViewingRequestsPage() {
-  const { viewings, stats } = await getViewings();
+export default async function ViewingRequestsPage({ searchParams }) {
+  const params = await searchParams;
+  const page = parseInt(params?.page || '1', 10);
+  const limit = 10;
+
+  const { viewings, stats, totalPages } = await getViewings(page, limit);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-[#0a0a0a] to-gray-900">
@@ -137,7 +146,7 @@ export default async function ViewingRequestsPage() {
               </div>
             ))}
             <div className="px-3 py-1 rounded-full bg-gray-800/50 border border-gray-700 text-sm text-gray-400">
-              Showing {stats.shown} of {stats.total}
+              Showing {stats.shown} of {stats.total} on Page {page}
             </div>
           </div>
         </div>
@@ -295,7 +304,7 @@ export default async function ViewingRequestsPage() {
                           <StatusBadge status={v.status} />
 
                           {/* Quick action buttons (placeholder) */}
-                          {v.status?.toLowerCase() === 'new' && (
+                          {/* {v.status?.toLowerCase() === 'new' && (
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button className="p-1 hover:bg-green-500/20 rounded transition-colors" title="Confirm">
                                 <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +322,7 @@ export default async function ViewingRequestsPage() {
                                 </svg>
                               </button>
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </td>
                     </tr>
@@ -322,6 +331,57 @@ export default async function ViewingRequestsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-800/60 bg-gray-900/50 gap-4">
+              <div className="text-sm text-gray-400">
+                Showing <span className="font-medium text-white">{viewings.length > 0 ? ((page - 1) * limit) + 1 : 0}</span> to <span className="font-medium text-white">{Math.min(page * limit, stats.total)}</span> of <span className="font-medium text-white">{stats.total}</span> entries
+              </div>
+              <div className="flex gap-1.5 flex-wrap justify-center">
+                {page > 1 ? (
+                  <Link href={`/admin/viewings?page=${page - 1}`} className="px-3 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 rounded-lg transition-colors font-medium">
+                    Prev
+                  </Link>
+                ) : (
+                  <button disabled className="px-3 py-1.5 text-sm bg-gray-800/50 text-gray-500 border border-gray-800 rounded-lg cursor-not-allowed font-medium">
+                    Prev
+                  </button>
+                )}
+
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const p = idx + 1;
+                  if (p === 1 || p === totalPages || (p >= page - 2 && p <= page + 2)) {
+                    return (
+                      <Link
+                        key={p}
+                        href={`/admin/viewings?page=${p}`}
+                        className={`w-8 flex items-center justify-center py-1.5 text-sm rounded-lg border transition-colors font-semibold ${page === p
+                            ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                            : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700'
+                          }`}
+                      >
+                        {p}
+                      </Link>
+                    )
+                  } else if (p === page - 3 || p === page + 3) {
+                    return <span key={p} className="px-1 text-sm text-gray-500 flex items-center">...</span>
+                  }
+                  return null;
+                })}
+
+                {page < totalPages ? (
+                  <Link href={`/admin/viewings?page=${page + 1}`} className="px-3 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 rounded-lg transition-colors font-medium">
+                    Next
+                  </Link>
+                ) : (
+                  <button disabled className="px-3 py-1.5 text-sm bg-gray-800/50 text-gray-500 border border-gray-800 rounded-lg cursor-not-allowed font-medium">
+                    Next
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
