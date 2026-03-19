@@ -1,5 +1,6 @@
 import connectDB from '../../../../lib/mongodb';
 import ProposalRequest from '../../../../lib/models/ProposalRequest';
+import Property from '../../../../lib/models/Property';
 import ProposalRequestsClient from './ProposalRequestsClient';
 
 async function getProposals() {
@@ -9,6 +10,24 @@ async function getProposals() {
             .sort({ createdAt: -1 })
             .limit(500)
             .lean();
+
+        const propertyIds = [
+            ...new Set(
+                docs
+                    .map((d) => d.propertyId?.toString?.())
+                    .filter((id) => Boolean(id))
+            ),
+        ];
+
+        const properties = propertyIds.length
+            ? await Property.find({ _id: { $in: propertyIds } })
+                  .populate('propertyTypeId', 'name icon slug')
+                  .lean()
+            : [];
+
+        const propertyMap = new Map(
+            properties.map((p) => [p._id.toString(), p])
+        );
 
         // Get counts for stats
         const totalCount = await ProposalRequest.countDocuments();
@@ -22,18 +41,45 @@ async function getProposals() {
         ]);
 
         return {
-            proposals: docs.map((d) => ({
-                id: d._id.toString(),
-                propertyId: d.propertyId?.toString?.() || '',
-                propertyTitle: d.propertyTitle || '',
-                agentName: d.agentName || '',
-                agentEmail: d.agentEmail || '',
-                name: d.name || '',
-                email: d.email || '',
-                phone: d.phone || '',
-                status: d.status || 'new',
-                createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : '',
-            })),
+            proposals: docs.map((d) => {
+                const property = d.propertyId
+                    ? propertyMap.get(d.propertyId.toString())
+                    : null;
+
+                return {
+                    id: d._id.toString(),
+                    propertyId: d.propertyId?.toString?.() || '',
+                    propertyTitle: d.propertyTitle || property?.title || '',
+                    agentName: d.agentName || property?.agentName || '',
+                    agentEmail: d.agentEmail || property?.agentEmail || '',
+                    name: d.name || '',
+                    email: d.email || '',
+                    phone: d.phone || '',
+                    status: d.status || 'new',
+                    createdAt: d.createdAt
+                        ? new Date(d.createdAt).toISOString()
+                        : '',
+                    property: property
+                        ? {
+                              id: property._id.toString(),
+                              title: property.title || '',
+                              price: property.price || 0,
+                              address: property.address || '',
+                              city: property.city || '',
+                              propertyType: property.propertyTypeId
+                                  ? {
+                                        name:
+                                            property.propertyTypeId.name || '',
+                                    }
+                                  : null,
+                              features: property.features || [],
+                              agentName: property.agentName || '',
+                              agentEmail: property.agentEmail || '',
+                              agentPhone: property.agentPhone || '',
+                          }
+                        : null,
+                };
+            }),
             stats: {
                 total: totalCount,
                 today: todayCount,
@@ -41,8 +87,8 @@ async function getProposals() {
                 byStatus: statusCounts.reduce((acc, { _id, count }) => {
                     acc[_id || 'unknown'] = count;
                     return acc;
-                }, {})
-            }
+                }, {}),
+            },
         };
     } catch (error) {
         console.error('Error fetching proposal requests:', error);

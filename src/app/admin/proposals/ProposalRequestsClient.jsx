@@ -36,12 +36,11 @@ export default function ProposalRequestsClient({ initialProposals }) {
     const generatePDF = async (proposal) => {
         setGeneratingId(proposal.id);
         try {
-            // Fetch full property details
-            const response = await fetch(`/api/properties/${proposal.propertyId}`);
-            const data = await response.json();
+            const property = proposal.property;
 
-            if (!data.success) throw new Error('Failed to fetch property data');
-            const property = data.data;
+            if (!property) {
+                throw new Error('No property details available for this proposal');
+            }
 
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.width;
