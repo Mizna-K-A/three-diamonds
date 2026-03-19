@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import ImageGallery from './ImageGallery';
 import DownloadProposalButton from './DownloadProposalButton';
+import ScheduleViewingForm from './ScheduleViewingForm';
 import mongoose from 'mongoose';
 import connectDB from '../../../../lib/mongodb';
 import Property from '../../../../lib/models/Property';
@@ -213,18 +214,18 @@ const extractCoordinatesFromMapLink = (mapLink) => {
 // Extract src attribute from iframe HTML string
 const extractSrcFromIframe = (iframeString) => {
   if (!iframeString) return null;
-  
+
   // Try to extract src attribute from iframe HTML
   const srcMatch = iframeString.match(/src="([^"]+)"/);
   if (srcMatch && srcMatch[1]) {
     return srcMatch[1];
   }
-  
+
   // If it's already a URL, return as is
   if (iframeString.startsWith('http')) {
     return iframeString;
   }
-  
+
   return null;
 };
 
@@ -296,7 +297,7 @@ export default async function PropertyDetailsPage({ params }) {
   if (!property) notFound();
 
   const pricePerSqft = property.area ? Math.round(property.price / property.area).toLocaleString() : null;
-  
+
   // Extract the actual URL from the iframe HTML if needed
   const mapUrl = property.mapLink ? extractSrcFromIframe(property.mapLink) : null;
   const coordinates = mapUrl ? extractCoordinatesFromMapLink(mapUrl) : null;
@@ -419,7 +420,7 @@ export default async function PropertyDetailsPage({ params }) {
                 )}
               </div>
 
-              
+
               {/* Amenities */}
               {property.amenities?.length > 0 && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -532,7 +533,7 @@ export default async function PropertyDetailsPage({ params }) {
                 </div>
               )}
 
-               {/* Tags */}
+              {/* Tags */}
               {property.tags?.length > 0 && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                   <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
@@ -658,89 +659,7 @@ export default async function PropertyDetailsPage({ params }) {
               </div>
 
               {/* Schedule Viewing Form */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <CalendarDays size={16} className="text-blue-400" />
-                  Schedule a Viewing
-                </h2>
-
-                {/* Tour Options */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-3 mb-3">
-                    <label className="flex items-center gap-1.5">
-                      <input type="radio" name="tourType" value="in-person" className="text-blue-500" defaultChecked />
-                      <span className="text-xs text-white">In Person</span>
-                    </label>
-                    <label className="flex items-center gap-1.5">
-                      <input type="radio" name="tourType" value="video" />
-                      <span className="text-xs text-white">Video Chat</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Contact Info */}
-                <form action="" method="POST">
-                  <input type="hidden" name="propertyId" value={property._id} />
-
-                  {/* Date & Time */}
-                  <div className="mb-4">
-                    <p className="text-xs text-gray-400 mb-2">PREFERRED DATE</p>
-                    <input
-                      type="date"
-                      name="preferredDate"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <p className="text-xs text-gray-400 mb-2">PREFERRED TIME</p>
-                    <select
-                      name="preferredTime"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                    >
-                      <option value="">Select time</option>
-                      {availableTimes.map(time => (
-                        <option key={time} value={time}>{time}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-2 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    required
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-2 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    required
-                  />
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="Phone"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    required
-                  />
-                  <textarea
-                    name="message"
-                    placeholder="Message to agent"
-                    rows="2"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-white/20 resize-none"
-                  />
-
-                  <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    Book Appointment
-                  </button>
-                </form>
-              </div>
+              <ScheduleViewingForm propertyId={property._id} />
               {/* Features */}
               {property.features?.length > 0 && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
