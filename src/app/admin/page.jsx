@@ -1,63 +1,62 @@
-// pages/admin/index.js
+import connectDB from '../../../lib/mongodb';
+import Property from '../../../lib/models/Property';
+import ContactSubmission from '../../../lib/models/ContactSubmission';
+import ScheduleViewing from '../../../lib/models/ScheduleViewing';
+import ProposalRequest from '../../../lib/models/ProposalRequest';
+import DashboardClient from './DashboardClient';
 
-const Dashboard = () => {
+export const dynamic = 'force-dynamic';
+
+export default async function Dashboard() {
+  await connectDB();
+
+  // Fetch counts
+  const propertiesCount = await Property.countDocuments();
+  const contactInquiriesCount = await ContactSubmission.countDocuments();
+  const viewingsCount = await ScheduleViewing.countDocuments();
+  const proposalsCount = await ProposalRequest.countDocuments();
+
   const stats = [
-    { name: 'Total Users', value: '2,543', change: '+12%' },
-    { name: 'Revenue', value: '$45,234', change: '+8%' },
-    { name: 'Orders', value: '1,234', change: '+23%' },
-    { name: 'Conversion Rate', value: '3.2%', change: '-2%' },
+    { id: 'properties', name: 'Total Properties', value: propertiesCount, link: '/admin/properties' },
+    { id: 'contacts', name: 'Contact Inquiries', value: contactInquiriesCount, link: '/admin/contacts' },
+    { id: 'viewings', name: 'Viewings Scheduled', value: viewingsCount, link: '/admin/viewings' },
+    { id: 'proposals', name: 'Proposal Requests', value: proposalsCount, link: '/admin/proposals' },
   ];
 
-  return (
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-          <p className="mt-1 text-sm text-white">
-            Welcome back! Here's what's happening with your application.
-          </p>
-        </div>
+  // Fetch recent activity
+  const recentContacts = await ContactSubmission.find().sort({ createdAt: -1 }).limit(5).lean();
+  const recentViewings = await ScheduleViewing.find().sort({ createdAt: -1 }).limit(5).lean();
+  const recentProposals = await ProposalRequest.find().sort({ createdAt: -1 }).limit(5).lean();
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.name}
-              className="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6"
-            >
-              <dt className="text-sm font-medium text-gray-500 truncate">
-                {stat.name}
-              </dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                {stat.value}
-              </dd>
-              <dd className="mt-2">
-                <span className={`text-sm ${
-                  stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stat.change}
-                </span>
-                <span className="text-sm text-gray-500"> from last month</span>
-              </dd>
-            </div>
-          ))}
-        </div>
+  const allActivity = [
+    ...recentContacts.map(c => ({
+      id: c._id.toString(),
+      type: 'Contact',
+      name: c.name,
+      email: c.email,
+      date: c.createdAt,
+      details: c.message ? `Message: ${c.message.substring(0, 50)}...` : 'No message',
+      link: '/admin/contacts',
+    })),
+    ...recentViewings.map(v => ({
+      id: v._id.toString(),
+      type: 'Viewing',
+      name: v.name,
+      email: v.email,
+      date: v.createdAt,
+      details: `Property: ${v.propertyTitle || 'Unknown'}`,
+      link: '/admin/viewings',
+    })),
+    ...recentProposals.map(p => ({
+      id: p._id.toString(),
+      type: 'Proposal',
+      name: p.name,
+      email: p.email,
+      date: p.createdAt,
+      details: `Property: ${p.propertyTitle || 'Unknown'}`,
+      link: '/admin/proposals',
+    })),
+  ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
 
-        {/* Recent Activity */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
-              Recent Activity
-            </h3>
-          </div>
-          <div className="border-t border-gray-200">
-            <div className="px-4 py-5 sm:p-6">
-              <p className="text-gray-500">No recent activity to display.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-  );
-};
-
-export default Dashboard;
+  return <DashboardClient stats={stats} allActivity={allActivity} />;
+}
