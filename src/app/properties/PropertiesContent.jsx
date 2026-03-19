@@ -43,8 +43,8 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
       <button
         onClick={() => setOpen(!open)}
         className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${open
-            ? "bg-white/15 text-white"
-            : "bg-white/8 text-gray-300 hover:bg-white/12 hover:text-white"
+          ? "bg-white/15 text-white"
+          : "bg-white/8 text-gray-300 hover:bg-white/12 hover:text-white"
           }`}
       >
         <div className="flex items-center gap-2">
@@ -71,8 +71,8 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
                 key={val}
                 onClick={() => { onChange(val); setOpen(false); }}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-colors ${isSel
-                    ? "bg-white text-black font-medium"
-                    : "text-gray-400 hover:bg-white/8 hover:text-white"
+                  ? "bg-white text-black font-medium"
+                  : "text-gray-400 hover:bg-white/8 hover:text-white"
                   }`}
               >
                 {showDot && (
@@ -116,6 +116,10 @@ export default function PropertiesContent({
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedTags, setSelectedTags] = useState([]);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // Display 8 properties per page for balanced grid
+
   // Build dot color map dynamically from statuses prop
   const statusDotMap = useMemo(() => {
     const map = { all: "bg-gray-500" };
@@ -128,17 +132,20 @@ export default function PropertiesContent({
   useEffect(() => {
     const typeFromUrl = searchParams.get("type");
     if (typeFromUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedType(typeFromUrl);
       setTimeout(() => {
         document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedType("all");
     }
   }, [searchParams]);
 
   const handleTypeChange = (value) => {
     setSelectedType(value);
+    setCurrentPage(1);
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "all") params.set("type", value);
     else params.delete("type");
@@ -170,12 +177,20 @@ export default function PropertiesContent({
     });
   }, [properties, selectedType, selectedStatus, selectedTags]);
 
+  // Compute pagination
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage) || 1;
+  const currentProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const hasFilters = selectedType !== "all" || selectedStatus !== "all" || selectedTags.length > 0;
 
   const clearFilters = () => {
     setSelectedType("all");
     setSelectedStatus("all");
     setSelectedTags([]);
+    setCurrentPage(1);
     router.push("/properties", { scroll: false });
   };
 
@@ -229,7 +244,7 @@ export default function PropertiesContent({
                   label="Status"
                   options={statusOptions}
                   value={selectedStatus}
-                  onChange={setSelectedStatus}
+                  onChange={(val) => { setSelectedStatus(val); setCurrentPage(1); }}
                   getKey={(o) => o._id}
                   getLabel={(o) => o?.name ?? o?.label}
                   dotMap={statusDotMap}
@@ -272,13 +287,16 @@ export default function PropertiesContent({
 
         {/* Result count */}
         <p className="text-xs text-gray-500 mb-8 tracking-wide text-center">
-          Showing <span className="font-semibold text-gray-300">{filteredProperties.length}</span> properties
+          Showing <span className="font-semibold text-gray-300">
+            {filteredProperties.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+            {Math.min(currentPage * itemsPerPage, filteredProperties.length)}
+          </span> of <span className="font-semibold text-gray-300">{filteredProperties.length}</span> properties
         </p>
 
         {/* GRID */}
-        {filteredProperties.length > 0 ? (
+        {currentProperties.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProperties.map((property) => {
+            {currentProperties.map((property) => {
               const imageUrl = getPrimaryImageUrl(property);
               const specs = [
                 property.price != null ? `${formatPrice(property.price)}` : null,
@@ -412,6 +430,68 @@ export default function PropertiesContent({
                 Clear all filters
               </button>
             )}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-12 w-fit mx-auto">
+            <button
+              onClick={() => {
+                setCurrentPage(p => Math.max(1, p - 1));
+                document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              disabled={currentPage === 1}
+              className="px-4 py-2.5 bg-black hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
+            >
+              Previous
+            </button>
+
+            <div className="flex gap-1.5 items-center">
+              {Array.from({ length: totalPages }).map((_, idx) => {
+                const pageNumber = idx + 1;
+                const isActive = pageNumber === currentPage;
+
+                if (
+                  pageNumber === 1 ||
+                  pageNumber === totalPages ||
+                  (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+                ) {
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => {
+                        setCurrentPage(pageNumber);
+                        document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200 text-sm font-semibold ${isActive
+                        ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+                        : 'bg-black border-white/10 text-gray-400 hover:bg-white/10 hover:text-white hover:border-white/30'
+                        }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                } else if (
+                  pageNumber === currentPage - 3 ||
+                  pageNumber === currentPage + 3
+                ) {
+                  return <span key={pageNumber} className="text-gray-600 flex items-end px-1 pb-1">...</span>;
+                }
+                return null;
+              })}
+            </div>
+
+            <button
+              onClick={() => {
+                setCurrentPage(p => Math.min(totalPages, p + 1));
+                document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2.5 bg-black hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
+            >
+              Next
+            </button>
           </div>
         )}
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import * as LucideIcons from 'lucide-react';
 import {
   Plus,
@@ -62,6 +62,10 @@ export default function PropertiesClient({
   const [isLoading, setIsLoading] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
   /* ── Tag toggle ── */
   const toggleTag = (id) =>
     setSelectedTags((prev) =>
@@ -105,6 +109,18 @@ export default function PropertiesClient({
     setSelectedTags([]);
   };
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedStatus, selectedType, selectedTags]);
+
+  // Compute pagination
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage) || 1;
+  const currentProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   /* ── Handlers ── */
   const handleOpenModal = (property) => {
     setEditingProperty(property);
@@ -132,7 +148,7 @@ export default function PropertiesClient({
         setProperties(prev => [result.data, ...prev]);
       }
       handleCloseModal();
-      
+
       // Show success message
       Swal.fire({
         icon: 'success',
@@ -156,10 +172,10 @@ export default function PropertiesClient({
   const handleDelete = async (id) => {
     // Find property for confirmation message
     const property = properties.find(p => p._id === id);
-    
+
     const result = await Swal.fire({
       title: 'Are you sure?',
-      text: property?.title 
+      text: property?.title
         ? `You are about to delete "${property.title}". This action cannot be undone.`
         : 'You are about to delete this property. This action cannot be undone.',
       icon: 'warning',
@@ -185,9 +201,9 @@ export default function PropertiesClient({
     try {
       const deleteResult = await deleteProperty(id);
       if (deleteResult.error) throw new Error(deleteResult.error);
-      
+
       setProperties(prev => prev.filter(p => p._id !== id));
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Deleted!',
@@ -222,7 +238,7 @@ export default function PropertiesClient({
       const result = await toggleFeature(id);
       if (result.error) throw new Error(result.error);
       setProperties(prev => prev.map(p => p._id === id ? { ...p, isFeatured: result.isFeatured } : p));
-      
+
       // Optional: Show success message
       Swal.fire({
         icon: 'success',
@@ -256,7 +272,7 @@ export default function PropertiesClient({
       const result = await togglePublish(id);
       if (result.error) throw new Error(result.error);
       setProperties(prev => prev.map(p => p._id === id ? { ...p, isPublished: result.isPublished } : p));
-      
+
       // Optional: Show success message
       Swal.fire({
         icon: 'success',
@@ -437,8 +453,8 @@ export default function PropertiesClient({
                 key={tag._id}
                 onClick={() => toggleTag(tag._id)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 ${active
-                    ? 'text-white border-transparent'
-                    : 'text-gray-300 hover:text-white'
+                  ? 'text-white border-transparent'
+                  : 'text-gray-300 hover:text-white'
                   }`}
                 style={{
                   backgroundColor: active ? tagColor : 'transparent',
@@ -458,12 +474,14 @@ export default function PropertiesClient({
       )}
       {/* Results count */}
       <p className="text-gray-500 text-sm mb-4">
-        Showing {filteredProperties.length} of {properties.length} properties
+        Showing {filteredProperties.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
+        -{Math.min(currentPage * itemsPerPage, filteredProperties.length)} of {filteredProperties.length} properties
+        {filteredProperties.length !== properties.length && ` (filtered from ${properties.length} total)`}
       </p>
 
       {/* Properties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.map((property) => {
+        {currentProperties.map((property) => {
           const primaryImage = getPrimaryImage(property.images);
           const imageUrl = !imageErrors[property._id] ? getImageUrl(primaryImage) : null;
 
@@ -557,8 +575,8 @@ export default function PropertiesClient({
                           key={tagId}
                           // onClick={() => toggleTag(tagId)}
                           className={`px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition-all duration-150 border ${active
-                              ? 'text-white border-transparent'
-                              : 'text-gray-300 hover:text-white'
+                            ? 'text-white border-transparent'
+                            : 'text-gray-300 hover:text-white'
                             }`}
                           style={{
                             backgroundColor: active ? tagColor : 'transparent',
@@ -621,7 +639,7 @@ export default function PropertiesClient({
           );
         })}
 
-        {filteredProperties.length === 0 && (
+        {currentProperties.length === 0 && (
           <div className="col-span-full text-center py-12">
             <Home size={48} className="mx-auto text-gray-700 mb-3" />
             <p className="text-gray-500 mb-1">No properties found</p>
@@ -636,6 +654,61 @@ export default function PropertiesClient({
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-gray-300 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Previous
+          </button>
+
+          <div className="flex gap-1">
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pageNumber = idx + 1;
+              const isActive = pageNumber === currentPage;
+
+              // Simple logic to show a window of pages (e.g. 1 2 3 ... 10)
+              // Showing +/- 2 pages from current page
+              if (
+                pageNumber === 1 ||
+                pageNumber === totalPages ||
+                (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+              ) {
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors ${isActive
+                      ? 'bg-blue-600 border-blue-500 text-white'
+                      : 'bg-[#111111] border-gray-800 text-gray-300 hover:bg-gray-800'
+                      }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              } else if (
+                pageNumber === currentPage - 3 ||
+                pageNumber === currentPage + 3
+              ) {
+                return <span key={pageNumber} className="text-gray-500 flex items-end px-1">...</span>;
+              }
+              return null;
+            })}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-[#111111] border border-gray-800 rounded-lg text-gray-300 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
