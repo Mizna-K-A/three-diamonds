@@ -107,7 +107,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                 </section>
 
                 {/* Category Filter Bar */}
-                <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="font-semibold text-lg text-gray-800">Browse by Category</h2>
@@ -141,7 +141,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                             })}
                         </div>
                     </div>
-                </section>
+                </section> */}
 
                 {/* Main Content Areas */}
                 <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
@@ -155,7 +155,9 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                                 </h3>
                                 <div className="space-y-4">
                                     {trendingInsights.map((insight, index) => (
-                                        <Link key={insight._id} href={`/insights/${insight._id}`} className="block group">
+                                        <Link key={insight._id}
+                                            href={`/insights`}
+                                            className="block group">
                                             <div className="flex gap-3">
                                                 <span className="text-2xl font-bold text-gray-300 group-hover:text-gray-600 transition-colors">{index + 1}</span>
                                                 <div>
@@ -189,7 +191,9 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {displayedInsights.map((insight) => (
                                             <article key={insight._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200">
-                                                <Link href={`/insights/${insight._id}`} className="block">
+                                                <Link
+                                                    href={`/insights`}
+                                                    className="block">
                                                     <div className="relative h-48 bg-gray-900">
                                                         {insight.image ? (
                                                             <img src={insight.image} alt={insight.title} className="w-full h-full object-cover opacity-80" />
@@ -246,7 +250,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                 </section>
 
                 {/* Newsletter Subscription */}
-                <section className="bg-black text-white py-20">
+                {/* <section className="bg-black text-white py-20">
                     <div className="container mx-auto px-4 text-center">
                         <h2 className="text-3xl font-bold mb-4">Stay Informed on Market Shifts</h2>
                         <p className="text-gray-400 mb-10 max-w-xl mx-auto">Get exclusive real estate reports and investment analysis delivered to your inbox.</p>
@@ -260,7 +264,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                             <button className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all">Subscribe</button>
                         </form>
                     </div>
-                </section>
+                </section> */}
             </main>
         </>
     );
