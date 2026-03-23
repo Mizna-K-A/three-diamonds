@@ -55,7 +55,7 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
             setSlides((prev) =>
                 prev.map((s) => (s._id === slide._id ? { ...updated, _dirty: false } : s))
             );
-            
+
             await showAlert({
                 icon: 'success',
                 title: 'Saved!',
@@ -91,12 +91,12 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
         });
 
         if (!result.isConfirmed) return;
-        
+
         setDeleting(id);
         try {
             await deleteHeroSlide(id);
             setSlides((prev) => prev.filter((s) => s._id !== id));
-            
+
             await showAlert({
                 icon: 'success',
                 title: 'Deleted!',
@@ -128,7 +128,7 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                 active: true,
             });
             setSlides((prev) => [...prev, { ...newSlide, _dirty: false }]);
-            
+
             await showAlert({
                 icon: 'success',
                 title: 'Added!',
@@ -153,12 +153,12 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
             formData.append('file', file);
             const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
             if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || 'Upload failed');
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Upload failed');
             }
             const { url } = await res.json();
             updateField(slideId, 'image', url);
-            
+
             await showAlert({
                 icon: 'success',
                 title: 'Uploaded!',
@@ -167,6 +167,7 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                 showConfirmButton: false
             });
         } catch (error) {
+            console.error('Upload error:', error);
             await showAlert({
                 icon: 'error',
                 title: 'Upload Failed',
@@ -192,7 +193,7 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
         try {
             await reorderHeroSlides(reordered.map((s) => ({ id: s._id, order: s.order })));
             setSlides(reordered.map((s) => ({ ...s, _dirty: false })));
-            
+
             await showAlert({
                 icon: 'success',
                 title: 'Order Updated!',
@@ -219,8 +220,8 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
             {toast && (
                 <div
                     className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-medium transition-all duration-300 ${toast.type === 'success'
-                            ? 'bg-gray-900 border-green-700 text-green-400'
-                            : 'bg-gray-900 border-red-700 text-red-400'
+                        ? 'bg-gray-900 border-green-700 text-green-400'
+                        : 'bg-gray-900 border-red-700 text-red-400'
                         }`}
                 >
                     {toast.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
@@ -363,8 +364,8 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                                     onClick={() => updateField(slide._id, 'active', !slide.active)}
                                     title={slide.active ? 'Visible on site' : 'Hidden on site'}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${slide.active
-                                            ? 'bg-green-500/10 text-green-400 border border-green-700/40'
-                                            : 'bg-gray-800 text-gray-500 border border-gray-700'
+                                        ? 'bg-green-500/10 text-green-400 border border-green-700/40'
+                                        : 'bg-gray-800 text-gray-500 border border-gray-700'
                                         }`}
                                 >
                                     {slide.active ? <Eye size={12} /> : <EyeOff size={12} />}
@@ -376,8 +377,8 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                                     onClick={() => saveSlide(slide)}
                                     disabled={saving === slide._id || !slide._dirty}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${slide._dirty
-                                            ? 'bg-white text-black hover:bg-gray-200'
-                                            : 'bg-gray-900 text-gray-600 border border-gray-800 cursor-default'
+                                        ? 'bg-white text-black hover:bg-gray-200'
+                                        : 'bg-gray-900 text-gray-600 border border-gray-800 cursor-default'
                                         }`}
                                 >
                                     {saving === slide._id ? (
