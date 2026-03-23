@@ -25,36 +25,37 @@ async function processAndSaveImage(file, index, isPrimary = false, alt = '') {
   try {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
+
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
     const baseFilename = `${timestamp}-${random}`;
-    
+
     const uploadDir = path.join(process.cwd(), 'public/uploads/properties');
     await mkdir(uploadDir, { recursive: true });
-    
-    // Generate main image (WebP)
+
+    // Generate main image (WebP) - Optimized with resize and lower effort
     const webpBuffer = await sharp(buffer)
-      .webp({ quality: 85, effort: 6 })
+      .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 85, effort: 2 })
       .toBuffer();
-    
+
     const mainFilename = `${baseFilename}.webp`;
     const mainPath = path.join(uploadDir, mainFilename);
     await writeFile(mainPath, webpBuffer);
-    
-    // Generate thumbnail
+
+    // Generate thumbnail - Optimized with lower effort
     const thumbnailBuffer = await sharp(buffer)
       .resize(150, 150, { fit: 'cover', position: 'center' })
-      .webp({ quality: 70, effort: 6 })
+      .webp({ quality: 70, effort: 2 })
       .toBuffer();
-    
+
     const thumbnailFilename = `${baseFilename}-thumbnail.webp`;
     const thumbnailPath = path.join(uploadDir, thumbnailFilename);
     await writeFile(thumbnailPath, thumbnailBuffer);
-    
+
     // Get metadata
     const mainMetadata = await sharp(webpBuffer).metadata();
-    
+
     // Return simplified image object
     return {
       url: `/uploads/properties/${mainFilename}`,
@@ -73,41 +74,42 @@ async function processAndSaveImage(file, index, isPrimary = false, alt = '') {
 // Server Action for creating property - UPDATED for multiple tags and simplified images
 async function createProperty(formData) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     // Validate required fields
     const title = formData.get('title');
     const statusId = formData.get('statusId');
     const price = formData.get('price');
-    
+
     if (!title || !statusId || !price) {
       return { error: 'Title, status, and price are required' };
     }
-    
+
     // Parse features
-    const features = formData.get('features') 
-      ? JSON.parse(formData.get('features')) 
+    const features = formData.get('features')
+      ? JSON.parse(formData.get('features'))
       : [];
-    
+
     // Handle images - UPDATED for simplified schema
     const images = [];
-    
+
     // Process new image files
     const imageFiles = formData.getAll('new_images');
     const imageAlts = formData.getAll('new_image_alts');
     const imageIsPrimary = formData.getAll('new_image_isPrimary');
-    
-    for (let i = 0; i < imageFiles.length; i++) {
-      const file = imageFiles[i];
-      const alt = imageAlts[i] || title;
-      const isPrimary = imageIsPrimary[i] === 'true' || (images.length === 0 && i === 0);
-      
-      const processedImage = await processAndSaveImage(file, images.length + i, isPrimary, alt);
-      images.push(processedImage);
-    }
-    
+
+    // Process new image files in parallel for better performance
+    const processedImages = await Promise.all(
+      imageFiles.map(async (file, i) => {
+        const alt = imageAlts[i] || title;
+        const isPrimary = imageIsPrimary[i] === 'true' || (images.length === 0 && i === 0);
+        return processAndSaveImage(file, images.length + i, isPrimary, alt);
+      })
+    );
+    images.push(...processedImages);
+
     // Ensure only one primary image
     if (images.length > 0) {
       const hasPrimary = images.some(img => img.isPrimary);
@@ -125,14 +127,14 @@ async function createProperty(formData) {
         });
       }
     }
-    
+
     // Handle tags - UPDATED for multiple tags
     const tagIdsJson = formData.get('tagIds');
     const tagIds = tagIdsJson ? JSON.parse(tagIdsJson) : [];
-    
+
     // Generate slug
     const slug = formData.get('slug') || generateSlug(title);
-    
+
     // Create property - UPDATED schema
     const property = await Property.create({
       title,
@@ -159,17 +161,17 @@ async function createProperty(formData) {
       isPublished: formData.get('isPublished') === 'true',
       expiresAt: formData.get('expiresAt') || null,
     });
-    
+
     // Revalidate paths
     revalidatePath('/admin/properties');
     revalidatePath('/properties');
-    
+
     // Return success with redirect URL
-    return { 
-      success: true, 
+    return {
+      success: true,
       redirect: `/admin/properties/${property._id}`
     };
-    
+
   } catch (error) {
     console.error('Error creating property:', error);
     return { error: error.message };
@@ -179,7 +181,7 @@ async function createProperty(formData) {
 async function getFormData() {
   try {
     await connectDB();
-    
+
     const [propertyTypes, statuses, tags] = await Promise.all([
       PropertyType.find({}).sort({ name: 1 }).lean(),
       // Remove isActive filter and sortOrder sorting
@@ -187,7 +189,7 @@ async function getFormData() {
       // Remove isActive filter and category/sortOrder sorting
       Tag.find({}).sort({ name: 1 }).lean(),
     ]);
-    
+
     return {
       propertyTypes: propertyTypes.map(type => ({
         ...type,
@@ -214,14 +216,14 @@ async function getFormData() {
 
 export default async function CreatePropertyPage() {
   const { propertyTypes, statuses, tags } = await getFormData();
-  
+
   return (
     <div className="p-6 bg-[#0a0a0a] min-h-screen">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white mb-2">Create New Property</h1>
         <p className="text-gray-400">Add a new property listing</p>
       </div>
-      
+
       <div className="bg-[#111111] border border-gray-800 rounded-xl p-6">
         <PropertyForm
           propertyTypes={propertyTypes}

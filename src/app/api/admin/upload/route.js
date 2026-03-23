@@ -65,14 +65,14 @@ export async function POST(request) {
             lossless: false,           // Use lossy compression (smaller files)
             nearLossless: false,
             smartSubsample: true,       // Use smart subsampling
-            effort: 6,                  // CPU effort (0-9)
+            effort: 2,                  // CPU effort (0-9) - Faster processing
         };
 
         // For images with transparency (PNG/GIF), use lossless compression
         if (metadata.hasAlpha) {
             webpOptions.lossless = true;
             webpOptions.quality = 100;
-            webpOptions.effort = 6;     // Max allowed effort (0-6)
+            webpOptions.effort = 2;     // Max allowed effort (0-6) - Faster processing
         }
 
         // For very large images, reduce quality

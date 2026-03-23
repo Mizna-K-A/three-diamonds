@@ -174,7 +174,7 @@ const FeatureCard = ({ feature, index, onUpdate, onRemove }) => (
     <button
       type="button"
       onClick={() => onRemove(index)}
-      className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+      className="p-2 text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
     >
       <Trash2 size={18} />
     </button>
@@ -253,7 +253,7 @@ const ImageCard = ({ image, index, total, onUpdate, onRemove, onMove, onSetPrima
       <button
         type="button"
         onClick={() => onRemove(index)}
-        className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+        className="p-2 text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
       >
         <Trash2 size={18} />
       </button>
@@ -323,13 +323,8 @@ const FileUploadArea = ({ onFilesSelected, isUploading }) => {
             <div>
               <p className="text-gray-300 font-medium">Drop images here or click to upload</p>
               <p className="text-sm text-gray-500 mt-1">
-                Supports: JPG, PNG, GIF, WebP (max 15MB each)
+                Supports: JPG, PNG, GIF, WebP
               </p>
-            </div>
-            {/* Add size warning indicator */}
-            <div className="flex items-center justify-center gap-1 text-xs text-gray-600 mt-2">
-              <AlertCircle size={12} />
-              <span>Maximum file size: 15MB per image</span>
             </div>
           </>
         )}
@@ -464,16 +459,8 @@ export default function PropertyForm({
     return acc;
   }, {});
 
-  // Image size validation function
+  // Image size validation function (disabled)
   const validateImageSize = (file) => {
-    const maxSizeInMB = 15;
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
-    
-    if (file.size > maxSizeInBytes) {
-      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-      showAlert('error', `Image "${file.name}" is ${sizeInMB}MB. Maximum allowed size is ${maxSizeInMB}MB`);
-      return false;
-    }
     return true;
   };
 
@@ -664,23 +651,9 @@ export default function PropertyForm({
     setSelectedTags(newSelectedTags);
   };
 
-  // Updated file upload handler with size validation
+  // Updated file upload handler
   const handleFileUpload = async (files) => {
-    // Filter files by size
-    const validFiles = [];
-    const invalidFiles = [];
-
-    Array.from(files).forEach(file => {
-      if (validateImageSize(file)) {
-        validFiles.push(file);
-      } else {
-        invalidFiles.push(file);
-      }
-    });
-
-    if (invalidFiles.length > 0) {
-      showAlert('error', `${invalidFiles.length} image(s) skipped due to size > 15MB`);
-    }
+    const validFiles = Array.from(files);
 
     if (validFiles.length === 0) {
       return;
@@ -691,7 +664,7 @@ export default function PropertyForm({
     try {
       const newImages = await Promise.all(validFiles.map(async (file, index) => {
         const preview = URL.createObjectURL(file);
-        
+
         return {
           id: `new-${Date.now()}-${index}-${Math.random()}`,
           file,
@@ -748,7 +721,7 @@ export default function PropertyForm({
       'Are you sure you want to remove this feature?',
       'Yes, remove it!'
     );
-    
+
     if (confirmed) {
       setFormData({
         ...formData,

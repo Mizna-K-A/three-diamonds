@@ -34,19 +34,20 @@ async function processAndSaveImage(file, index, isPrimary = false, alt = '') {
     const uploadDir = path.join(process.cwd(), 'public/uploads/properties');
     await mkdir(uploadDir, { recursive: true });
 
-    // Generate main image (WebP)
+    // Generate main image (WebP) - Optimized with resize and lower effort
     const webpBuffer = await sharp(buffer)
-      .webp({ quality: 85, effort: 6 })
+      .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 85, effort: 2 })
       .toBuffer();
 
     const mainFilename = `${baseFilename}.webp`;
     const mainPath = path.join(uploadDir, mainFilename);
     await writeFile(mainPath, webpBuffer);
 
-    // Generate thumbnail
+    // Generate thumbnail - Optimized with lower effort
     const thumbnailBuffer = await sharp(buffer)
       .resize(150, 150, { fit: 'cover', position: 'center' })
-      .webp({ quality: 70, effort: 6 })
+      .webp({ quality: 70, effort: 2 })
       .toBuffer();
 
     const thumbnailFilename = `${baseFilename}-thumbnail.webp`;
@@ -228,13 +229,14 @@ async function updateProperty(id, formData) {
 
     const imageFiles = formData.getAll('new_images');
 
-    for (let i = 0; i < imageFiles.length; i++) {
-      const file = imageFiles[i];
-      const { alt, isPrimary } = newImages[i] || { alt: title, isPrimary: false };
-
-      const processedImage = await processAndSaveImage(file, images.length + i, isPrimary, alt);
-      images.push(processedImage);
-    }
+    // Process new image files in parallel for better performance
+    const processedImages = await Promise.all(
+      imageFiles.map(async (file, i) => {
+        const { alt, isPrimary } = newImages[i] || { alt: title, isPrimary: false };
+        return processAndSaveImage(file, images.length + i, isPrimary, alt);
+      })
+    );
+    images.push(...processedImages);
 
     // Ensure only one primary image
     if (images.length > 0) {
