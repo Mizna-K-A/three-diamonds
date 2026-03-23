@@ -9,10 +9,6 @@ export default function FloatingActions({ whatsappNumber = '971529398258' }) {
     const pathname = usePathname();
     const [showUpArrow, setShowUpArrow] = useState(false);
 
-    // Hide on admin routes
-    if (pathname?.startsWith('/admin')) {
-        return null;
-    }
 
     useEffect(() => {
         const toggleVisibility = () => {
@@ -46,6 +42,11 @@ export default function FloatingActions({ whatsappNumber = '971529398258' }) {
         const cleanedNumber = whatsappNumber.replace(/[^\d+]/g, '');
         window.open(`https://wa.me/${cleanedNumber}`, '_blank');
     };
+
+    // Hide on admin routes
+    if (pathname?.startsWith('/admin')) {
+        return null;
+    }
 
     return (
         <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">

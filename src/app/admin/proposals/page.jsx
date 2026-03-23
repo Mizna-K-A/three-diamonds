@@ -21,8 +21,8 @@ async function getProposals() {
 
         const properties = propertyIds.length
             ? await Property.find({ _id: { $in: propertyIds } })
-                  .populate('propertyTypeId', 'name icon slug')
-                  .lean()
+                .populate('propertyTypeId', 'name icon slug')
+                .lean()
             : [];
 
         const propertyMap = new Map(
@@ -61,22 +61,27 @@ async function getProposals() {
                         : '',
                     property: property
                         ? {
-                              id: property._id.toString(),
-                              title: property.title || '',
-                              price: property.price || 0,
-                              address: property.address || '',
-                              city: property.city || '',
-                              propertyType: property.propertyTypeId
-                                  ? {
-                                        name:
-                                            property.propertyTypeId.name || '',
-                                    }
-                                  : null,
-                              features: property.features || [],
-                              agentName: property.agentName || '',
-                              agentEmail: property.agentEmail || '',
-                              agentPhone: property.agentPhone || '',
-                          }
+                            id: property._id.toString(),
+                            title: property.title || '',
+                            price: property.price || 0,
+                            address: property.address || '',
+                            city: property.city || '',
+                            propertyType: property.propertyTypeId
+                                ? {
+                                    name:
+                                        property.propertyTypeId.name || '',
+                                }
+                                : null,
+                            features: property.features?.map(f => typeof f === 'string' ? f : f.name) || [],
+                            agentName: property.agentName || '',
+                            agentEmail: property.agentEmail || '',
+                            agentPhone: property.agentPhone || '',
+                            area: property.area || 0,
+                            bedrooms: property.bedrooms || 0,
+                            bathrooms: property.bathrooms || 0,
+                            NoOFCheck: property.NoOFCheck || '',
+                            RentalPeriod: property.RentalPeriod || '',
+                        }
                         : null,
                 };
             }),
