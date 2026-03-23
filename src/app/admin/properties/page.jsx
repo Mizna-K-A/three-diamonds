@@ -1,5 +1,5 @@
 import Property from '../../../../lib/models/Property';
-import PropertyStatus from '../../../../lib/models/PropertyStatus';
+  import PropertyStatus from '../../../../lib/models/PropertyStatus';
 import connectDB from '../../../../lib/mongodb';
 import PropertiesClient from './PropertiesClient';
 import PropertyType from '../../../../lib/models/PropertyType';
