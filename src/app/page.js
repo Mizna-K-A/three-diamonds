@@ -14,6 +14,7 @@ import { getPropertyStatuses } from './admin/property-statuses/page';
 import { getTags } from './admin/tags/page';
 import dbConnect from '../../lib/mongodb';
 import SiteSettings from '../../lib/models/SiteSettings';
+import About from './components/About';
 
 export default async function Home() {
   const properties = await getProperties()
@@ -30,6 +31,7 @@ export default async function Home() {
         <HeaderWithPropertyTypes />
         <Hero />
         <Team />
+        <About/>
         <Services />
         <FeaturedProperties
           initialProperties={properties}

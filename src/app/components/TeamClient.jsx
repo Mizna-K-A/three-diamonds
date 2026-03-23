@@ -312,26 +312,6 @@ export default function TeamClient({ teamMembers }) {
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          variants={bottomSectionVariant}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: false, amount: 0.8 }}
-          className="mt-12 text-center"
-        >
-          <div className="bg-gray-50 rounded-xl p-8 inline-block">
-            <h3 className="text-2xl font-bold mb-4">Our Dedicated Team</h3>
-            <p className="text-gray-600 max-w-2xl mb-6">
-              Backed by a team of passionate professionals including property
-              consultants, legal experts, and customer service specialists
-              committed to your success.
-            </p>
-            <a href="#contact" className="btn-primary">
-              Meet Our Full Team
-            </a>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

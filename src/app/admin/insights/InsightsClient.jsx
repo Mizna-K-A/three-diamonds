@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Plus, Trash2, Save, Eye, EyeOff, CheckCircle, AlertCircle, Newspaper, Edit2, X, Upload, TrendingUp, Star } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Trash2, Save, Eye, EyeOff, CheckCircle, AlertCircle, Newspaper, Edit2, X, Upload, TrendingUp, Star, Globe, Lock } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function InsightsClient({ initialInsights, createInsight, updateInsight, deleteInsight, uploadImageAction }) {
@@ -11,6 +12,7 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [isGeneratingSlug, setIsGeneratingSlug] = useState(false);
     const fileInputRef = useRef(null);
 
     const categories = [
@@ -23,6 +25,44 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
         { id: 'technology', name: 'Technology', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
         { id: 'luxury', name: 'Luxury', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' }
     ];
+
+    // Function to generate slug from title
+    const generateSlug = (title) => {
+        return title
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '') // Remove special characters
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+            .replace(/^-+|-+$/g, ''); // Remove hyphens from start and end
+    };
+
+    const handleTitleChange = (e) => {
+        const newTitle = e.target.value;
+
+        // Only auto-generate slug if the slug field is empty or hasn't been manually edited
+        // We'll track if slug was manually edited by checking if it matches the auto-generated one
+        const autoSlug = generateSlug(newTitle);
+
+        setEditForm(prev => ({
+            ...prev,
+            title: newTitle,
+            // Only auto-update slug if it's empty OR if it matches the previous auto-generated slug
+            slug: (!prev.slug || prev.slug === generateSlug(prev.title)) ? autoSlug : prev.slug
+        }));
+    };
+
+    const handleSlugChange = (e) => {
+        const newSlug = e.target.value
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+        setEditForm({ ...editForm, slug: newSlug });
+    };
 
     const showToast = (type, msg) => {
         Swal.fire({
@@ -57,11 +97,12 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
             categoryName: 'Market Reports',
             date: new Date().toISOString().split('T')[0],
             readTime: '5 min read',
-            author: 'Admin',
-            authorRole: 'Editor',
+            author: '',
+            authorRole: '',
             image: '',
             featured: false,
             trending: false,
+            slug: '',
             tags: [],
             active: true
         });
@@ -76,19 +117,25 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                 if (!editForm.excerpt) missingFields.push('Excerpt');
                 if (!editForm.content) missingFields.push('Content');
                 if (!editForm.image) missingFields.push('Featured Image');
-                
+
                 showToast('error', `Required fields missing: ${missingFields.join(', ')}`);
                 setSaving(false);
                 return;
             }
 
+            // Ensure slug is generated if empty
+            const dataToSave = { ...editForm };
+            if (!dataToSave.slug && dataToSave.title) {
+                dataToSave.slug = generateSlug(dataToSave.title);
+            }
+
             if (isEditing === 'new') {
-                const res = await createInsight(editForm);
+                const res = await createInsight(dataToSave);
                 if (res.error) throw new Error(res.error);
                 setInsights([res.data, ...insights]);
                 showToast('success', 'Insight created successfully!');
             } else {
-                const res = await updateInsight(isEditing, editForm);
+                const res = await updateInsight(isEditing, dataToSave);
                 if (res.error) throw new Error(res.error);
                 setInsights(insights.map(i => i._id === isEditing ? res.data : i));
                 showToast('success', 'Insight updated successfully!');
@@ -186,8 +233,8 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                         <p className="text-gray-500 text-sm ml-1">Manage blog posts, market reports, and industry news</p>
                     </div>
                     {!isEditing && (
-                        <button 
-                            onClick={handleAddNew} 
+                        <button
+                            onClick={handleAddNew}
                             className="group flex items-center gap-2 bg-gradient-to-r from-white to-gray-100 text-black px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-white/10 transition-all duration-200 border border-white/20"
                         >
                             <Plus size={18} className="group-hover:rotate-90 transition-transform duration-200" />
@@ -204,8 +251,8 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                 <div className="w-1 h-6 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full"></div>
                                 {isEditing === 'new' ? 'Create New Insight' : 'Edit Insight'}
                             </h2>
-                            <button 
-                                onClick={() => { setIsEditing(null); setEditForm(null); }} 
+                            <button
+                                onClick={() => { setIsEditing(null); setEditForm(null); }}
                                 className="text-gray-500 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
                             >
                                 <X size={20} />
@@ -220,12 +267,30 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                 </label>
                                 <input
                                     value={editForm.title}
-                                    onChange={e => setEditForm({ ...editForm, title: e.target.value })}
-                                    className={`w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all ${
-                                        !editForm.title ? 'border-red-500/30' : 'border-gray-800'
-                                    }`}
+                                    onChange={handleTitleChange}
+                                    className={`w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all ${!editForm.title ? 'border-red-500/30' : 'border-gray-800'
+                                        }`}
                                     placeholder="Enter a compelling title..."
                                 />
+                            </div>
+
+                            {/* Slug */}
+                            <div>
+                                <label className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2 block">
+                                    Slug (URL identifier)
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-600 text-sm font-medium pr-1">three-diamonds.com/insights/</span>
+                                    <input
+                                        value={editForm.slug}
+                                        onChange={handleSlugChange}
+                                        className="flex-1 bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all font-mono text-sm"
+                                        placeholder="auto-generated-from-title"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-2 px-1 italic">
+                                    Automatically generated from title. You can edit it manually if needed.
+                                </p>
                             </div>
 
                             {/* Grid Fields */}
@@ -300,9 +365,8 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                 <textarea
                                     value={editForm.excerpt}
                                     onChange={e => setEditForm({ ...editForm, excerpt: e.target.value })}
-                                    className={`w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all resize-none ${
-                                        !editForm.excerpt ? 'border-red-500/30' : 'border-gray-800'
-                                    }`}
+                                    className={`w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all resize-none ${!editForm.excerpt ? 'border-red-500/30' : 'border-gray-800'
+                                        }`}
                                     rows={3}
                                     placeholder="A brief summary for the list view..."
                                 />
@@ -316,9 +380,8 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                 <textarea
                                     value={editForm.content}
                                     onChange={e => setEditForm({ ...editForm, content: e.target.value })}
-                                    className={`w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all resize-none ${
-                                        !editForm.content ? 'border-red-500/30' : 'border-gray-800'
-                                    }`}
+                                    className={`w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all resize-none ${!editForm.content ? 'border-red-500/30' : 'border-gray-800'
+                                        }`}
                                     rows={8}
                                     placeholder="Write the full article content here..."
                                 />
@@ -330,9 +393,8 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                     Featured Image <span className="text-red-500 ml-1">*</span>
                                 </label>
                                 <div className="flex flex-col sm:flex-row items-start gap-4">
-                                    <div className={`w-full sm:w-48 h-32 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border-2 overflow-hidden relative ${
-                                        !editForm.image ? 'border-dashed border-red-500/30' : 'border-gray-700'
-                                    }`}>
+                                    <div className={`w-full sm:w-48 h-32 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border-2 overflow-hidden relative ${!editForm.image ? 'border-dashed border-red-500/30' : 'border-gray-700'
+                                        }`}>
                                         {editForm.image ? (
                                             <img src={editForm.image} alt="Preview" className="w-full h-full object-cover" />
                                         ) : (
@@ -378,11 +440,10 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                         onChange={e => setEditForm({ ...editForm, featured: e.target.checked })}
                                         className="hidden"
                                     />
-                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                                        editForm.featured 
-                                            ? 'bg-gradient-to-br from-amber-500 to-yellow-500 border-amber-500 shadow-lg shadow-amber-500/20' 
-                                            : 'border-gray-700 bg-gray-800 group-hover:border-gray-600'
-                                    }`}>
+                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${editForm.featured
+                                        ? 'bg-gradient-to-br from-amber-500 to-yellow-500 border-amber-500 shadow-lg shadow-amber-500/20'
+                                        : 'border-gray-700 bg-gray-800 group-hover:border-gray-600'
+                                        }`}>
                                         {editForm.featured && <Star size={12} className="text-black fill-current" />}
                                     </div>
                                     <span className="text-gray-400 group-hover:text-white transition-colors text-sm">Mark as Featured</span>
@@ -395,11 +456,10 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                         onChange={e => setEditForm({ ...editForm, trending: e.target.checked })}
                                         className="hidden"
                                     />
-                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                                        editForm.trending 
-                                            ? 'bg-gradient-to-br from-orange-500 to-red-500 border-orange-500 shadow-lg shadow-orange-500/20' 
-                                            : 'border-gray-700 bg-gray-800 group-hover:border-gray-600'
-                                    }`}>
+                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${editForm.trending
+                                        ? 'bg-gradient-to-br from-orange-500 to-red-500 border-orange-500 shadow-lg shadow-orange-500/20'
+                                        : 'border-gray-700 bg-gray-800 group-hover:border-gray-600'
+                                        }`}>
                                         {editForm.trending && <TrendingUp size={12} className="text-white" />}
                                     </div>
                                     <span className="text-gray-400 group-hover:text-white transition-colors text-sm">Trending Now</span>
@@ -437,66 +497,69 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                 {insights.map((insight) => {
                                     const categoryColor = getCategoryColor(insight.category);
                                     return (
-                                        <div 
-                                            key={insight._id} 
+                                        <div
+                                            key={insight._id}
                                             className="group bg-gradient-to-b from-[#111111] to-[#0c0c0c] rounded-2xl border border-gray-800/80 overflow-hidden flex flex-col hover:border-gray-700/80 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300"
                                         >
-                                            {/* Image Container */}
-                                            <div className="relative h-48 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
-                                                {insight.image ? (
-                                                    <img 
-                                                        src={insight.image} 
-                                                        alt={insight.title} 
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <Newspaper size={48} className="text-gray-700" />
+                                            <Link href={`/admin/insights/${insight.slug}`} className="flex-1 flex flex-col">
+                                                {/* Image Container */}
+                                                <div className="relative h-48 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
+                                                    {insight.image ? (
+                                                        <img
+                                                            src={insight.image}
+                                                            alt={insight.title}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <Newspaper size={48} className="text-gray-700" />
+                                                        </div>
+                                                    )}
+
+                                                    {/* Category Badge */}
+                                                    <div className="absolute top-3 left-3">
+                                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${categoryColor}`}>
+                                                            {insight.categoryName}
+                                                        </span>
                                                     </div>
-                                                )}
-                                                
-                                                {/* Category Badge */}
-                                                <div className="absolute top-3 left-3">
-                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${categoryColor}`}>
-                                                        {insight.categoryName}
-                                                    </span>
+
+                                                    {/* Featured/Trending Icons */}
+                                                    <div className="absolute top-3 right-3 flex gap-2">
+                                                        {insight.featured && (
+                                                            <div className="p-1.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-full shadow-lg shadow-amber-500/20">
+                                                                <Star size={12} className="text-black fill-current" />
+                                                            </div>
+                                                        )}
+                                                        {insight.trending && (
+                                                            <div className="p-1.5 bg-gradient-to-br from-orange-500 to-red-500 rounded-full shadow-lg shadow-orange-500/20">
+                                                                <TrendingUp size={12} className="text-white" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Status Indicator */}
+                                                    <div className={`absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full backdrop-blur-md ${insight.active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+                                                        }`}>
+                                                        {insight.active ? <Eye size={12} /> : <EyeOff size={12} />}
+                                                        <span className="text-[10px] font-semibold uppercase tracking-wider">
+                                                            {insight.active ? 'Published' : 'Hidden'}
+                                                        </span>
+                                                    </div>
                                                 </div>
 
-                                                {/* Featured/Trending Icons */}
-                                                <div className="absolute top-3 right-3 flex gap-2">
-                                                    {insight.featured && (
-                                                        <div className="p-1.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-full shadow-lg shadow-amber-500/20">
-                                                            <Star size={12} className="text-black fill-current" />
-                                                        </div>
-                                                    )}
-                                                    {insight.trending && (
-                                                        <div className="p-1.5 bg-gradient-to-br from-orange-500 to-red-500 rounded-full shadow-lg shadow-orange-500/20">
-                                                            <TrendingUp size={12} className="text-white" />
-                                                        </div>
-                                                    )}
+                                                {/* Content */}
+                                                <div className="p-5 flex-1 flex flex-col">
+                                                    <h3 className="text-white font-bold text-lg leading-tight mb-2 line-clamp-2 group-hover:text-amber-400 transition-colors">
+                                                        {insight.title}
+                                                    </h3>
+                                                    <p className="text-gray-500 text-sm line-clamp-3 mb-4 flex-1">
+                                                        {insight.excerpt}
+                                                    </p>
                                                 </div>
+                                            </Link>
 
-                                                {/* Status Indicator */}
-                                                <div className={`absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full backdrop-blur-md ${
-                                                    insight.active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
-                                                }`}>
-                                                    {insight.active ? <Eye size={12} /> : <EyeOff size={12} />}
-                                                    <span className="text-[10px] font-semibold uppercase tracking-wider">
-                                                        {insight.active ? 'Published' : 'Hidden'}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Content */}
-                                            <div className="p-5 flex-1 flex flex-col">
-                                                <h3 className="text-white font-bold text-lg leading-tight mb-2 line-clamp-2 group-hover:text-amber-400 transition-colors">
-                                                    {insight.title}
-                                                </h3>
-                                                <p className="text-gray-500 text-sm line-clamp-3 mb-4 flex-1">
-                                                    {insight.excerpt}
-                                                </p>
-
-                                                {/* Meta Info */}
+                                            {/* Meta Info */}
+                                            <div className="p-5 pt-0">
                                                 <div className="flex items-center gap-2 text-xs text-gray-600 mb-4">
                                                     <span>{insight.author}</span>
                                                     <span>•</span>
@@ -507,26 +570,33 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                                 <div className="flex items-center justify-between pt-4 border-t border-gray-800/50">
                                                     <div className="flex items-center gap-1">
                                                         <button
-                                                            onClick={() => toggleActive(insight)}
-                                                            className={`p-2 rounded-lg transition-all ${
-                                                                insight.active 
-                                                                    ? 'text-green-500 hover:bg-green-500/10 hover:text-green-400' 
-                                                                    : 'text-gray-600 hover:bg-gray-800 hover:text-gray-300'
-                                                            }`}
+                                                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleActive(insight); }}
+                                                            className={`p-2 rounded-lg transition-all ${insight.active
+                                                                ? 'text-green-500 hover:bg-green-500/10 hover:text-green-400'
+                                                                : 'text-gray-600 hover:bg-gray-800 hover:text-gray-300'
+                                                                }`}
                                                             title={insight.active ? 'Published' : 'Hidden'}
                                                         >
-                                                            {insight.active ? <Eye size={16} /> : <EyeOff size={16} />}
+                                                            {insight.active ? <Globe size={16} /> : <Lock size={16} />}
                                                         </button>
                                                         <button
-                                                            onClick={() => handleEdit(insight)}
+                                                            onClick={(e) => { e.stopPropagation(); handleEdit(insight); }}
                                                             className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
                                                             title="Edit"
                                                         >
                                                             <Edit2 size={16} />
                                                         </button>
+                                                        <Link
+                                                            href={`/admin/insights/${insight.slug}`}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="p-2 text-gray-500 hover:text-amber-400 hover:bg-amber-400/10 rounded-lg transition-all"
+                                                            title="Admin Preview"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </Link>
                                                     </div>
                                                     <button
-                                                        onClick={() => handleDelete(insight._id)}
+                                                        onClick={(e) => { e.stopPropagation(); handleDelete(insight._id); }}
                                                         disabled={deleting === insight._id}
                                                         className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                                                         title="Delete"
@@ -553,8 +623,8 @@ export default function InsightsClient({ initialInsights, createInsight, updateI
                                 <p className="text-gray-500 mb-8 max-w-sm mx-auto">
                                     Start sharing your market knowledge and company news with your audience.
                                 </p>
-                                <button 
-                                    onClick={handleAddNew} 
+                                <button
+                                    onClick={handleAddNew}
                                     className="inline-flex items-center gap-2 bg-gradient-to-r from-white to-gray-100 text-black px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-white/10 transition-all"
                                 >
                                     <Plus size={20} />

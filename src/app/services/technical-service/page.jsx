@@ -160,7 +160,7 @@ export default function ThreeDiamondsPage() {
               </motion.h1>
               <motion.h1 variants={fadeUp} custom={0.15}
                 className="text-[clamp(2.2rem,5vw,4.2rem)] font-black leading-[1.1] tracking-[-0.02em] mb-5"
-                style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.18)', color: 'transparent' }}>
+                style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.18)' }}>
                 Technical Services L.L.C
               </motion.h1>
 

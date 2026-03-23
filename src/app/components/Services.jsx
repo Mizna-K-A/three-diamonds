@@ -145,7 +145,7 @@ export default function Services() {
       gradient: 'from-gray-800 to-black',
       accentColor: 'border-gray-400',
       hoverColor: 'hover:border-gray-300',
-      items: ['Warehouse', 'Showroom', 'Office Space', 'Open Land', 'Labour Camp', 'Staff Accommodation', 'Commercial Villa']
+      items: ['Warehouse', 'Showroom', 'Office Space', 'Open Land', 'Labour Camp', 'Staff Accommodation', 'Commercial Villa'],
     },
     {
       title: 'RESIDENTIAL LEASING',
@@ -340,7 +340,7 @@ export default function Services() {
                 className="mt-8 pt-6 border-t border-gray-700 relative z-10"
               >
                 <motion.a
-                  href="#contact"
+                  href="/services"
                   whileHover={{ x: 5 }}
                   className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300"
                 >

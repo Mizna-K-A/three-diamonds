@@ -156,7 +156,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                                 <div className="space-y-4">
                                     {trendingInsights.map((insight, index) => (
                                         <Link key={insight._id}
-                                            href={`/insights`}
+                                            href={`/insights/${insight.slug}`}
                                             className="block group">
                                             <div className="flex gap-3">
                                                 <span className="text-2xl font-bold text-gray-300 group-hover:text-gray-600 transition-colors">{index + 1}</span>
@@ -192,7 +192,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                                         {displayedInsights.map((insight) => (
                                             <article key={insight._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200">
                                                 <Link
-                                                    href={`/insights`}
+                                                    href={`/insights/${insight.slug}`}
                                                     className="block">
                                                     <div className="relative h-48 bg-gray-900">
                                                         {insight.image ? (
