@@ -1,3 +1,4 @@
+import Agent from '../../../../lib/models/Agent';
 import Property from '../../../../lib/models/Property';
 import PropertyStatus from '../../../../lib/models/PropertyStatus';
 import connectDB from '../../../../lib/mongodb';

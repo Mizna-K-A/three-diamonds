@@ -25,11 +25,16 @@ export async function POST(request) {
 
     await connectDB();
 
-    // Optional: store a snapshot of the property title for easier admin viewing
     let propertyTitle = '';
+    let agentEmail = '';
+    let agentName = '';
     try {
-      const property = await Property.findById(propertyId).select('title').lean();
+      const property = await Property.findById(propertyId)
+        .select('title agentEmail agentName agentId')
+        .populate('agentId', 'name email');
       propertyTitle = property?.title || '';
+      agentEmail = property?.agentId?.email || property?.agentEmail || '';
+      agentName = property?.agentId?.name || property?.agentName || '';
     } catch {
       // ignore property lookup errors; still store request
     }
@@ -37,6 +42,8 @@ export async function POST(request) {
     const doc = await ScheduleViewing.create({
       propertyId,
       propertyTitle,
+      agentName,
+      agentEmail,
       tourType,
       preferredDate,
       preferredTime,
@@ -73,6 +80,25 @@ export async function POST(request) {
         await sendMail({
           to: process.env.ADMIN_EMAIL,
           ...adminMail
+        });
+      }
+
+      // 3. Send to Agent
+      if (agentEmail) {
+        const agentMail = getAdminNotificationTemplate('Property Viewing Request', {
+          agent: agentName,
+          customer: name,
+          email,
+          phone,
+          property: propertyTitle,
+          type: tourType,
+          date: preferredDate,
+          time: preferredTime,
+          message
+        });
+        await sendMail({
+          to: agentEmail,
+          ...agentMail
         });
       }
     } catch (mailError) {

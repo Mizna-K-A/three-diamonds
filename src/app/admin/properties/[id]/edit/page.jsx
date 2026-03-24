@@ -128,6 +128,7 @@ async function getProperty(id) {
       statusId: property.statusId?._id?.toString() || '',
       propertyTypeId: property.propertyTypeId?._id?.toString() || '',
       purposeTagId: property.purposeTagId?._id?.toString() || '',
+      agentId: property.agentId?._id?.toString() || property.agentId?.toString() || null,
       tagIds: property.tagIds?.map(t => t._id.toString()) || [],
       images: processedImages,
       features: processedFeatures,
