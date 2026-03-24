@@ -41,27 +41,32 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
     );
   };
 
-  const saveTestimonial = async (testimonial) => {
-    setSaving(testimonial._id);
+  const saveAllTestimonials = async () => {
+    const dirtyTestimonials = testimonials.filter((t) => t._dirty);
+    if (dirtyTestimonials.length === 0) return;
+
+    setSaving('all');
     try {
-      const updated = await updateTestimonial(testimonial._id, {
-        name: testimonial.name,
-        company: testimonial.company,
-        content: testimonial.content,
-        rating: testimonial.rating,
-        avatar: testimonial.avatar,
-        order: testimonial.order,
-        active: testimonial.active,
-      });
-      setTestimonials((prev) =>
-        prev.map((t) =>
-          t._id === testimonial._id ? { ...t, ...updated, _dirty: false } : t
+      await Promise.all(
+        dirtyTestimonials.map((t) =>
+          updateTestimonial(t._id, {
+            name: t.name,
+            company: t.company,
+            content: t.content,
+            rating: t.rating,
+            avatar: t.avatar,
+            order: t.order,
+            active: t.active,
+          })
         )
       );
-      showToast('success', 'Testimonial saved!');
+      setTestimonials((prev) =>
+        prev.map((t) => ({ ...t, _dirty: false }))
+      );
+      showToast('success', 'All testimonials saved!');
     } catch (e) {
       console.error(e);
-      showToast('error', 'Failed to save testimonial');
+      showToast('error', 'Failed to save some testimonials');
     } finally {
       setSaving(null);
     }
@@ -149,6 +154,8 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
     }
   };
 
+  const hasChanges = testimonials.some(t => t._dirty);
+
   return (
     <div
       className="min-h-screen bg-[#0a0a0a] p-6 md:p-8"
@@ -161,13 +168,30 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
             Manage client feedback and success stories
           </p>
         </div>
-        <button
-          onClick={addTestimonial}
-          className="flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all duration-150 shadow-lg"
-        >
-          <Plus size={16} />
-          Add Testimonial
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={saveAllTestimonials}
+            disabled={saving === 'all' || !hasChanges}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 shadow-lg ${hasChanges
+              ? 'bg-green-600 text-white hover:bg-green-500 hover:scale-105 active:scale-95'
+              : 'bg-gray-900 text-gray-500 border border-gray-800 cursor-not-allowed opacity-50'
+              }`}
+          >
+            {saving === 'all' ? (
+              <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+            ) : (
+              <Save size={18} />
+            )}
+            {saving === 'all' ? 'Saving...' : 'Save All Changes'}
+          </button>
+          <button
+            onClick={addTestimonial}
+            className="flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all duration-150 shadow-lg"
+          >
+            <Plus size={16} />
+            Add Testimonial
+          </button>
+        </div>
       </div>
 
       {testimonials.length === 0 && (
@@ -181,9 +205,8 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
           {testimonials.map((testimonial, idx) => (
             <div
               key={testimonial._id}
-              className={`bg-[#111111] rounded-2xl border transition-all duration-200 overflow-hidden ${
-                testimonial._dirty ? 'border-gray-600' : 'border-gray-800'
-              }`}
+              className={`bg-[#111111] rounded-2xl border transition-all duration-200 overflow-hidden ${testimonial._dirty ? 'border-green-900/50 bg-[#121412]' : 'border-gray-800'
+                }`}
             >
               <div className="flex flex-col lg:flex-row gap-6 p-6">
                 <div className="flex lg:flex-col items-center gap-4 shrink-0">
@@ -282,30 +305,13 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
                     onClick={() =>
                       updateField(testimonial._id, 'active', !testimonial.active)
                     }
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      testimonial.active
-                        ? 'bg-green-500/10 text-green-400 border border-green-700/40'
-                        : 'bg-gray-800 text-gray-500 border border-gray-700'
-                    }`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${testimonial.active
+                      ? 'bg-green-500/10 text-green-400 border border-green-700/40'
+                      : 'bg-gray-800 text-gray-500 border border-gray-700'
+                      }`}
                   >
                     {testimonial.active ? <Eye size={12} /> : <EyeOff size={12} />}
                     {testimonial.active ? 'Visible' : 'Hidden'}
-                  </button>
-                  <button
-                    onClick={() => saveTestimonial(testimonial)}
-                    disabled={saving === testimonial._id || !testimonial._dirty}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      testimonial._dirty
-                        ? 'bg-white text-black hover:bg-gray-200'
-                        : 'bg-gray-900 text-gray-600 border border-gray-800 cursor-default'
-                    }`}
-                  >
-                    {saving === testimonial._id ? (
-                      <div className="w-3 h-3 border border-gray-400 border-t-black animate-spin rounded-full" />
-                    ) : (
-                      <Save size={12} />
-                    )}
-                    Save
                   </button>
                   <button
                     onClick={() => handleDelete(testimonial._id)}
@@ -322,9 +328,9 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
                 </div>
               </div>
               {testimonial._dirty && (
-                <div className="px-6 py-2 bg-gray-800/40 border-t border-gray-800 text-[10px] text-gray-500 flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-                  Unsaved changes
+                <div className="px-6 py-2 bg-green-500/5 border-t border-green-900/30 text-[10px] text-green-500 flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Unsaved changes — click &quot;Save All Changes&quot; to apply
                 </div>
               )}
             </div>

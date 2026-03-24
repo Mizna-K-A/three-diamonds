@@ -40,34 +40,41 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
         );
     };
 
-    // Save (update) a single slide via server action
-    const saveSlide = async (slide) => {
-        setSaving(slide._id);
+    // Save all dirty slides
+    const saveAllSlides = async () => {
+        const dirtySlides = slides.filter(s => s._dirty);
+        if (dirtySlides.length === 0) return;
+
+        setSaving('all');
         try {
-            const updated = await updateHeroSlide(slide._id, {
-                title: slide.title,
-                subtitle: slide.subtitle,
-                cta: slide.cta,
-                image: slide.image,
-                order: slide.order,
-                active: slide.active,
-            });
-            setSlides((prev) =>
-                prev.map((s) => (s._id === slide._id ? { ...updated, _dirty: false } : s))
+            await Promise.all(
+                dirtySlides.map(slide =>
+                    updateHeroSlide(slide._id, {
+                        title: slide.title,
+                        subtitle: slide.subtitle,
+                        cta: slide.cta,
+                        image: slide.image,
+                        order: slide.order,
+                        active: slide.active,
+                    })
+                )
             );
+
+            setSlides(prev => prev.map(s => ({ ...s, _dirty: false })));
 
             await showAlert({
                 icon: 'success',
-                title: 'Saved!',
-                text: 'Slide has been updated successfully.',
+                title: 'All Saved!',
+                text: `${dirtySlides.length} slides have been updated successfully.`,
                 timer: 2000,
                 showConfirmButton: false
             });
-        } catch {
+        } catch (error) {
+            console.error('Save all error:', error);
             await showAlert({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to save slide. Please try again.',
+                text: 'Failed to save some slides. Please try again.',
             });
         } finally {
             setSaving(null);
@@ -214,6 +221,8 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
         }
     };
 
+    const hasChanges = slides.some(s => s._dirty);
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] p-6 md:p-8" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             {/* Toast */}
@@ -235,13 +244,30 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                     <h1 className="text-2xl font-bold text-white tracking-tight">Home Slides</h1>
                     <p className="text-gray-500 text-sm mt-1">Manage homepage carousel slides</p>
                 </div>
-                <button
-                    onClick={addSlide}
-                    className="flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all duration-150 shadow-lg"
-                >
-                    <Plus size={16} />
-                    Add Slide
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={saveAllSlides}
+                        disabled={saving === 'all' || !hasChanges}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 shadow-lg ${hasChanges
+                            ? 'bg-green-600 text-white hover:bg-green-500 hover:scale-105 active:scale-95'
+                            : 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-50'
+                            }`}
+                    >
+                        {saving === 'all' ? (
+                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        ) : (
+                            <Save size={18} />
+                        )}
+                        {saving === 'all' ? 'Saving...' : 'Save All Changes'}
+                    </button>
+                    <button
+                        onClick={addSlide}
+                        className="flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all duration-150 shadow-lg"
+                    >
+                        <Plus size={16} />
+                        Add Slide
+                    </button>
+                </div>
             </div>
 
             {/* Empty state */}
@@ -257,7 +283,7 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                 {slides.map((slide, idx) => (
                     <div
                         key={slide._id}
-                        className={`bg-[#111111] rounded-2xl border transition-all duration-200 overflow-hidden ${slide._dirty ? 'border-gray-600' : 'border-gray-800'
+                        className={`bg-[#111111] rounded-2xl border transition-all duration-200 overflow-hidden ${slide._dirty ? 'border-green-900/50 bg-[#121412]' : 'border-gray-800'
                             }`}
                     >
                         <div className="flex gap-4 p-5">
@@ -372,23 +398,6 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                                     {slide.active ? 'Visible' : 'Hidden'}
                                 </button>
 
-                                {/* Save */}
-                                <button
-                                    onClick={() => saveSlide(slide)}
-                                    disabled={saving === slide._id || !slide._dirty}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${slide._dirty
-                                        ? 'bg-white text-black hover:bg-gray-200'
-                                        : 'bg-gray-900 text-gray-600 border border-gray-800 cursor-default'
-                                        }`}
-                                >
-                                    {saving === slide._id ? (
-                                        <div className="w-3 h-3 rounded-full border border-gray-400 border-t-black animate-spin" />
-                                    ) : (
-                                        <Save size={12} />
-                                    )}
-                                    Save
-                                </button>
-
                                 {/* Delete */}
                                 <button
                                     onClick={() => deleteSlide(slide._id)}
@@ -407,9 +416,9 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
 
                         {/* Unsaved indicator */}
                         {slide._dirty && (
-                            <div className="px-5 py-2 bg-gray-800/40 border-t border-gray-800 text-xs text-gray-500 flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-                                Unsaved changes — click Save to apply
+                            <div className="px-5 py-2 bg-green-500/5 border-t border-green-900/30 text-xs text-green-500 flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                Unsaved changes — click &quot;Save All Changes&quot; to apply
                             </div>
                         )}
                     </div>
