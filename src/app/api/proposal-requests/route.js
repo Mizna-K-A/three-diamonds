@@ -23,10 +23,13 @@ export async function POST(request) {
         let agentName = '';
 
         try {
-            const property = await Property.findById(propertyId).select('title agentEmail agentName').lean();
+            const property = await Property.findById(propertyId)
+                .select('title agentEmail agentName agentId')
+                .populate('agentId', 'name email');
+
             propertyTitle = property?.title || '';
-            agentEmail = property?.agentEmail || '';
-            agentName = property?.agentName || '';
+            agentEmail = property?.agentId?.email || property?.agentEmail || '';
+            agentName = property?.agentId?.name || property?.agentName || '';
         } catch {
             // ignore property lookup errors; still store request
         }

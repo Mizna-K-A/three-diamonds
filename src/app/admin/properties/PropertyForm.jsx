@@ -50,7 +50,7 @@ const FormInput = ({ label, icon: Icon, error, ...props }) => (
     </label>
     <div className="relative">
       {Icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-3">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Icon size={18} className="text-gray-500" />
         </div>
       )}
@@ -101,7 +101,7 @@ const FormSelect = ({ label, icon: Icon, options, ...props }) => (
     <div className="relative">
       {Icon && (
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon size={18} className="text-black" />
+          <Icon size={18} className="text-white" />
         </div>
       )}
       <select
@@ -136,7 +136,7 @@ const SectionHeader = ({ title, icon: Icon }) => (
   </div>
 );
 
-// Tag Button Component
+// Tag Button Component - Modified for single selection
 const TagButton = ({ tag, isSelected, onClick }) => (
   <button
     type="button"
@@ -413,6 +413,7 @@ export default function PropertyForm({
   propertyTypes,
   statuses,
   tags,
+  agents = [], // Add agents prop
   action,
   buttonText,
 }) {
@@ -433,12 +434,13 @@ export default function PropertyForm({
     agentName: '',
     agentPhone: '',
     agentEmail: '',
+    agentId: '', // Add agentId
     area: '',
     NoOFCheck: '',
     RentalPeriod: '',
     statusId: '',
     propertyTypeId: '',
-    tagIds: [],
+    tagIds: [], // Now stores only one tag ID
     images: [],
     features: [],
     isFeatured: false,
@@ -447,8 +449,7 @@ export default function PropertyForm({
     mapLink: '',
   });
 
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [newFeatureName, setNewFeatureName] = useState('');
+  const [selectedTag, setSelectedTag] = useState(null); // Changed to single tag
 
   // Group tags by category
   const tagsByCategory = tags.reduce((acc, tag) => {
@@ -478,11 +479,16 @@ export default function PropertyForm({
         uploadedAt: img.uploadedAt,
       }));
 
-      // Get tag IDs
-      const tagIds = property.tagIds || (property.tagId ? [property.tagId] : []);
+      // Get tag IDs - ensure it's a single tag
+      let tagId = null;
+      if (property.tagIds && property.tagIds.length > 0) {
+        tagId = property.tagIds[0]; // Only take the first tag
+      } else if (property.tagId) {
+        tagId = property.tagId;
+      }
 
-      // Find selected tags
-      const selected = tags.filter(tag => tagIds.includes(tag._id));
+      // Find selected tag
+      const selected = tags.find(tag => tag._id === tagId) || null;
 
       setFormData({
         title: property.title || '',
@@ -496,12 +502,13 @@ export default function PropertyForm({
         agentName: property.agentName || '',
         agentPhone: property.agentPhone || '',
         agentEmail: property.agentEmail || '',
+        agentId: property.agentId?._id || property.agentId || '',
         area: property.area?.toString() || '',
         NoOFCheck: property.NoOFCheck || '',
         RentalPeriod: property.RentalPeriod || '',
         statusId: property.statusId || '',
         propertyTypeId: property.propertyTypeId || '',
-        tagIds: tagIds,
+        tagIds: tagId ? [tagId] : [], // Store as array with single element
         images: processedImages,
         features: property.features || [],
         isFeatured: property.isFeatured || false,
@@ -509,14 +516,16 @@ export default function PropertyForm({
         expiresAt: property.expiresAt ? property.expiresAt.split('T')[0] : '',
       });
 
-      setSelectedTags(selected);
+      setSelectedTag(selected);
     } else {
       // Set default status for new property
       const defaultStatus = statuses.find(s => s.isDefault);
       setFormData(prev => ({
         ...prev,
         statusId: defaultStatus?._id || '',
+        tagIds: [], // Initialize empty array for single tag
       }));
+      setSelectedTag(null);
     }
   }, [property, statuses, tags]);
 
@@ -590,7 +599,10 @@ export default function PropertyForm({
         } else if (key === 'features') {
           submitData.append(key, JSON.stringify(value));
         } else if (key === 'tagIds') {
+          // Send as array but only with one tag
           submitData.append(key, JSON.stringify(value));
+        } else if (key === 'agentId') {
+          submitData.append(key, value || '');
         } else {
           submitData.append(key, value?.toString() || '');
         }
@@ -632,23 +644,17 @@ export default function PropertyForm({
     }
   };
 
-  // Updated tag toggle to handle multiple tags
+  // Modified tag toggle for single selection
   const handleTagToggle = (tag) => {
-    let newTagIds;
-    let newSelectedTags;
-
-    if (selectedTags.some(t => t._id === tag._id)) {
-      // Remove tag
-      newTagIds = formData.tagIds.filter(id => id !== tag._id);
-      newSelectedTags = selectedTags.filter(t => t._id !== tag._id);
+    // If clicking the currently selected tag, deselect it
+    if (selectedTag && selectedTag._id === tag._id) {
+      setFormData({ ...formData, tagIds: [] });
+      setSelectedTag(null);
     } else {
-      // Add tag
-      newTagIds = [...formData.tagIds, tag._id];
-      newSelectedTags = [...selectedTags, tag];
+      // Otherwise, select only this tag (replace any existing selection)
+      setFormData({ ...formData, tagIds: [tag._id] });
+      setSelectedTag(tag);
     }
-
-    setFormData({ ...formData, tagIds: newTagIds });
-    setSelectedTags(newSelectedTags);
   };
 
   // Updated file upload handler
@@ -785,6 +791,8 @@ export default function PropertyForm({
 
     setFormData({ ...formData, images: newImages });
   };
+
+  const [newFeatureName, setNewFeatureName] = useState('');
 
   // Clean up preview URLs
   useEffect(() => {
@@ -967,20 +975,19 @@ export default function PropertyForm({
                   />
                 </div>
 
-                {/* Tags Section */}
+                {/* Tags Section - Modified for single selection */}
                 <div className="space-y-6 animate-fadeIn">
-                  <SectionHeader title="Tags" icon={Tag} />
+                  <SectionHeader title="Tag" icon={Tag} />
 
                   <div className="space-y-6">
                     {Object.entries(tagsByCategory).map(([category, categoryTags]) => (
                       <div key={category} className="space-y-3">
-                        <h4 className="text-sm font-medium text-gray-400">{category}</h4>
                         <div className="flex flex-wrap gap-2">
                           {categoryTags.map(tag => (
                             <TagButton
                               key={tag._id}
                               tag={tag}
-                              isSelected={selectedTags.some(t => t._id === tag._id)}
+                              isSelected={selectedTag && selectedTag._id === tag._id}
                               onClick={() => handleTagToggle(tag)}
                             />
                           ))}
@@ -989,25 +996,20 @@ export default function PropertyForm({
                     ))}
                   </div>
 
-                  {selectedTags.length > 0 && (
+                  {selectedTag && (
                     <div className="mt-6 p-4 bg-[#1a1a1a] rounded-xl border border-gray-800">
-                      <p className="text-sm text-gray-400 mb-2">Selected Tags:</p>
+                      <p className="text-sm text-gray-400 mb-2">Selected Tag:</p>
                       <div className="flex flex-wrap gap-2">
-                        {selectedTags.map(tag => (
-                          <span
-                            key={tag._id}
-                            className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2"
+                        <span className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-2">
+                          {selectedTag.name}
+                          <button
+                            type="button"
+                            onClick={() => handleTagToggle(selectedTag)}
+                            className="hover:bg-blue-700 rounded p-0.5"
                           >
-                            {tag.name}
-                            <button
-                              type="button"
-                              onClick={() => handleTagToggle(tag)}
-                              className="hover:bg-blue-700 rounded p-0.5"
-                            >
-                              <X size={14} />
-                            </button>
-                          </span>
-                        ))}
+                            <X size={14} />
+                          </button>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -1047,31 +1049,58 @@ export default function PropertyForm({
                 </div>
 
                 {/* Agent Information */}
-                <div className="mt-8">
-                  <h4 className="text-md font-medium text-gray-300 mb-4">Agent Information</h4>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <FormInput
-                      label="Agent Name"
+                <div className="mt-8 space-y-6">
+                  <SectionHeader title="Agent Details" icon={User} />
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <FormSelect
+                      label="Select Agent"
                       icon={User}
-                      value={formData.agentName}
-                      onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
-                      placeholder="Full name"
+                      value={formData.agentId}
+                      onChange={(e) => {
+                        const selectedAgent = agents.find(a => a._id === e.target.value);
+                        setFormData({
+                          ...formData,
+                          agentId: e.target.value,
+                          // Optionally auto-fill the static fields for backward compatibility if needed
+                          agentName: selectedAgent?.name || '',
+                          agentPhone: selectedAgent?.phone || '',
+                          agentEmail: selectedAgent?.email || '',
+                        });
+                      }}
+                      options={agents}
+                      placeholder="Choose an agent from list"
                     />
-                    <FormInput
-                      label="Agent Phone"
-                      icon={Phone}
-                      value={formData.agentPhone}
-                      onChange={(e) => setFormData({ ...formData, agentPhone: e.target.value })}
-                      placeholder="Phone number"
-                    />
-                    <FormInput
-                      label="Agent Email"
-                      icon={Mail}
-                      type="email"
-                      value={formData.agentEmail}
-                      onChange={(e) => setFormData({ ...formData, agentEmail: e.target.value })}
-                      placeholder="Email address"
-                    />
+
+                    <div className="p-4 bg-[#1a1a1a] border border-gray-800 rounded-xl">
+                      <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-bold">Manual Agent Info (Optional)</p>
+                      <p className="text-[10px] text-gray-600 mb-4">You can override the agent details or provide them manually if no agent is selected above.</p>
+
+                      <div className="space-y-4">
+                        <FormInput
+                          label="Agent Name (Override)"
+                          icon={User}
+                          value={formData.agentName}
+                          onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
+                          placeholder="Full name"
+                        />
+                        <FormInput
+                          label="Agent Phone (Override)"
+                          icon={Phone}
+                          value={formData.agentPhone}
+                          onChange={(e) => setFormData({ ...formData, agentPhone: e.target.value })}
+                          placeholder="Phone number"
+                        />
+                        <FormInput
+                          label="Agent Email (Override)"
+                          icon={Mail}
+                          type="email"
+                          value={formData.agentEmail}
+                          onChange={(e) => setFormData({ ...formData, agentEmail: e.target.value })}
+                          placeholder="Email address"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -51,6 +51,7 @@ async function getProperty(id) {
       .populate('propertyTypeId', 'name slug icon')
       .populate('tagIds', 'name label color icon category slug')
       .populate('purposeTagId', 'name label color icon slug')
+      .populate('agentId', 'name phone email image')
       .lean();
 
     if (!property) return null;
@@ -106,6 +107,10 @@ async function getProperty(id) {
       createdAt: property.createdAt?.toISOString().split('T')[0],
       updatedAt: property.updatedAt?.toISOString().split('T')[0],
       expiresAt: property.expiresAt?.toISOString().split('T')[0] ?? null,
+      agent: property.agentId ? {
+        ...property.agentId,
+        _id: property.agentId._id.toString()
+      } : null,
     };
   } catch (error) {
     console.error('Error fetching property:', error);
@@ -701,25 +706,33 @@ export default async function PropertyDetailPage({ params }) {
                   Agent Information
                 </h2>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
-                    <User size={20} className="text-gray-400" />
+                  <div className="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {property.agent?.image ? (
+                      <img
+                        src={property.agent.image}
+                        alt={property.agent.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User size={20} className="text-gray-400" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    {property.agentName && (
+                    {(property.agent?.name || property.agentName) && (
                       <div className="text-white font-medium mb-1">
-                        {property.agentName}
+                        {property.agent?.name || property.agentName}
                       </div>
                     )}
-                    {property.agentPhone && (
-                      <a href={`tel:${property.agentPhone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-1">
+                    {(property.agent?.phone || property.agentPhone) && (
+                      <a href={`tel:${property.agent?.phone || property.agentPhone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-1">
                         <Phone size={14} />
-                        {property.agentPhone}
+                        {property.agent?.phone || property.agentPhone}
                       </a>
                     )}
-                    {property.agentEmail && (
-                      <a href={`mailto:${property.agentEmail}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+                    {(property.agent?.email || property.agentEmail) && (
+                      <a href={`mailto:${property.agent?.email || property.agentEmail}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
                         <Mail size={14} />
-                        {property.agentEmail}
+                        {property.agent?.email || property.agentEmail}
                       </a>
                     )}
                   </div>

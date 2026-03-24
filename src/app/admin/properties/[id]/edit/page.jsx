@@ -4,6 +4,7 @@ import connectDB from '../../../../../../lib/mongodb';
 import { notFound } from 'next/navigation';
 import Property from '../../../../../../lib/models/Property';
 import PropertyStatus from '../../../../../../lib/models/PropertyStatus';
+import Agent from '../../../../../../lib/models/Agent';
 import PropertyForm from '../../PropertyForm';
 import { writeFile, mkdir, unlink } from 'fs/promises';
 import path from 'path';
@@ -97,6 +98,7 @@ async function getProperty(id) {
       .populate('propertyTypeId', 'name slug icon')
       .populate('tagIds', 'name label color icon category slug')
       .populate('purposeTagId', 'name label color icon slug')
+      .populate('agentId', 'name phone email image')
       .lean();
 
     if (!property) {
@@ -141,12 +143,11 @@ async function getFormData() {
   try {
     await connectDB();
 
-    const [propertyTypes, statuses, tags] = await Promise.all([
+    const [propertyTypes, statuses, tags, agents] = await Promise.all([
       PropertyType.find({}).sort({ name: 1 }).lean(),
-      // Remove the isActive filter and sortOrder sorting since they don't exist in schema
       PropertyStatus.find({}).sort({ name: 1 }).lean(),
-      // Remove the isActive filter and category/sortOrder sorting since they don't exist in schema
       Tag.find({}).sort({ name: 1 }).lean(),
+      Agent.find({}).sort({ name: 1 }).lean(),
     ]);
 
     return {
@@ -162,6 +163,10 @@ async function getFormData() {
         ...tag,
         _id: tag._id.toString(),
       })),
+      agents: agents.map(agent => ({
+        ...agent,
+        _id: agent._id.toString(),
+      })),
     };
   } catch (error) {
     console.error('Error fetching form data:', error);
@@ -169,6 +174,7 @@ async function getFormData() {
       propertyTypes: [],
       statuses: [],
       tags: [],
+      agents: [],
     };
   }
 }
@@ -275,6 +281,7 @@ async function updateProperty(id, formData) {
         agentName: formData.get('agentName') || '',
         agentPhone: formData.get('agentPhone') || '',
         agentEmail: formData.get('agentEmail') || '',
+        agentId: formData.get('agentId') || null,
         area: parseFloat(formData.get('area')) || 0,
         NoOFCheck: formData.get('NoOFCheck') || '',
         RentalPeriod: formData.get('RentalPeriod') || '',
@@ -312,7 +319,7 @@ async function updateProperty(id, formData) {
 
 export default async function EditPropertyPage({ params }) {
   const { id } = await params;
-  const [property, { propertyTypes, statuses, tags }] = await Promise.all([
+  const [property, { propertyTypes, statuses, tags, agents }] = await Promise.all([
     getProperty(id),
     getFormData(),
   ]);
@@ -334,6 +341,7 @@ export default async function EditPropertyPage({ params }) {
           propertyTypes={propertyTypes}
           statuses={statuses}
           tags={tags}
+          agents={agents}
           action={updateProperty}
           buttonText="Update Property"
         />

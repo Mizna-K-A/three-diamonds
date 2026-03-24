@@ -1,12 +1,13 @@
 // app/properties/[id]/ImageGallery.jsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ImageGallery({ images, title }) {
   const [active, setActive] = useState(0);
   const [imageUrls, setImageUrls] = useState([]);
+  const thumbnailContainerRef = useRef(null);
 
   useEffect(() => {
     const urls = images.map(img => {
@@ -26,18 +27,31 @@ export default function ImageGallery({ images, title }) {
     }
   }, [images, active]);
 
+  // Scroll thumbnail into view when active changes
+  useEffect(() => {
+    if (thumbnailContainerRef.current && imageUrls.length > 0) {
+      const thumbnailElement = thumbnailContainerRef.current.children[active];
+      if (thumbnailElement) {
+        thumbnailElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  }, [active]);
+
   if (!images?.length || imageUrls.length === 0) return null;
 
   const prev = () => setActive((i) => Math.max(0, i - 1));
   const next = () => setActive((i) => Math.min(imageUrls.length - 1, i + 1));
 
   const getThumbnailUrl = (img) => {
-    // img is the full image object, we need to access its webp properties
     return img.webp?.thumbnail?.url || 
            img.webp?.small?.url || 
            img.webp?.medium?.url || 
            img.url ||
-           '/placeholder-image.jpg'; // Add a fallback
+           '/placeholder-image.jpg';
   };
 
   return (
@@ -80,31 +94,79 @@ export default function ImageGallery({ images, title }) {
         </div>
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails - Horizontal Scrollable Container */}
       {imageUrls.length > 1 && (
-        <div className="flex flex-wrap gap-0.5 p-0.5 bg-[#080808]">
-          {images.map((img, i) => {
-            const thumbUrl = getThumbnailUrl(img);
-            return (
-              <div
-                key={i}
-                onClick={() => setActive(i)}
-                className={`w-[72px] h-16 overflow-hidden cursor-pointer relative transition-opacity ${
-                  active === i ? 'ring-2 ring-white/90' : 'opacity-70 hover:opacity-100'
-                }`}
-              >
-                <img 
-                  src={thumbUrl} 
-                  alt={`${title} thumbnail ${i + 1}`}
-                  className="w-full h-full object-cover transition-all duration-250 hover:scale-105"
-                  onError={(e) => {
-                    // If thumbnail fails, try using the main image URL for this index
-                    e.target.src = imageUrls[i] || '/placeholder-image.jpg';
-                  }}
-                />
-              </div>
-            );
-          })}
+        <div className="relative bg-[#080808]">
+          {/* Scroll Buttons */}
+          <div className="absolute left-0 top-0 bottom-0 flex items-center z-10">
+            <button
+              onClick={() => {
+                if (thumbnailContainerRef.current) {
+                  thumbnailContainerRef.current.scrollBy({
+                    left: -200,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
+              className="w-8 h-8 bg-black/70 backdrop-blur-sm text-white rounded-r-md hover:bg-black/90 transition-colors flex items-center justify-center"
+            >
+              <ChevronLeft size={18} />
+            </button>
+          </div>
+          
+          <div className="absolute right-0 top-0 bottom-0 flex items-center z-10">
+            <button
+              onClick={() => {
+                if (thumbnailContainerRef.current) {
+                  thumbnailContainerRef.current.scrollBy({
+                    left: 200,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
+              className="w-8 h-8 bg-black/70 backdrop-blur-sm text-white rounded-l-md hover:bg-black/90 transition-colors flex items-center justify-center"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          {/* Scrollable Thumbnails Container */}
+          <div
+            ref={thumbnailContainerRef}
+            className="flex overflow-x-auto gap-0.5 p-0.5 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none', // Firefox
+              msOverflowStyle: 'none', // IE/Edge
+            }}
+          >
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            
+            {images.map((img, i) => {
+              const thumbUrl = getThumbnailUrl(img);
+              return (
+                <div
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className={`flex-shrink-0 w-[72px] h-16 overflow-hidden cursor-pointer relative transition-opacity ${
+                    active === i ? 'ring-2 ring-white/90' : 'opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <img 
+                    src={thumbUrl} 
+                    alt={`${title} thumbnail ${i + 1}`}
+                    className="w-full h-full object-cover transition-all duration-250 hover:scale-105"
+                    onError={(e) => {
+                      e.target.src = imageUrls[i] || '/placeholder-image.jpg';
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </>

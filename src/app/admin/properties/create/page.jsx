@@ -4,6 +4,7 @@ import PropertyType from '../../../../../lib/models/PropertyType';
 import PropertyStatus from '../../../../../lib/models/PropertyStatus';
 import connectDB from '../../../../../lib/mongodb';
 import Property from '../../../../../lib/models/Property';
+import Agent from '../../../../../lib/models/Agent';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
@@ -149,6 +150,7 @@ async function createProperty(formData) {
       agentName: formData.get('agentName') || '',
       agentPhone: formData.get('agentPhone') || '',
       agentEmail: formData.get('agentEmail') || '',
+      agentId: formData.get('agentId') || null,
       area: parseFloat(formData.get('area')) || 0,
       NoOFCheck: formData.get('NoOFCheck') || '',
       RentalPeriod: formData.get('RentalPeriod') || '',
@@ -182,12 +184,13 @@ async function getFormData() {
   try {
     await connectDB();
 
-    const [propertyTypes, statuses, tags] = await Promise.all([
+    const [propertyTypes, statuses, tags, agents] = await Promise.all([
       PropertyType.find({}).sort({ name: 1 }).lean(),
       // Remove isActive filter and sortOrder sorting
       PropertyStatus.find({}).sort({ name: 1 }).lean(),
       // Remove isActive filter and category/sortOrder sorting
       Tag.find({}).sort({ name: 1 }).lean(),
+      Agent.find({}).sort({ name: 1 }).lean(),
     ]);
 
     return {
@@ -203,6 +206,10 @@ async function getFormData() {
         ...tag,
         _id: tag._id.toString(),
       })),
+      agents: agents.map(agent => ({
+        ...agent,
+        _id: agent._id.toString(),
+      })),
     };
   } catch (error) {
     console.error('Error fetching form data:', error);
@@ -210,12 +217,13 @@ async function getFormData() {
       propertyTypes: [],
       statuses: [],
       tags: [],
+      agents: [],
     };
   }
 }
 
 export default async function CreatePropertyPage() {
-  const { propertyTypes, statuses, tags } = await getFormData();
+  const { propertyTypes, statuses, tags, agents } = await getFormData();
 
   return (
     <div className="p-6 bg-[#0a0a0a] min-h-screen">
@@ -229,6 +237,7 @@ export default async function CreatePropertyPage() {
           propertyTypes={propertyTypes}
           statuses={statuses}
           tags={tags}
+          agents={agents}
           action={createProperty}
           buttonText="Create Property"
         />

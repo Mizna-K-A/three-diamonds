@@ -34,6 +34,7 @@ const navigation = [
   { name: 'Insights', href: '/admin/insights', icon: Newspaper },
   { name: 'Home Slides', href: '/admin/hero-slides', icon: ImageIcon },
   { name: 'Team Members', href: '/admin/team', icon: Users },
+  { name: 'Agents', href: '/admin/agents', icon: Users },
   { name: 'Testimonials', href: '/admin/testimonials', icon: FileText },
   { name: 'Contact Info', href: '/admin/contact-info', icon: Settings },
 ];
@@ -200,9 +201,9 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
                 <p className="text-gray-300 text-sm font-semibold truncate leading-none">
                   Admin User
                 </p>
-                <p className="text-gray-600 text-xs mt-0.5 truncate">
+                {/* <p className="text-gray-600 text-xs mt-0.5 truncate">
                   admin@company.com
-                </p>
+                </p> */}
               </div>
             </div>
           )}

@@ -46,6 +46,10 @@ export async function getProperties(onlyPublished = false) {
         _id: property.purposeTagId._id.toString(),
         slug: property.purposeTagId.slug, // Include slug
       } : null,
+      agentId: property.agentId ? {
+        ...property.agentId,
+        _id: property.agentId._id.toString(),
+      } : null,
       userId: property.userId?.toString() || null,
       // Fix: Properly serialize the images array with the simplified schema
       images: (property.images || []).map(image => ({
@@ -265,6 +269,10 @@ async function createProperty(formData) {
           _id: populatedProperty.purposeTagId._id.toString(),
           slug: populatedProperty.purposeTagId.slug,
         } : null,
+        agentId: populatedProperty.agentId ? {
+          ...populatedProperty.agentId,
+          _id: populatedProperty.agentId._id.toString(),
+        } : null,
         // Return simplified images
         images: (populatedProperty.images || []).map(img => ({
           url: img.url,
@@ -389,6 +397,10 @@ async function updateProperty(id, formData) {
           ...propertyObj.purposeTagId,
           _id: propertyObj.purposeTagId._id.toString(),
           slug: propertyObj.purposeTagId.slug,
+        } : null,
+        agentId: propertyObj.agentId ? {
+          ...propertyObj.agentId,
+          _id: propertyObj.agentId._id.toString(),
         } : null,
         // Return simplified images
         images: (propertyObj.images || []).map(img => ({

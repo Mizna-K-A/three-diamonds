@@ -120,11 +120,16 @@ async function getProperty(slugOrId) {
       }),
       amenities: property.amenities || [],
       nearby: property.nearby || [],
-      agent: property.agent || {
+      agent: property.agentId ? {
+        name: property.agentId.name || property.agentName || 'Property Agent',
+        phone: property.agentId.phone || property.agentPhone || '+971 50 123 4567',
+        email: property.agentId.email || property.agentEmail || 'agent@example.com',
+        image: property.agentId.image || null
+      } : {
         name: property.agentName || 'Property Agent',
         phone: property.agentPhone || '+971 50 123 4567',
         email: property.agentEmail || 'agent@example.com',
-        image: property.agentImage || null
+        image: null
       },
       specs: property.specs || [],
       priceDetails: {
