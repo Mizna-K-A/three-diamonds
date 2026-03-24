@@ -47,7 +47,7 @@ async function getProperty(slugOrId) {
     await connectDB();
 
     // Try to find by slug first, then fallback to ID
-    let property = await Property.findOne({ slug: slugOrId })
+    let property = await Property.findOne({ slug: slugOrId, isPublished: true })
       .populate('statusId', 'name label color icon')
       .populate('propertyTypeId', 'name slug icon')
       .populate('tagIds', 'name label color icon category')
@@ -63,6 +63,11 @@ async function getProperty(slugOrId) {
         .populate('tagIds', 'name label color icon category')
         .populate('purposeTagId', 'name label color icon')
         .lean();
+
+      // If found by ID, still check isPublished
+      if (property && !property.isPublished) {
+        property = null;
+      }
     }
 
     if (!property) return null;

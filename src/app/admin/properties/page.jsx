@@ -1,22 +1,23 @@
 import Property from '../../../../lib/models/Property';
-  import PropertyStatus from '../../../../lib/models/PropertyStatus';
+import PropertyStatus from '../../../../lib/models/PropertyStatus';
 import connectDB from '../../../../lib/mongodb';
 import PropertiesClient from './PropertiesClient';
 import PropertyType from '../../../../lib/models/PropertyType';
 import Tag from '../../../../lib/models/Tag';
 
-export async function getProperties() {
+export async function getProperties(onlyPublished = false) {
   try {
     await connectDB();
-    
-    const properties = await Property.find({})
+
+    const query = onlyPublished ? { isPublished: true } : {};
+    const properties = await Property.find(query)
       .populate('statusId', 'name label color icon slug') // Added slug
       .populate('propertyTypeId', 'name slug icon')
       .populate('tagIds', 'name label color icon category slug') // Added slug
       .populate('purposeTagId', 'name label color icon slug') // Added slug
       .sort({ createdAt: -1 })
       .lean();
-    
+
     return properties.map(property => ({
       ...property,
       _id: property._id.toString(),
@@ -136,7 +137,7 @@ async function getTags() {
 // Helper function to convert slug to ID for tags
 async function getTagIdsFromSlugs(slugs = []) {
   if (!slugs.length) return [];
-  
+
   try {
     await connectDB();
     const tags = await Tag.find({ slug: { $in: slugs } }).select('_id').lean();
@@ -150,7 +151,7 @@ async function getTagIdsFromSlugs(slugs = []) {
 // Helper function to get slug from ID (for response)
 async function getTagSlugFromId(id) {
   if (!id) return null;
-  
+
   try {
     await connectDB();
     const tag = await Tag.findById(id).select('slug').lean();
@@ -164,21 +165,21 @@ async function getTagSlugFromId(id) {
 // Server Actions
 async function createProperty(formData) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     // Parse features and images from JSON strings
     const features = formData.get('features') ? JSON.parse(formData.get('features')) : [];
     const images = formData.get('images') ? JSON.parse(formData.get('images')) : [];
-    
+
     // Handle tags - support both IDs and slugs
     let tagIds = [];
     const tagInput = formData.get('tagIds');
-    
+
     if (tagInput) {
       const parsedTags = JSON.parse(tagInput);
-      
+
       // Check if the first item is a slug (string without ObjectId format)
       if (parsedTags.length > 0 && typeof parsedTags[0] === 'string' && !parsedTags[0].match(/^[0-9a-fA-F]{24}$/)) {
         // Input is slugs, convert to IDs
@@ -188,7 +189,7 @@ async function createProperty(formData) {
         tagIds = parsedTags;
       }
     }
-    
+
     // Prepare images with simplified schema
     const processedImages = images.map((img, index) => ({
       url: img.url,
@@ -198,7 +199,7 @@ async function createProperty(formData) {
       sortOrder: img.sortOrder || index,
       uploadedAt: new Date(),
     }));
-    
+
     const property = await Property.create({
       title: formData.get('title'),
       description: formData.get('description') || '',
@@ -213,7 +214,7 @@ async function createProperty(formData) {
       bedrooms: parseInt(formData.get('bedrooms')) || 0,
       bathrooms: parseFloat(formData.get('bathrooms')) || 0,
       area: parseFloat(formData.get('area')) || 0,
-       NoOFCheck: formData.get('NoOFCheck'),
+      NoOFCheck: formData.get('NoOFCheck'),
       RentalPeriod: formData.get('RentalPeriod'),
       statusId: formData.get('statusId'),
       propertyTypeId: formData.get('propertyTypeId') || null,
@@ -225,7 +226,7 @@ async function createProperty(formData) {
       isPublished: formData.get('isPublished') === 'true',
       expiresAt: formData.get('expiresAt') || null,
     });
-    
+
     // Fetch populated property
     const populatedProperty = await Property.findById(property._id)
       .populate('statusId', 'name label color icon slug')
@@ -233,8 +234,8 @@ async function createProperty(formData) {
       .populate('tagIds', 'name label color icon category slug')
       .populate('purposeTagId', 'name label color icon slug')
       .lean();
-    
-    return { 
+
+    return {
       success: true,
       data: {
         ...populatedProperty,
@@ -284,21 +285,21 @@ async function createProperty(formData) {
 
 async function updateProperty(id, formData) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     // Parse features and images from JSON strings
     const features = formData.get('features') ? JSON.parse(formData.get('features')) : [];
     const images = formData.get('images') ? JSON.parse(formData.get('images')) : [];
-    
+
     // Handle tags - support both IDs and slugs
     let tagIds = [];
     const tagInput = formData.get('tagIds');
-    
+
     if (tagInput) {
       const parsedTags = JSON.parse(tagInput);
-      
+
       // Check if the first item is a slug (string without ObjectId format)
       if (parsedTags.length > 0 && typeof parsedTags[0] === 'string' && !parsedTags[0].match(/^[0-9a-fA-F]{24}$/)) {
         // Input is slugs, convert to IDs
@@ -308,7 +309,7 @@ async function updateProperty(id, formData) {
         tagIds = parsedTags;
       }
     }
-    
+
     // Prepare images with simplified schema
     const processedImages = images.map((img, index) => ({
       url: img.url,
@@ -318,7 +319,7 @@ async function updateProperty(id, formData) {
       sortOrder: img.sortOrder || index,
       uploadedAt: img.uploadedAt ? new Date(img.uploadedAt) : new Date(),
     }));
-    
+
     const property = await Property.findByIdAndUpdate(
       id,
       {
@@ -349,17 +350,17 @@ async function updateProperty(id, formData) {
       },
       { new: true, runValidators: true }
     ).populate('statusId', 'name label color icon slug')
-     .populate('propertyTypeId', 'name slug icon')
-     .populate('tagIds', 'name label color icon category slug')
-     .populate('purposeTagId', 'name label color icon slug');
-    
+      .populate('propertyTypeId', 'name slug icon')
+      .populate('tagIds', 'name label color icon category slug')
+      .populate('purposeTagId', 'name label color icon slug');
+
     if (!property) {
       return { error: 'Property not found' };
     }
-    
+
     const propertyObj = property.toObject();
-    
-    return { 
+
+    return {
       success: true,
       data: {
         ...propertyObj,
@@ -409,16 +410,16 @@ async function updateProperty(id, formData) {
 
 async function deleteProperty(id) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     const property = await Property.findByIdAndDelete(id);
-    
+
     if (!property) {
       return { error: 'Property not found' };
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error deleting property:', error);
@@ -428,18 +429,18 @@ async function deleteProperty(id) {
 
 async function toggleFeature(id) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     const property = await Property.findById(id);
     if (!property) {
       return { error: 'Property not found' };
     }
-    
+
     property.isFeatured = !property.isFeatured;
     await property.save();
-    
+
     return { success: true, isFeatured: property.isFeatured };
   } catch (error) {
     console.error('Error toggling feature:', error);
@@ -449,21 +450,21 @@ async function toggleFeature(id) {
 
 async function togglePublish(id) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     const property = await Property.findById(id);
     if (!property) {
       return { error: 'Property not found' };
     }
-    
+
     property.isPublished = !property.isPublished;
     if (property.isPublished && !property.publishedAt) {
       property.publishedAt = new Date();
     }
     await property.save();
-    
+
     return { success: true, isPublished: property.isPublished };
   } catch (error) {
     console.error('Error toggling publish:', error);
@@ -478,9 +479,9 @@ export default async function PropertiesPage() {
     getPropertyStatuses(),
     getTags(),
   ]);
-  
+
   return (
-    <PropertiesClient 
+    <PropertiesClient
       initialProperties={properties}
       propertyTypes={propertyTypes}
       statuses={statuses}

@@ -17,7 +17,7 @@ import SiteSettings from '../../lib/models/SiteSettings';
 import About from './components/About';
 
 export default async function Home() {
-  const properties = await getProperties()
+  const properties = await getProperties(true)
   const propertyTypes = await getPropertyTypes();
   const statuses = await getPropertyStatuses();
   const tags = await getTags();
@@ -31,7 +31,7 @@ export default async function Home() {
         <HeaderWithPropertyTypes />
         <Hero />
         <Team />
-        <About/>
+        <About />
         <Services />
         <FeaturedProperties
           initialProperties={properties}

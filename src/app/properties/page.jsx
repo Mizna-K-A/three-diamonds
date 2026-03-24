@@ -7,7 +7,7 @@ import { getPropertyStatuses } from '../admin/property-statuses/page';
 import { getTags } from '../admin/tags/page';
 
 export default async function PropertiesPage() {
-  const properties = await getProperties()
+  const properties = await getProperties(true)
   const propertyTypes = await getPropertyTypes();
   const statuses = await getPropertyStatuses();
   const tags = await getTags();

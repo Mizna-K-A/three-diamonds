@@ -611,6 +611,20 @@ export default function PropertiesClient({
                   </div>
 
                   <div className="flex gap-1">
+                    {/* <button
+                      onClick={() => handleToggleFeature(property._id)}
+                      className={`p-2 rounded-lg transition-colors ${property.isFeatured ? 'text-yellow-500 hover:bg-yellow-900/20' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                      title={property.isFeatured ? "Unfeature property" : "Feature property"}
+                    >
+                      {property.isFeatured ? <Star size={16} fill="currentColor" /> : <StarOff size={16} />}
+                    </button> */}
+                    <button
+                      onClick={() => handleTogglePublish(property._id)}
+                      className={`p-2 rounded-lg transition-colors ${!property.isPublished ? 'text-red-500 hover:bg-red-900/20' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                      title={property.isPublished ? "Make invisible" : "Make visible"}
+                    >
+                      {property.isPublished ? <Star size={16} /> : <StarOff size={16} />}
+                    </button>
                     <Link
                       href={`/admin/properties/${property._id}/`}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"

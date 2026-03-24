@@ -170,7 +170,7 @@ export default function FeaturedProperties({
         const matchesTags =
           selectedTags.length === 0 ||
           property.tags?.some((tag) => selectedTags.includes(tag._id));
-        return matchesStatus && matchesTags;
+        return matchesStatus && matchesTags && property.isPublished;
       });
 
     // Then sort to show featured properties first
@@ -244,7 +244,7 @@ export default function FeaturedProperties({
         </div>
 
         {/* ── STATUS BUTTONS ── */}
-        {statuses.length > 0 && (
+        {/* {statuses.length > 0 && (
           <motion.div
             className="flex flex-wrap justify-center gap-2 mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -253,11 +253,10 @@ export default function FeaturedProperties({
           >
             <button
               onClick={() => setSelectedStatus("all")}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                selectedStatus === "all"
-                  ? "bg-black text-white shadow-md"
-                  : "bg-stone-100 text-stone-700 hover:bg-stone-200"
-              }`}
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${selectedStatus === "all"
+                ? "bg-black text-white shadow-md"
+                : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                }`}
             >
               All Status
             </button>
@@ -265,18 +264,17 @@ export default function FeaturedProperties({
               <button
                 key={status._id}
                 onClick={() => setSelectedStatus(status._id)}
-                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                  selectedStatus === status._id
-                    ? "bg-black text-white shadow-md"
-                    : "bg-stone-100 text-stone-700 hover:bg-stone-200"
-                }`}
+                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${selectedStatus === status._id
+                  ? "bg-black text-white shadow-md"
+                  : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                  }`}
               >
                 <span className={`w-2 h-2 rounded-full ${statusDotMap[status._id]}`} />
                 {status.name}
               </button>
             ))}
           </motion.div>
-        )}
+        )} */}
 
         {/* Result count with fade animation */}
         <motion.p
@@ -328,7 +326,10 @@ export default function FeaturedProperties({
                   return (
                     <div
                       key={property.id ?? property._id}
-                      className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                      className={`group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all duration-300 ${property.status?.slug?.includes('sold') || property.status?.name?.toLowerCase().includes('sold')
+                          ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
+                          : "hover:shadow-xl hover:-translate-y-2 cursor-pointer"
+                        }`}
                     >
                       {/* IMAGE */}
                       <div className="relative h-52 overflow-hidden bg-gray-50">
@@ -353,10 +354,10 @@ export default function FeaturedProperties({
                             {property.tags[0]?.name}
                           </span>
                         </div>
-
+                        {console.log(property)}
                         {property.propertyType?.name != null && (
                           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm">
-                            {property.propertyType?.name ?? "Property"}
+                            {property.status?.name ?? "Property"}
                           </div>
                         )}
                       </div>

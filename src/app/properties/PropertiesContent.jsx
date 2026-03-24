@@ -173,7 +173,7 @@ export default function PropertiesContent({
       const matchesType = selectedType === "all" || property.propertyType?.slug === selectedType;
       const matchesStatus = selectedStatus === "all" || property.status?._id === selectedStatus;
       const matchesTags = selectedTags.length === 0 || property.tags?.some((tag) => selectedTags.includes(tag._id));
-      return matchesType && matchesStatus && matchesTags;
+      return matchesType && matchesStatus && matchesTags && property.isPublished;
     });
   }, [properties, selectedType, selectedStatus, selectedTags]);
 
@@ -308,7 +308,10 @@ export default function PropertiesContent({
               return (
                 <div
                   key={property._id}
-                  className="group bg-[#161616] rounded-2xl overflow-hidden border border-white/6 hover:border-white/15 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                  className={`group bg-[#161616] rounded-2xl overflow-hidden border border-white/6 transition-all duration-300 ${property.status?.slug?.includes('sold') || property.status?.name?.toLowerCase().includes('sold')
+                      ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
+                      : "hover:border-white/15 hover:shadow-2xl hover:shadow-black/60 cursor-pointer hover:-translate-y-1"
+                    }`}
                   onClick={() => router.push(`/properties/${property.slug || property._id}`)}
                 >
                   {/* IMAGE */}
