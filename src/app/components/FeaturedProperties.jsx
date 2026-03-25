@@ -326,7 +326,7 @@ export default function FeaturedProperties({
                   return (
                     <div
                       key={property.id ?? property._id}
-                      className={`group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all duration-300 ${property.status?.slug?.includes('sold') || property.status?.name?.toLowerCase().includes('sold')
+                      className={`group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all duration-300 ${property.isFadeProperty
                           ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
                           : "hover:shadow-xl hover:-translate-y-2 cursor-pointer"
                         }`}

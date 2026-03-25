@@ -76,6 +76,7 @@ export async function getProperties(onlyPublished = false) {
       updatedAt: property.updatedAt?.toISOString(),
       publishedAt: property.publishedAt?.toISOString(),
       expiresAt: property.expiresAt?.toISOString(),
+      isFadeProperty: property.isFadeProperty || false, // Add this line
     }));
   } catch (error) {
     console.error('Error fetching properties:', error);
@@ -228,6 +229,7 @@ async function createProperty(formData) {
       images: processedImages,
       features: features,
       isFeatured: formData.get('isFeatured') === 'true',
+      isFadeProperty: formData.get('isFadeProperty') === 'true', // Add this line
       isPublished: formData.get('isPublished') === 'true',
       expiresAt: formData.get('expiresAt') || null,
     });
@@ -284,6 +286,7 @@ async function createProperty(formData) {
           uploadedAt: img.uploadedAt?.toISOString(),
           _id: img._id?.toString(),
         })),
+        isFadeProperty: populatedProperty.isFadeProperty || false, // Add this line
       }
     };
   } catch (error) {
@@ -353,6 +356,7 @@ async function updateProperty(id, formData) {
         images: processedImages,
         features: features,
         isFeatured: formData.get('isFeatured') === 'true',
+        isFadeProperty: formData.get('isFadeProperty') === 'true', // Add this line
         isPublished: formData.get('isPublished') === 'true',
         expiresAt: formData.get('expiresAt') || null,
         updatedAt: new Date(),
@@ -413,6 +417,7 @@ async function updateProperty(id, formData) {
           uploadedAt: img.uploadedAt?.toISOString(),
           _id: img._id?.toString(),
         })),
+        isFadeProperty: propertyObj.isFadeProperty || false, // Add this line
       }
     };
   } catch (error) {
@@ -461,6 +466,41 @@ async function toggleFeature(id) {
   }
 }
 
+// Add new toggleFadeProperty function
+async function toggleFadeProperty(id) {
+  'use server';
+
+  try {
+    await connectDB();
+ const property = await Property.findById(id);
+    if (!property) {
+      return { error: 'Property not found' };
+    }
+
+    property.isFadeProperty = !property.isFadeProperty;
+    await property.save();
+
+    return { success: true, isFadeProperty: property.isFadeProperty };
+  } catch (error) {
+    console.error('Error toggling fade:', error);
+    return { error: error.message };
+  }
+  //   const property = await Property.findById(id);
+  //   if (!property) {
+  //     return { error: 'Property not found' };
+  //   }
+
+  //   // This toggles between true and false
+  //   property.isFadeProperty = !property.isFadeProperty;
+  //   await property.save();
+
+  //   return { success: true, isFadeProperty: property.isFadeProperty };
+  // } catch (error) {
+  //   console.error('Error toggling fade property:', error);
+  //   return { error: error.message };
+  // }
+}
+
 async function togglePublish(id) {
   'use server';
 
@@ -504,6 +544,7 @@ export default async function PropertiesPage() {
       deleteProperty={deleteProperty}
       toggleFeature={toggleFeature}
       togglePublish={togglePublish}
+      toggleFadeProperty={toggleFadeProperty} // Add this line
     />
   );
 }

@@ -444,7 +444,10 @@ export default function PropertyForm({
     images: [],
     features: [],
     isFeatured: false,
+
     isPublished: true,
+    isFadeProperty: false,
+
     expiresAt: '',
     mapLink: '',
   });
@@ -512,7 +515,10 @@ export default function PropertyForm({
         images: processedImages,
         features: property.features || [],
         isFeatured: property.isFeatured || false,
+
         isPublished: property.isPublished !== false,
+        isFadeProperty: property.isFadeProperty || false,
+
         expiresAt: property.expiresAt ? property.expiresAt.split('T')[0] : '',
       });
 

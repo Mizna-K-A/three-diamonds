@@ -51,6 +51,7 @@ export default function PropertiesClient({
   deleteProperty,
   toggleFeature,
   togglePublish,
+  toggleFadeProperty
 }) {
   const [properties, setProperties] = useState(initialProperties || []);
   const [searchTerm, setSearchTerm] = useState('');
@@ -266,7 +267,39 @@ export default function PropertiesClient({
       });
     }
   };
+  const handleToggleFadeProperty = async (id) => {
+    try {
+      // Assuming you have a toggleFadeProperty prop passed from parent
+      const result = await toggleFadeProperty(id);
+      if (result.error) throw new Error(result.error);
+      setProperties(prev => prev.map(p => p._id === id ? { ...p, isFadeProperty: result.isFadeProperty } : p));
 
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `Property ${result.isFadeProperty ? 'marked as fade' : 'removed from fade'} successfully.`,
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
+    } catch (error) {
+      console.error('Error toggling fade property:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to toggle fade property status.',
+        background: '#111111',
+        color: '#ffffff',
+        customClass: {
+          popup: 'border border-gray-800 rounded-xl'
+        }
+      });
+    }
+  };
   const handleTogglePublish = async (id) => {
     try {
       const result = await togglePublish(id);
@@ -618,6 +651,17 @@ export default function PropertiesClient({
                     >
                       {property.isFeatured ? <Star size={16} fill="currentColor" /> : <StarOff size={16} />}
                     </button> */}
+                    {/* Fade Property Toggle Button */}
+                    <button
+                      onClick={() => handleToggleFadeProperty(property._id)}
+                      className={`p-2 rounded-lg transition-colors ${property.isFadeProperty
+                          ? 'text-purple-500 hover:bg-purple-900/20'  // When faded (true)
+                          : 'text-gray-400 hover:text-purple-400 hover:bg-gray-800'  // When not faded (false)
+                        }`}
+                      title={property.isFadeProperty ? "Remove from fade" : "Mark as fade property"}
+                    >
+                      <LucideIcons.Ghost size={16} fill={property.isFadeProperty ? "currentColor" : "none"} />
+                    </button>
                     <button
                       onClick={() => handleTogglePublish(property._id)}
                       className={`p-2 rounded-lg transition-colors ${!property.isPublished ? 'text-red-500 hover:bg-red-900/20' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
