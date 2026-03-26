@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Download, FileText, Mail, Phone, ExternalLink, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { buildProposalPDF } from '../../../../lib/buildProposalPDF';
 
 export default function ProposalRequestsClient({ initialProposals }) {
     const [proposals, setProposals] = useState(initialProposals);
@@ -42,88 +42,22 @@ export default function ProposalRequestsClient({ initialProposals }) {
                 throw new Error('No property details available for this proposal');
             }
 
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.width;
+            // Load logo as base64 for watermark
+            let logoBase64 = null;
+            try {
+                const res = await fetch('/logoooo.png');
+                const buf = await res.arrayBuffer();
+                logoBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+            } catch { /* watermark is cosmetic — skip if missing */ }
 
-            // Header
-            doc.setFillColor(31, 41, 55); // Dark blue-gray
-            doc.rect(0, 0, pageWidth, 40, 'F');
+            const doc = buildProposalPDF(
+                new jsPDF(),
+                property,
+                { name: proposal.name, email: proposal.email, phone: proposal.phone },
+                logoBase64
+            );
 
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(22);
-            doc.text('THREE DIAMONDS REAL ESTATE', 15, 20);
-            doc.setFontSize(10);
-            doc.text('PROPERTY PROPOSAL', 15, 30);
-
-            // Customer Info
-            doc.setTextColor(50, 50, 50);
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text('Prepared for:', 15, 55);
-            doc.setFont(undefined, 'normal');
-            doc.text(`${proposal.name}`, 15, 62);
-            doc.text(`${proposal.email}`, 15, 68);
-            doc.text(`${proposal.phone}`, 15, 74);
-
-            // Property Title
-            doc.setFontSize(18);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(29, 78, 216); // Blue-700
-            doc.text(property.title, 15, 95);
-
-            // Price & Basics
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Price: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(property.price)}`, 15, 105);
-            doc.text(`Location: ${property.address}, ${property.city}`, 15, 112);
-            doc.text(`Type: ${property.propertyType?.name || 'N/A'}`, 15, 119);
-
-            // Details Table
-            const details = [
-                ['Area', `${property.area} sq ft`],
-                ['No of Checks', property.NoOFCheck || 'N/A'],
-                ['Rental Period', property.RentalPeriod || 'N/A'],
-            ];
-
-            autoTable(doc, {
-                startY: 130,
-                head: [['Feature', 'Description']],
-                body: details,
-                theme: 'striped',
-                headStyles: { fillColor: [29, 78, 216] }
-            });
-
-            const tableResults = doc.lastAutoTable;
-            const finalY = tableResults ? tableResults.finalY : 130;
-
-            // Features
-            if (property.features && property.features.length > 0) {
-                doc.setFontSize(14);
-                doc.setFont(undefined, 'bold');
-                doc.text('Features & Amenities:', 15, finalY + 15);
-                doc.setFont(undefined, 'normal');
-                doc.setFontSize(10);
-
-                property.features.forEach((feature, index) => {
-                    const featureName = typeof feature === 'string' ? feature : feature.name;
-                    doc.text(`• ${featureName}`, 20, finalY + 25 + (index * 6));
-                });
-            }
-
-            // Agent Info
-            const currentY = doc.internal.pageSize.height - 40;
-            doc.setDrawColor(200, 200, 200);
-            doc.line(15, currentY, pageWidth - 15, currentY);
-
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text('Your Dedicated Agent:', 15, currentY + 10);
-            doc.setFont(undefined, 'normal');
-            doc.text(property.agentName || 'Three Diamonds Representative', 15, currentY + 18);
-            doc.text(`Email: ${property.agentEmail || 'info@threediamonds.ae'}`, 15, currentY + 24);
-            doc.text(`Phone: ${property.agentPhone || '+971 4 XXX XXXX'}`, 15, currentY + 30);
-
-            doc.save(`Proposal_${property.title.replace(/\s+/g, '_')}.pdf`);
+            doc.save(`Proposal_${(property.title || 'Property').replace(/\s+/g, '_')}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
             alert('Failed to generate PDF. Please try again.');
@@ -131,6 +65,8 @@ export default function ProposalRequestsClient({ initialProposals }) {
             setGeneratingId(null);
         }
     };
+
+
 
     function StatusBadge({ status }) {
         const statusConfig = {
