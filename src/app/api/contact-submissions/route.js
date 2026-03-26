@@ -37,7 +37,7 @@ export async function POST(request) {
 
     // Send Email Notifications
     try {
-      const { sendMail, getContactEmailTemplate, getAdminNotificationTemplate } = await import('../../../../lib/mail');
+      const { sendMail, getContactEmailTemplate, getAdminNotificationTemplate, getAdminEmails } = await import('../../../../lib/mail');
 
       const isBrochure = source === 'brochure-download';
       const typeLabel = isBrochure ? 'Brochure Request' : 'Contact Submission';
@@ -59,9 +59,11 @@ export async function POST(request) {
         source: isBrochure ? 'Brochure Download' : 'Contact Form',
         message
       });
-      if (process.env.ADMIN_EMAIL) {
+
+      const adminTo = await getAdminEmails();
+      if (adminTo) {
         await sendMail({
-          to: process.env.ADMIN_EMAIL,
+          to: adminTo,
           ...adminMail
         });
       }

@@ -56,7 +56,7 @@ export async function POST(request) {
 
     // Send Email Notifications
     try {
-      const { sendMail, getViewingEmailTemplate, getAdminNotificationTemplate } = await import('../../../../lib/mail');
+      const { sendMail, getViewingEmailTemplate, getAdminNotificationTemplate, getAdminEmails } = await import('../../../../lib/mail');
 
       // 1. Send to Client
       const clientMail = getViewingEmailTemplate(name, propertyTitle, preferredDate, preferredTime);
@@ -76,9 +76,11 @@ export async function POST(request) {
         time: preferredTime,
         message
       });
-      if (process.env.ADMIN_EMAIL) {
+
+      const adminTo = await getAdminEmails();
+      if (adminTo) {
         await sendMail({
-          to: process.env.ADMIN_EMAIL,
+          to: adminTo,
           ...adminMail
         });
       }

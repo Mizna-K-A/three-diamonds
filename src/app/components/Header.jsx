@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key, Computer } from 'lucide-react';
+import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key, Computer, BuildingIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -159,6 +159,7 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
         { label: 'Tenant Representation', href: '/services/tenant-representation', icon: Users },
         { label: 'Landlord Agency', href: '/services/landlord-agency', icon: Key },
         { label: 'Techinical Services', href: '/services/technical-service', icon: Computer },
+        { label: 'Goshi City', href: '/services/goshi-city', icon: BuildingIcon },
       ]
     },
     {

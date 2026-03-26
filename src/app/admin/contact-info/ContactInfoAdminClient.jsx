@@ -11,7 +11,8 @@ export default function ContactInfoAdminClient({ initialSettings }) {
         emails: initialSettings?.emails?.length ? initialSettings.emails : [''],
         locations: initialSettings?.locations?.length ? initialSettings.locations : [{ title: '', address: '', lat: 0, lng: 0, mapEmbedUrl: '' }],
         businessHours: initialSettings?.businessHours?.length ? initialSettings.businessHours : [''],
-        socialLinks: initialSettings?.socialLinks?.length ? initialSettings.socialLinks : [{ platform: 'facebook', url: '' }]
+        socialLinks: initialSettings?.socialLinks?.length ? initialSettings.socialLinks : [{ platform: 'facebook', url: '' }],
+        adminEmails: initialSettings?.adminEmails?.length ? initialSettings.adminEmails : ['']
     });
     const [saving, setSaving] = useState(false);
 
@@ -64,7 +65,8 @@ export default function ContactInfoAdminClient({ initialSettings }) {
                 emails: settings.emails.filter(e => e.trim() !== ''),
                 locations: settings.locations.filter(l => l.address.trim() !== ''),
                 businessHours: settings.businessHours.filter(h => h.trim() !== ''),
-                socialLinks: settings.socialLinks.filter(s => s.url.trim() !== '')
+                socialLinks: settings.socialLinks.filter(s => s.url.trim() !== ''),
+                adminEmails: settings.adminEmails.filter(e => e.trim() !== '')
             };
 
             await updateContactSettings(filteredSettings);
@@ -164,6 +166,7 @@ export default function ContactInfoAdminClient({ initialSettings }) {
                         </div>
                     </div>
 
+                    
                     {/* Business Hours */}
                     <div className="bg-[#111111] rounded-2xl border border-gray-800 p-6">
                         <div className="flex items-center justify-between mb-6">
@@ -290,6 +293,38 @@ export default function ContactInfoAdminClient({ initialSettings }) {
                             ))}
                         </div>
                     </div>
+
+                    {/* Admin Notification Emails */}
+                    <div className="bg-[#111111] rounded-2xl border border-gray-800 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <Mail size={18} className="text-[#4ade80]" />
+                                Admin Notification Emails
+                            </h2>
+                            <button onClick={() => addArrayItem('adminEmails')} className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-1">
+                                <Plus size={12} /> Add
+                            </button>
+                        </div>
+                        <p className="text-gray-500 text-xs mb-4">Emails added here will receive notifications for contact submissions, viewing schedules, and brochure requests.</p>
+                        <div className="space-y-3">
+                            {settings.adminEmails.map((email, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <input
+                                        type="email"
+                                        autoComplete="off"
+                                        value={email}
+                                        onChange={e => handleArrayChange('adminEmails', idx, e.target.value)}
+                                        className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-white text-sm focus:border-gray-600 outline-none"
+                                        placeholder="admin@threediamonds.ae"
+                                    />
+                                    <button onClick={() => removeArrayItem('adminEmails', idx)} className="p-2 text-gray-500 hover:text-red-500 transition-colors">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

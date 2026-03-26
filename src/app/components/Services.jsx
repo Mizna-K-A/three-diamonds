@@ -146,6 +146,7 @@ export default function Services() {
       accentColor: 'border-gray-400',
       hoverColor: 'hover:border-gray-300',
       items: ['Warehouse', 'Showroom', 'Office Space', 'Open Land', 'Labour Camp', 'Staff Accommodation', 'Commercial Villa'],
+      navigate: '/services/maintenance'
     },
     {
       title: 'RESIDENTIAL LEASING',
@@ -153,7 +154,8 @@ export default function Services() {
       gradient: 'from-gray-800 to-black',
       accentColor: 'border-gray-400',
       hoverColor: 'hover:border-gray-300',
-      items: ['Villas', 'Apartments', 'Townhouses', 'Penthouses', 'Hotel Apartments']
+      items: ['Villas', 'Apartments', 'Townhouses', 'Penthouses', 'Hotel Apartments'],
+      navigate: '/services/landlord-agency'
     },
     {
       title: 'BUSINESS SOLUTIONS',
@@ -169,7 +171,8 @@ export default function Services() {
         'Exit Strategy',
         'Financial Analysis',
         'Be in control'
-      ]
+      ],
+      navigate: '/services/tenant-representation'
     },
     {
       title: 'PROPERTY MANAGEMENT',
@@ -177,7 +180,8 @@ export default function Services() {
       gradient: 'from-gray-800 to-black',
       accentColor: 'border-gray-400',
       hoverColor: 'hover:border-gray-300',
-      items: ['Maintenance', 'Tenant Screening', 'Rent Collection', 'Property Inspection', '24/7 Support', 'Legal Compliance']
+      items: ['Maintenance', 'Tenant Screening', 'Rent Collection', 'Property Inspection', '24/7 Support', 'Legal Compliance'],
+      navigate: '/services/property-management'
     }
   ];
 
@@ -340,7 +344,7 @@ export default function Services() {
                 className="mt-8 pt-6 border-t border-gray-700 relative z-10"
               >
                 <motion.a
-                  href="/services"
+                  href={service.navigate}
                   whileHover={{ x: 5 }}
                   className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300"
                 >

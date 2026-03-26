@@ -25,7 +25,11 @@ export async function updateContactSettings(data) {
     let settings = await SiteSettings.findOne();
 
     if (settings) {
-        settings = await SiteSettings.findByIdAndUpdate(settings._id, data, { new: true });
+        settings = await SiteSettings.findByIdAndUpdate(
+            settings._id,
+            { $set: data },
+            { new: true, strict: false }
+        );
     } else {
         settings = await SiteSettings.create(data);
     }
