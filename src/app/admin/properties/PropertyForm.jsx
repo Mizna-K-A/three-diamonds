@@ -447,6 +447,8 @@ export default function PropertyForm({
 
     isPublished: true,
     isFadeProperty: false,
+    proposalPdf: '',
+    proposalPdfFile: null,
 
     expiresAt: '',
     mapLink: '',
@@ -518,6 +520,7 @@ export default function PropertyForm({
 
         isPublished: property.isPublished !== false,
         isFadeProperty: property.isFadeProperty || false,
+        proposalPdf: property.proposalPdf || '',
 
         expiresAt: property.expiresAt ? property.expiresAt.split('T')[0] : '',
       });
@@ -607,6 +610,8 @@ export default function PropertyForm({
         } else if (key === 'tagIds') {
           // Send as array but only with one tag
           submitData.append(key, JSON.stringify(value));
+        } else if (key === 'proposalPdfFile' && value) {
+          submitData.append('proposalPdfFile', value);
         } else if (key === 'agentId') {
           submitData.append(key, value || '');
         } else {
@@ -979,6 +984,23 @@ export default function PropertyForm({
                     onChange={(e) => setFormData({ ...formData, RentalPeriod: e.target.value })}
                     placeholder="Rental Period"
                   />
+                  <div className="lg:col-span-2 space-y-1.5 p-4 bg-[#1a1a1a] border border-gray-800 rounded-xl">
+                    <label className="block text-sm font-medium text-gray-300">Proposal PDF (Optional)</label>
+                    <div className="flex items-center gap-4 mt-2">
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) => setFormData({ ...formData, proposalPdfFile: e.target.files[0] })}
+                        className="text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                      />
+                      {formData.proposalPdf && !formData.proposalPdfFile && (
+                        <a href={formData.proposalPdf} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 text-sm font-medium whitespace-nowrap">
+                          View Current PDF
+                        </a>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Upload a property details PDF to be sent automatically to clients when they request a proposal.</p>
+                  </div>
                 </div>
 
                 {/* Tags Section - Modified for single selection */}

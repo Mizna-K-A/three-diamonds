@@ -639,7 +639,7 @@ export default async function PropertyDetailsPage({ params }) {
                     </div>
                     <span className="text-sm text-white">{property.NoOFCheck || '—'}</span>
                   </div>
-
+{console.log(property)}
                   {property.area && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-gray-400">

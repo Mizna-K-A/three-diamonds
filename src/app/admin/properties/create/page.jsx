@@ -136,6 +136,31 @@ async function createProperty(formData) {
     // Generate slug
     const slug = formData.get('slug') || generateSlug(title);
 
+    // Process proposal PDF file if exists
+    let proposalPdf = '';
+    const proposalPdfFile = formData.get('proposalPdfFile');
+
+    if (proposalPdfFile && proposalPdfFile.size > 0) {
+      try {
+        const bytes = await proposalPdfFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 10);
+        const pdfFilename = `proposal-${timestamp}-${random}.pdf`;
+
+        const pdfDir = path.join(process.cwd(), 'public/uploads/properties/pdfs');
+        await mkdir(pdfDir, { recursive: true });
+
+        const pdfPath = path.join(pdfDir, pdfFilename);
+        await writeFile(pdfPath, buffer);
+
+        proposalPdf = `/uploads/properties/pdfs/${pdfFilename}`;
+      } catch (error) {
+        console.error('Error saving proposal PDF:', error);
+      }
+    }
+
     // Create property - UPDATED schema
     const property = await Property.create({
       title,
@@ -161,6 +186,7 @@ async function createProperty(formData) {
       features,
       isFeatured: formData.get('isFeatured') === 'true',
       isPublished: formData.get('isPublished') === 'true',
+      proposalPdf,
       expiresAt: formData.get('expiresAt') || null,
     });
 

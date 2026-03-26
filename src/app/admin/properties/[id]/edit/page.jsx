@@ -132,6 +132,7 @@ async function getProperty(id) {
       tagIds: property.tagIds?.map(t => t._id.toString()) || [],
       images: processedImages,
       features: processedFeatures,
+      proposalPdf: property.proposalPdf || '',
       expiresAt: property.expiresAt ? property.expiresAt.toISOString().split('T')[0] : '',
     };
   } catch (error) {
@@ -266,6 +267,31 @@ async function updateProperty(id, formData) {
     const tagIdsJson = formData.get('tagIds');
     const tagIds = tagIdsJson ? JSON.parse(tagIdsJson) : [];
 
+    // Process proposal PDF file if exists
+    let proposalPdfUpdate = {};
+    const proposalPdfFile = formData.get('proposalPdfFile');
+
+    if (proposalPdfFile && proposalPdfFile.size > 0) {
+      try {
+        const bytes = await proposalPdfFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 10);
+        const pdfFilename = `proposal-${timestamp}-${random}.pdf`;
+
+        const pdfDir = path.join(process.cwd(), 'public/uploads/properties/pdfs');
+        await mkdir(pdfDir, { recursive: true });
+
+        const pdfPath = path.join(pdfDir, pdfFilename);
+        await writeFile(pdfPath, buffer);
+
+        proposalPdfUpdate.proposalPdf = `/uploads/properties/pdfs/${pdfFilename}`;
+      } catch (error) {
+        console.error('Error saving proposal PDF:', error);
+      }
+    }
+
     // Update property - UPDATED schema
     const property = await Property.findByIdAndUpdate(
       id,
@@ -293,6 +319,7 @@ async function updateProperty(id, formData) {
         features,
         isFeatured: formData.get('isFeatured') === 'true',
         isPublished: formData.get('isPublished') === 'true',
+        ...proposalPdfUpdate,
         expiresAt: formData.get('expiresAt') || null,
         updatedAt: new Date(),
       },

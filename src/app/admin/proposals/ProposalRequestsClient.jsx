@@ -81,8 +81,6 @@ export default function ProposalRequestsClient({ initialProposals }) {
             // Details Table
             const details = [
                 ['Area', `${property.area} sq ft`],
-                ['Bedrooms', property.bedrooms || 'N/A'],
-                ['Bathrooms', property.bathrooms || 'N/A'],
                 ['No of Checks', property.NoOFCheck || 'N/A'],
                 ['Rental Period', property.RentalPeriod || 'N/A'],
             ];
