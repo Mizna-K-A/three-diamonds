@@ -63,6 +63,7 @@ async function getProposals() {
                         ? {
                             id: property._id.toString(),
                             title: property.title || '',
+                            description: property.description || '',
                             price: property.price || 0,
                             address: property.address || '',
                             city: property.city || '',
@@ -77,8 +78,6 @@ async function getProposals() {
                             agentEmail: property.agentEmail || '',
                             agentPhone: property.agentPhone || '',
                             area: property.area || 0,
-                            bedrooms: property.bedrooms || 0,
-                            bathrooms: property.bathrooms || 0,
                             NoOFCheck: property.NoOFCheck || '',
                             RentalPeriod: property.RentalPeriod || '',
                         }
