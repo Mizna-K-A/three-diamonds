@@ -2,6 +2,7 @@ import Property from '../../../../lib/models/Property';
 import PropertyStatus from '../../../../lib/models/PropertyStatus';
 import connectDB from '../../../../lib/mongodb';
 import PropertyStatusClient from './PropertyStatusClient';
+import { revalidateTag } from 'next/cache';
 
 export async function getPropertyStatuses() {
     try {
@@ -49,6 +50,8 @@ async function createPropertyStatus(formData) {
             icon: formData.get('icon') || '',
             color: formData.get('color') || '#6b7280',
         });
+
+        revalidateTag('property-statuses');
 
         return {
             success: true,
@@ -98,6 +101,8 @@ async function updatePropertyStatus(id, formData) {
             { new: true, runValidators: true }
         );
 
+        revalidateTag('property-statuses');
+
         if (!status) {
             return { error: 'Property status not found' };
         }
@@ -130,6 +135,8 @@ async function deletePropertyStatus(id) {
         }
 
         await PropertyStatus.findByIdAndDelete(id);
+
+        revalidateTag('property-statuses');
 
         return { success: true };
     } catch (error) {

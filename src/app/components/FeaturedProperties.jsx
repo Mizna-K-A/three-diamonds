@@ -354,7 +354,6 @@ export default function FeaturedProperties({
                             {property.tags[0]?.name}
                           </span>
                         </div>
-                        {console.log(property)}
                         {property.propertyType?.name != null && (
                           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm">
                             {property.status?.name ?? "Property"}

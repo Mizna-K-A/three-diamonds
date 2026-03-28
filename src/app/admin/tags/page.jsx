@@ -2,6 +2,7 @@ import Property from '../../../../lib/models/Property';
 import Tag from '../../../../lib/models/Tag';
 import connectDB from '../../../../lib/mongodb';
 import TagsClient from './TagsClient';
+import { revalidateTag } from 'next/cache';
 
 // Simplified category options since we removed category from the model
 // You might want to remove this entirely or keep for UI organization
@@ -12,11 +13,11 @@ const CATEGORY_OPTIONS = [
 export async function getTags() {
   try {
     await connectDB();
-    
+
     const tags = await Tag.find({})
       .sort({ name: 1 }) // Simplified sorting
       .lean();
-    
+
     return tags.map(tag => ({
       ...tag,
       _id: tag._id.toString(),
@@ -47,13 +48,13 @@ async function getTagUsageCounts() {
       { $unwind: '$tagIds' },
       { $group: { _id: '$tagIds', count: { $sum: 1 } } }
     ]);
-    
+
     // Convert to map for easy lookup
     const usageMap = {};
     stats.forEach(stat => {
       usageMap[stat._id.toString()] = stat.count;
     });
-    
+
     return usageMap;
   } catch (error) {
     console.error('Error getting tag usage:', error);
@@ -64,10 +65,10 @@ async function getTagUsageCounts() {
 // Server Actions
 async function createTag(formData) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     // Check if name or slug already exists
     const existing = await Tag.findOne({
       $or: [
@@ -75,19 +76,21 @@ async function createTag(formData) {
         { slug: formData.get('slug') }
       ]
     });
-    
+
     if (existing) {
       return { error: 'Tag with this name or slug already exists' };
     }
-    
+
     const tag = await Tag.create({
       name: formData.get('name'),
       slug: formData.get('slug'),
       icon: formData.get('icon') || '',
       color: formData.get('color') || '#6b7280',
     });
-    
-    return { 
+
+    revalidateTag('tags');
+
+    return {
       success: true,
       data: {
         ...tag.toObject(),
@@ -106,25 +109,27 @@ async function createTag(formData) {
 
 async function updateTag(id, formData) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     // Check if name or slug already exists (excluding current)
     const existing = await Tag.findOne({
       $and: [
         { _id: { $ne: id } },
-        { $or: [
-          { name: formData.get('name') },
-          { slug: formData.get('slug') }
-        ]}
+        {
+          $or: [
+            { name: formData.get('name') },
+            { slug: formData.get('slug') }
+          ]
+        }
       ]
     });
-    
+
     if (existing) {
       return { error: 'Tag with this name or slug already exists' };
     }
-    
+
     const tag = await Tag.findByIdAndUpdate(
       id,
       {
@@ -136,12 +141,14 @@ async function updateTag(id, formData) {
       },
       { new: true, runValidators: true }
     );
-    
+
+    revalidateTag('tags');
+
     if (!tag) {
       return { error: 'Tag not found' };
     }
-    
-    return { 
+
+    return {
       success: true,
       data: {
         ...tag.toObject(),
@@ -160,19 +167,21 @@ async function updateTag(id, formData) {
 
 async function deleteTag(id) {
   'use server';
-  
+
   try {
     await connectDB();
-    
+
     // Check if tag is being used by any properties
     const propertiesCount = await Property.countDocuments({ tagIds: id });
-    
+
     if (propertiesCount > 0) {
       return { error: `Cannot delete: ${propertiesCount} properties are using this tag. Please remove the tag from those properties first.` };
     }
-    
+
     await Tag.findByIdAndDelete(id);
-    
+
+    revalidateTag('tags');
+
     return { success: true };
   } catch (error) {
     console.error('Error deleting tag:', error);
@@ -183,14 +192,14 @@ async function deleteTag(id) {
 export default async function TagsPage() {
   const tags = await getTags();
   const usageCounts = await getTagUsageCounts();
-  
+
   // Group tags by category (simplified - all in one category)
   const tagsByCategory = {
     general: tags
   };
-  
+
   return (
-    <TagsClient 
+    <TagsClient
       initialTags={tags}
       tagsByCategory={tagsByCategory}
       usageCounts={usageCounts}

@@ -3,7 +3,7 @@ import connectDB from '../../../lib/mongodb';
 import HeroSlide from '../../../lib/models/HeroSlide';
 import HeroClient from './HeroClient';
 
-export const dynamic = 'force-dynamic';
+import { unstable_cache } from 'next/cache';
 
 const FALLBACK_SLIDES = [
   {
@@ -29,23 +29,27 @@ const FALLBACK_SLIDES = [
   },
 ];
 
-async function getHeroSlides() {
-  try {
-    await connectDB();
-    const docs = await HeroSlide.find({ active: true })
-      .sort({ order: 1, createdAt: 1 })
-      .lean();
-    return docs.map((d) => ({
-      ...d,
-      _id: d._id.toString(),
-    }));
-  } catch {
-    return [];
-  }
-}
+const getCachedHeroSlides = unstable_cache(
+  async () => {
+    try {
+      await connectDB();
+      const docs = await HeroSlide.find({ active: true })
+        .sort({ order: 1, createdAt: 1 })
+        .lean();
+      return docs.map((d) => ({
+        ...d,
+        _id: d._id.toString(),
+      }));
+    } catch {
+      return [];
+    }
+  },
+  ['hero-slides'],
+  { revalidate: 3600, tags: ['hero-slides'] }
+);
 
 export default async function Hero() {
-  const slides = await getHeroSlides();
+  const slides = await getCachedHeroSlides();
   const heroSlides = slides.length > 0 ? slides : FALLBACK_SLIDES;
   return <HeroClient slides={heroSlides} />;
 }

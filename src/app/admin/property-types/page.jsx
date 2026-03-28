@@ -3,6 +3,7 @@ import PropertyTypesClient from './PropertyTypesClient';
 import connectDB from '../../../../lib/mongodb';
 import PropertyType from '../../../../lib/models/PropertyType';
 import Property from '../../../../lib/models/Property';
+import { revalidateTag } from 'next/cache';
 
 export async function getPropertyTypes() {
   try {
@@ -79,6 +80,8 @@ async function createPropertyType(formData) {
       updatedAt: new Date(),
     });
 
+    revalidateTag('property-types');
+
     return {
       success: true,
       data: {
@@ -133,6 +136,8 @@ async function updatePropertyType(id, formData) {
       { new: true, runValidators: true }
     );
 
+    revalidateTag('property-types');
+
     if (!propertyType) {
       return { error: 'Property type not found' };
     }
@@ -183,6 +188,8 @@ async function deletePropertyType(id) {
 
     // Delete the property type
     await PropertyType.findByIdAndDelete(id);
+
+    revalidateTag('property-types');
 
     return {
       success: true,

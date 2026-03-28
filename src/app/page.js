@@ -15,16 +15,56 @@ import { getTags } from './admin/tags/page';
 import dbConnect from '../../lib/mongodb';
 import SiteSettings from '../../lib/models/SiteSettings';
 import About from './components/About';
+import { unstable_cache } from 'next/cache';
+
+// Cached data fetchers
+const getCachedProperties = unstable_cache(
+  async () => getProperties(true),
+  ['home-properties'],
+  { revalidate: 3600, tags: ['properties'] }
+);
+
+const getCachedPropertyTypes = unstable_cache(
+  async () => getPropertyTypes(),
+  ['property-types'],
+  { revalidate: 3600, tags: ['property-types'] }
+);
+
+const getCachedPropertyStatuses = unstable_cache(
+  async () => getPropertyStatuses(),
+  ['property-statuses'],
+  { revalidate: 3600, tags: ['property-statuses'] }
+);
+
+const getCachedTags = unstable_cache(
+  async () => getTags(),
+  ['property-tags'],
+  { revalidate: 3600, tags: ['tags'] }
+);
+
+const getCachedSettings = unstable_cache(
+  async () => {
+    await dbConnect();
+    const settings = await SiteSettings.findOne().lean();
+    return settings ? JSON.parse(JSON.stringify(settings)) : null;
+  },
+  ['site-settings'],
+  { revalidate: 3600, tags: ['settings'] }
+);
 
 export default async function Home() {
-  const properties = await getProperties(true)
-  const propertyTypes = await getPropertyTypes();
-  const statuses = await getPropertyStatuses();
-  const tags = await getTags();
-
-  await dbConnect();
-  const settings = await SiteSettings.findOne().lean();
-  const serializedSettings = settings ? JSON.parse(JSON.stringify(settings)) : null;
+  const [properties, propertyTypes, statuses, tags, serializedSettings] = await Promise.all([
+    getCachedProperties(),
+    getCachedPropertyTypes(),
+    getCachedPropertyStatuses(),
+    getCachedTags(),
+    getCachedSettings()
+  ]);
+  console.log("Properties:", properties);
+  console.log("Types:", propertyTypes);
+  console.log("Statuses:", statuses);
+  console.log("Tags:", tags);
+  console.log("Settings:", serializedSettings);
   return (
     <Loader>
       <main className="min-h-screen">

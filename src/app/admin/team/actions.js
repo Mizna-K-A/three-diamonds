@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import connectDB from "../../../../lib/mongodb";
 import TeamMember from "../../../../lib/models/TeamMember";
 
@@ -27,6 +27,7 @@ export async function createTeamMember(input) {
     active: typeof input?.active === "boolean" ? input.active : true,
   });
   revalidatePath("/admin/team");
+  revalidateTag('team');
   return serialize(doc);
 }
 
@@ -36,6 +37,7 @@ export async function updateTeamMember(id, updates) {
   const doc = await TeamMember.findByIdAndUpdate(id, updates, { new: true });
   if (!doc) throw new Error("Team member not found");
   revalidatePath("/admin/team");
+  revalidateTag('team');
   return serialize(doc);
 }
 
@@ -44,6 +46,7 @@ export async function deleteTeamMember(id) {
   if (!id) throw new Error("id required");
   await TeamMember.findByIdAndDelete(id);
   revalidatePath("/admin/team");
+  revalidateTag('team');
   return { success: true };
 }
 
@@ -56,6 +59,7 @@ export async function reorderTeamMembers(orderUpdates) {
     )
   );
   revalidatePath("/admin/team");
+  revalidateTag('team');
   return { success: true };
 }
 

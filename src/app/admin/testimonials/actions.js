@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import connectDB from "../../../../lib/mongodb";
 import Testimonial from "../../../../lib/models/Testimonial";
 
@@ -26,6 +26,7 @@ export async function createTestimonial(input) {
   });
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
+  revalidateTag('testimonials');
   return serialize(doc);
 }
 
@@ -36,6 +37,7 @@ export async function updateTestimonial(id, updates) {
   if (!doc) throw new Error("Testimonial not found");
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
+  revalidateTag('testimonials');
   return serialize(doc);
 }
 
@@ -45,6 +47,7 @@ export async function deleteTestimonial(id) {
   await Testimonial.findByIdAndDelete(id);
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
+  revalidateTag('testimonials');
   return { success: true };
 }
 
@@ -58,6 +61,7 @@ export async function reorderTestimonials(orderUpdates) {
   );
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
+  revalidateTag('testimonials');
   return { success: true };
 }
 

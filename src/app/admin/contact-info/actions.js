@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import connectDB from '../../../../lib/mongodb';
 import SiteSettings from '../../../../lib/models/SiteSettings';
 
@@ -37,6 +37,7 @@ export async function updateContactSettings(data) {
     revalidatePath('/admin/contact-info');
     revalidatePath('/contact');
     revalidatePath('/');
+    revalidateTag('settings');
 
     return serialize(settings);
 }

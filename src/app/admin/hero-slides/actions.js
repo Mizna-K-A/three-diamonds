@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import connectDB from "../../../../lib/mongodb";
 import HeroSlide from "../../../../lib/models/HeroSlide";
 
@@ -58,6 +58,7 @@ export async function createHeroSlide(input) {
     });
     revalidatePath('/admin/hero-slides');
     revalidatePath('/');
+    revalidateTag('hero-slides');
     return serialize(doc);
 }
 
@@ -68,6 +69,7 @@ export async function updateHeroSlide(id, updates) {
     if (!doc) throw new Error('Slide not found');
     revalidatePath('/admin/hero-slides');
     revalidatePath('/');
+    revalidateTag('hero-slides');
     return serialize(doc);
 }
 
@@ -77,6 +79,7 @@ export async function deleteHeroSlide(id) {
     await HeroSlide.findByIdAndDelete(id);
     revalidatePath('/admin/hero-slides');
     revalidatePath('/');
+    revalidateTag('hero-slides');
     return { success: true };
 }
 
@@ -90,5 +93,6 @@ export async function reorderHeroSlides(orderUpdates) {
     );
     revalidatePath('/admin/hero-slides');
     revalidatePath('/');
+    revalidateTag('hero-slides');
     return { success: true };
 }

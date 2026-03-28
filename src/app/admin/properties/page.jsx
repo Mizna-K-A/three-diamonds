@@ -5,6 +5,7 @@ import connectDB from '../../../../lib/mongodb';
 import PropertiesClient from './PropertiesClient';
 import PropertyType from '../../../../lib/models/PropertyType';
 import Tag from '../../../../lib/models/Tag';
+import { revalidateTag } from 'next/cache';
 
 export async function getProperties(onlyPublished = false) {
   try {
@@ -234,6 +235,8 @@ async function createProperty(formData) {
       expiresAt: formData.get('expiresAt') || null,
     });
 
+    revalidateTag('properties');
+
     // Fetch populated property
     const populatedProperty = await Property.findById(property._id)
       .populate('statusId', 'name label color icon slug')
@@ -367,6 +370,8 @@ async function updateProperty(id, formData) {
       .populate('tagIds', 'name label color icon category slug')
       .populate('purposeTagId', 'name label color icon slug');
 
+    revalidateTag('properties');
+
     if (!property) {
       return { error: 'Property not found' };
     }
@@ -438,6 +443,8 @@ async function deleteProperty(id) {
       return { error: 'Property not found' };
     }
 
+    revalidateTag('properties');
+
     return { success: true };
   } catch (error) {
     console.error('Error deleting property:', error);
@@ -459,6 +466,8 @@ async function toggleFeature(id) {
     property.isFeatured = !property.isFeatured;
     await property.save();
 
+    revalidateTag('properties');
+
     return { success: true, isFeatured: property.isFeatured };
   } catch (error) {
     console.error('Error toggling feature:', error);
@@ -472,13 +481,15 @@ async function toggleFadeProperty(id) {
 
   try {
     await connectDB();
- const property = await Property.findById(id);
+    const property = await Property.findById(id);
     if (!property) {
       return { error: 'Property not found' };
     }
 
     property.isFadeProperty = !property.isFadeProperty;
     await property.save();
+
+    revalidateTag('properties');
 
     return { success: true, isFadeProperty: property.isFadeProperty };
   } catch (error) {
@@ -517,6 +528,8 @@ async function togglePublish(id) {
       property.publishedAt = new Date();
     }
     await property.save();
+
+    revalidateTag('properties');
 
     return { success: true, isPublished: property.isPublished };
   } catch (error) {
