@@ -117,14 +117,14 @@ export default function ThreeDiamondsPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#060708] text-white pb-32 overflow-x-hidden">
+      <main className="min-h-screen bg-[#060708] text-white pb-16 md:pb-24 lg:pb-32 overflow-x-hidden">
 
         {/* ══════════════════════════════════════════════════════
-            HERO — full-height with image right, bold centred type
+            HERO
         ══════════════════════════════════════════════════════ */}
         <section className="relative min-h-screen overflow-hidden flex items-center">
 
-          {/* Right image — tall, tilted inward */}
+          {/* Right image — desktop only */}
           <motion.div
             className="absolute top-0 right-[-30px] w-[48%] h-full hidden lg:block overflow-hidden"
             initial={{ opacity: 0, x: 80 }}
@@ -139,14 +139,33 @@ export default function ThreeDiamondsPage() {
             <div className="absolute inset-0 border-l-[3px] border-white/[0.04] left-0" />
           </motion.div>
 
+          {/* Mobile/tablet background image */}
+          <div className="absolute inset-0 lg:hidden">
+            <Image
+              src="/technical-service/technical-1.jpg"
+              alt="AC Service"
+              fill
+              priority
+              className="object-cover object-center opacity-15"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#060708]/60 via-[#060708]/75 to-[#060708]" />
+          </div>
+
           {/* Left text */}
-          <div className="relative z-10 container mx-auto px-4 md:px-6 pt-32 pb-20">
-            <ServiceNavigation />
+          <div className="relative z-10 container mx-auto px-4 md:px-6 pt-28 md:pt-32 pb-16 md:pb-20">
 
-            <motion.div className="mt-14 max-w-[500px]" initial="hidden" animate="show" variants={stagger}>
+            {/* ServiceNavigation — desktop only */}
+            <div className="hidden lg:block">
+              <ServiceNavigation />
+            </div>
 
-              {/* Eyebrow with logo text */}
-              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-3 mb-6">
+            <motion.div
+              className="mt-10 lg:mt-14 max-w-full sm:max-w-[480px] lg:max-w-[500px]"
+              initial="hidden" animate="show" variants={stagger}
+            >
+
+              {/* Eyebrow */}
+              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-3 mb-5 md:mb-6">
                 <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
                   <Wind className="w-4 h-4 text-white/50" />
                 </div>
@@ -155,29 +174,29 @@ export default function ThreeDiamondsPage() {
 
               {/* Company Name */}
               <motion.h1 variants={fadeUp} custom={0.08}
-                className="text-[clamp(2.2rem,5vw,4.2rem)] font-black leading-[1.1] tracking-[-0.02em] text-white mb-3">
+                className="text-[clamp(2rem,7vw,4.2rem)] font-black leading-[1.1] tracking-[-0.02em] text-white mb-2 md:mb-3">
                 Three Diamonds
               </motion.h1>
               <motion.h1 variants={fadeUp} custom={0.15}
-                className="text-[clamp(2.2rem,5vw,4.2rem)] font-black leading-[1.1] tracking-[-0.02em] mb-5"
-                style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.18)' }}>
+                className="text-[clamp(2rem,7vw,4.2rem)] font-black leading-[1.1] tracking-[-0.02em] mb-4 md:mb-5"
+                style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.18)', color: 'transparent' }}>
                 Technical Services L.L.C
               </motion.h1>
 
               <motion.p variants={fadeUp} custom={0.25}
-                className="text-[15px] text-white/70 max-w-[420px] leading-relaxed mb-5">
+                className="text-[14px] md:text-[15px] text-white/70 max-w-[420px] leading-relaxed mb-4 md:mb-5">
                 We are a team of highly skilled technicians dedicated to providing exceptional service and ensuring your comfort year-round.
               </motion.p>
 
               <motion.p variants={fadeUp} custom={0.3}
-                className="text-[13px] text-white/38 max-w-[380px] leading-[1.8] mb-8 pl-4 border-l-2 border-white/8">
+                className="text-[13px] text-white/38 max-w-[380px] leading-[1.8] mb-7 md:mb-8 pl-4 border-l-2 border-white/8">
                 Welcome to Three Diamonds AC Services, your trusted partner for all your air conditioning needs.
               </motion.p>
 
-              <motion.div variants={fadeUp} custom={0.35} className="flex items-center gap-5 mb-16">
+              <motion.div variants={fadeUp} custom={0.35} className="flex items-center gap-4 md:gap-5 mb-12 md:mb-16 flex-wrap">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                   <Link href="/contact"
-                    className="inline-flex items-center gap-2 bg-white text-black px-7 py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
+                    className="inline-flex items-center gap-2 bg-white text-black px-6 md:px-7 py-[13px] md:py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
                     Get Service <ArrowRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
@@ -191,14 +210,14 @@ export default function ThreeDiamondsPage() {
 
               {/* Mini stats */}
               <motion.div variants={fadeUp} custom={0.4}
-                className="flex items-center gap-8 pt-8 border-t border-white/[0.06]">
+                className="flex items-center gap-6 md:gap-8 pt-6 md:pt-8 border-t border-white/[0.06]">
                 {[
-                  { n: '10+', l: 'Years Experience' },
-                  { n: '24/7', l: 'Emergency Service' },
-                  { n: '100%', l: 'Satisfaction' },
+                  { n: '10+',  l: 'Years Experience'   },
+                  { n: '24/7', l: 'Emergency Service'  },
+                  { n: '100%', l: 'Satisfaction'       },
                 ].map(({ n, l }) => (
                   <div key={l}>
-                    <p className="text-2xl font-black text-white">{n}</p>
+                    <p className="text-xl md:text-2xl font-black text-white">{n}</p>
                     <p className="text-[10px] text-white/25 uppercase tracking-widest mt-0.5">{l}</p>
                   </div>
                 ))}
@@ -206,7 +225,7 @@ export default function ThreeDiamondsPage() {
             </motion.div>
           </div>
 
-          {/* Floating glass pill — bottom-centre overlap */}
+          {/* Floating glass pill — desktop only */}
           <motion.div
             className="absolute bottom-12 right-[44%] bg-[#060708]/70 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 z-20 hidden lg:flex items-center gap-3.5"
             initial={{ opacity: 0, y: 28, scale: 0.9 }}
@@ -223,7 +242,7 @@ export default function ThreeDiamondsPage() {
             </div>
           </motion.div>
 
-          {/* White chip */}
+          {/* White chip — desktop only */}
           <motion.div
             className="absolute top-[36%] right-[6%] bg-white text-black text-[11px] font-black px-4 py-2 rounded-full shadow-xl z-20 hidden lg:block"
             initial={{ opacity: 0, scale: 0.7 }}
@@ -243,18 +262,17 @@ export default function ThreeDiamondsPage() {
         </div>
 
         {/* ══════════════════════════════════════════════════════
-            WHO WE ARE SECTION
+            WHO WE ARE
         ══════════════════════════════════════════════════════ */}
-        <section className="mt-28 container mx-auto px-4 md:px-6 relative">
+        <section className="mt-16 md:mt-24 lg:mt-28 container mx-auto px-4 md:px-6 relative">
 
-          {/* Ghost number */}
           <motion.div
             className="absolute -top-10 -right-4 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
             viewport={{ once: false }} transition={{ duration: 1.4 }}
           >01</motion.div>
 
-          <Reveal variants={fadeUp} className="mb-16">
+          <Reveal variants={fadeUp} className="mb-10 md:mb-16">
             <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 flex items-center gap-2">
               <span className="w-5 h-px bg-white/12" /> Who We Are
             </p>
@@ -262,11 +280,10 @@ export default function ThreeDiamondsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-            {/* Left image stack — cols 1-5 */}
-            <div className="lg:col-span-5 relative h-[520px]">
+            {/* Left image stack — hidden on mobile */}
+            <div className="hidden md:block lg:col-span-5 relative h-[460px] md:h-[520px]">
 
-              {/* Main tall image */}
-              <Reveal variants={fadeLeft} className="absolute top-0 left-0 w-[80%] h-[380px]">
+              <Reveal variants={fadeLeft} className="absolute top-0 left-0 w-[80%] h-[340px] md:h-[380px]">
                 <div className="w-full h-full rounded-3xl overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.8)]">
                   <Parallax speed={0.09} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                     <Image src="/technical-service/technical-2.jpg" alt="Our Team" fill className="object-cover" />
@@ -275,15 +292,13 @@ export default function ThreeDiamondsPage() {
                 </div>
               </Reveal>
 
-              {/* Small overlapping card — bottom right */}
-              <Reveal variants={rotateIn} custom={0.2} className="absolute bottom-0 right-0 w-[52%] h-[240px] z-10">
+              <Reveal variants={rotateIn} custom={0.2} className="absolute bottom-0 right-0 w-[52%] h-[200px] md:h-[240px] z-10">
                 <div className="w-full h-full rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.85)] border-[3px] border-[#060708]">
                   <Image src="/technical-service/technical-3.jpg" alt="Technician" fill className="object-cover" />
                   <div className="absolute inset-0 bg-[#060708]/20" />
                 </div>
               </Reveal>
 
-              {/* Badge — top right of main image */}
               <Reveal variants={scaleIn} custom={0.35} className="absolute top-5 right-8 z-20">
                 <motion.div
                   className="bg-[#060708]/65 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 text-center"
@@ -295,25 +310,34 @@ export default function ThreeDiamondsPage() {
               </Reveal>
             </div>
 
-            {/* Right text — cols 6-12 */}
+            {/* Mobile-only single image */}
+            <div className="md:hidden relative w-full h-[220px] rounded-2xl overflow-hidden mb-2">
+              <Image src="/technical-service/technical-2.jpg" alt="Our Team" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#060708]/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 bg-[#060708]/65 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-2.5 text-center">
+                <p className="text-xl font-black text-white">24/7</p>
+                <p className="text-[10px] text-white/35 tracking-widest uppercase">Emergency Response</p>
+              </div>
+            </div>
+
+            {/* Right text */}
             <motion.div
               className="lg:col-span-7 lg:pl-10 lg:pt-6"
               initial="hidden" whileInView="show"
               viewport={{ once: false, margin: '-70px' }} variants={stagger}
             >
               <motion.h2 variants={si}
-                className="text-4xl md:text-[2.8rem] font-black leading-[1.04] tracking-[-0.025em] text-white mb-7">
+                className="text-3xl md:text-4xl lg:text-[2.8rem] font-black leading-[1.04] tracking-[-0.025em] text-white mb-6 md:mb-7">
                 Customer-Focused Approach
               </motion.h2>
-              <motion.p variants={si} className="text-[17px] text-white/80 leading-[1.95] mb-5">
+              <motion.p variants={si} className="text-[15px] md:text-[17px] text-white/80 leading-[1.95] mb-4 md:mb-5">
                 Daily wear and tear can significantly impact the longevity and efficiency of both residential and commercial properties. Our comprehensive annual maintenance services, backed by advanced technology and skilled technicians, offer a range of solutions from routine inspections to emergency repairs.
               </motion.p>
-              <motion.p variants={si} className="text-[17px] text-white/80 leading-[1.95] mb-8">
+              <motion.p variants={si} className="text-[15px] md:text-[17px] text-white/80 leading-[1.95] mb-7 md:mb-8">
                 By investing in our annual maintenance contracts (AMCs), you can benefit from proactive maintenance, enhanced safety and hygiene, optimized property performance, 24/7 emergency response, and cost-effective solutions.
               </motion.p>
 
-              {/* Key Benefits — horizontal pill tags */}
-              <motion.div variants={si} className="flex flex-wrap gap-2 mb-10">
+              <motion.div variants={si} className="flex flex-wrap gap-2 mb-8 md:mb-10">
                 {['Proactive Maintenance', 'Safety & Hygiene', 'Optimized Performance', 'Cost-Effective'].map((b, i) => (
                   <motion.span key={i}
                     className="text-[11px] font-semibold text-white/50 border border-white/[0.08] bg-white/[0.03] rounded-full px-4 py-1.5 cursor-default"
@@ -328,17 +352,16 @@ export default function ThreeDiamondsPage() {
                 ))}
               </motion.div>
 
-              {/* Wide image strip below text */}
               <Reveal variants={fadeUp} custom={0.1} className="w-full">
-                <div className="relative w-full h-[180px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+                <div className="relative w-full h-[150px] md:h-[180px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
                   <Parallax speed={0.06} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                     <Image src="/technical-service/technical-4.jpg" alt="AC Service" fill className="object-cover" />
                   </Parallax>
                   <div className="absolute inset-0 bg-gradient-to-r from-[#060708]/75 to-transparent" />
-                  <motion.div className="absolute left-6 top-1/2 -translate-y-1/2"
+                  <motion.div className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2"
                     initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: false }} transition={{ duration: 0.6, delay: 0.2 }}>
-                    <p className="text-white font-black text-base">Trust us to keep your property</p>
+                    <p className="text-white font-black text-sm md:text-base">Trust us to keep your property</p>
                     <p className="text-white/35 text-xs mt-0.5">in optimal condition, year-round.</p>
                   </motion.div>
                 </div>
@@ -348,149 +371,86 @@ export default function ThreeDiamondsPage() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            MISSION / VISION SECTION
+            MISSION / VISION
         ══════════════════════════════════════════════════════ */}
-        <section className="container mx-auto px-4 md:px-6 mt-32 relative">
-          
+        <section className="container mx-auto px-4 md:px-6 mt-20 md:mt-28 lg:mt-32 relative">
+
           <motion.div
             className="absolute -top-10 -left-4 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
             viewport={{ once: false }} transition={{ duration: 1.4 }}
           >02</motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Mission Card */}
-            <motion.div
-              className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Target className="w-10 h-10 text-white/30 mb-6" />
-              <h3 className="text-2xl font-black text-white mb-4">Optimize Comfort</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                Our mission is to optimize your comfort and indoor environment by providing exceptional AC services that ensure a healthy and comfortable living space year-round.
-              </p>
-            </motion.div>
-
-            {/* Efficiency Card */}
-            <motion.div
-              className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Gauge className="w-10 h-10 text-white/30 mb-6" />
-              <h3 className="text-2xl font-black text-white mb-4">Enhance Efficiency</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                We strive to maximize the efficiency of your AC system, minimizing energy consumption and reducing your environmental impact while promoting cost-savings.
-              </p>
-            </motion.div>
-
-            {/* Build Trust Card */}
-            <motion.div
-              className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <HeartHandshake className="w-10 h-10 text-white/30 mb-6" />
-              <h3 className="text-2xl font-black text-white mb-4">Build Trust</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                We aim to build long-lasting relationships with our clients based on trust, reliability, and exceptional service. We are committed to exceeding expectations.
-              </p>
-            </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {[
+              { icon: Target, title: 'Optimize Comfort', desc: 'Our mission is to optimize your comfort and indoor environment by providing exceptional AC services that ensure a healthy and comfortable living space year-round.', delay: 0.1 },
+              { icon: Gauge, title: 'Enhance Efficiency', desc: 'We strive to maximize the efficiency of your AC system, minimizing energy consumption and reducing your environmental impact while promoting cost-savings.', delay: 0.2 },
+              { icon: HeartHandshake, title: 'Build Trust', desc: 'We aim to build long-lasting relationships with our clients based on trust, reliability, and exceptional service. We are committed to exceeding expectations.', delay: 0.3 },
+            ].map(({ icon: Icon, title, desc, delay }) => (
+              <motion.div
+                key={title}
+                className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-6 md:p-8 relative overflow-hidden group"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ duration: 0.8, delay }}
+                whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <Icon className="w-8 h-8 md:w-10 md:h-10 text-white/30 mb-4 md:mb-6" />
+                <h3 className="text-xl md:text-2xl font-black text-white mb-3 md:mb-4">{title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed">{desc}</p>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Vision Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            
-            {/* Innovation Card */}
-            <motion.div
-              className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group md:col-span-1"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <TrendingUp className="w-10 h-10 text-white/30 mb-6" />
-              <h3 className="text-xl font-black text-white mb-3">Innovation</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                We envision a future where AC technology continuously evolves to provide even more efficient, sustainable, and comfortable solutions.
-              </p>
-            </motion.div>
-
-            {/* Impact Card */}
-            <motion.div
-              className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group md:col-span-1"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.25 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Target className="w-10 h-10 text-white/30 mb-6" />
-              <h3 className="text-xl font-black text-white mb-3">Impact</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                Our vision is to make a positive impact on our community, promoting energy efficiency, environmental responsibility, and comfort for everyone.
-              </p>
-            </motion.div>
-
-            {/* Leadership Card */}
-            <motion.div
-              className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group md:col-span-1"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.35 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Award className="w-10 h-10 text-white/30 mb-6" />
-              <h3 className="text-xl font-black text-white mb-3">Leadership</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                We aspire to be recognized as the leading AC service provider in our community, setting the benchmark for industry standards.
-              </p>
-            </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-4 md:mt-6">
+            {[
+              { icon: TrendingUp, title: 'Innovation', desc: 'We envision a future where AC technology continuously evolves to provide even more efficient, sustainable, and comfortable solutions.', delay: 0.15 },
+              { icon: Target, title: 'Impact', desc: 'Our vision is to make a positive impact on our community, promoting energy efficiency, environmental responsibility, and comfort for everyone.', delay: 0.25 },
+              { icon: Award, title: 'Leadership', desc: 'We aspire to be recognized as the leading AC service provider in our community, setting the benchmark for industry standards.', delay: 0.35 },
+            ].map(({ icon: Icon, title, desc, delay }) => (
+              <motion.div
+                key={title}
+                className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-6 md:p-8 relative overflow-hidden group"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ duration: 0.8, delay }}
+                whileHover={{ y: -8, borderColor: 'rgba(255,255,255,0.15)' }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <Icon className="w-8 h-8 md:w-10 md:h-10 text-white/30 mb-4 md:mb-6" />
+                <h3 className="text-lg md:text-xl font-black text-white mb-2 md:mb-3">{title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed">{desc}</p>
+              </motion.div>
+            ))}
           </div>
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            VALUES SECTION
+            VALUES
         ══════════════════════════════════════════════════════ */}
-        <section className="container mx-auto px-4 md:px-6 mt-32 relative">
-          
+        <section className="container mx-auto px-4 md:px-6 mt-20 md:mt-28 lg:mt-32 relative">
+
           <motion.div
             className="absolute -top-10 -right-4 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
             viewport={{ once: false }} transition={{ duration: 1.4 }}
           >03</motion.div>
 
-          <Reveal variants={fadeUp} className="mb-16">
+          <Reveal variants={fadeUp} className="mb-10 md:mb-16">
             <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 flex items-center gap-2">
               <span className="w-5 h-px bg-white/12" /> Our Values
             </p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white mt-4">What We Stand For</h2>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-[-0.025em] text-white mt-3 md:mt-4">What We Stand For</h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             {values.map((value, index) => (
               <motion.div
                 key={value.label}
-                className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group"
+                className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-6 md:p-8 relative overflow-hidden group"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false }}
@@ -498,12 +458,12 @@ export default function ThreeDiamondsPage() {
                 whileHover={{ y: -6, borderColor: 'rgba(255,255,255,0.15)' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-start gap-5">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0">
-                    <value.icon className="w-5 h-5 text-white/50" />
+                <div className="flex items-start gap-4 md:gap-5">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0">
+                    <value.icon className="w-4 h-4 md:w-5 md:h-5 text-white/50" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white/80 group-hover:text-white transition-colors mb-3">{value.label}</h3>
+                    <h3 className="text-lg md:text-xl font-black text-white/80 group-hover:text-white transition-colors mb-2 md:mb-3">{value.label}</h3>
                     <p className="text-white/40 text-sm leading-relaxed">{value.desc}</p>
                   </div>
                 </div>
@@ -513,9 +473,9 @@ export default function ThreeDiamondsPage() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            SERVICES — asymmetric mixed grid
+            SERVICES
         ══════════════════════════════════════════════════════ */}
-        <section id="services" className="container mx-auto px-4 md:px-6 mt-32 relative">
+        <section id="services" className="container mx-auto px-4 md:px-6 mt-20 md:mt-28 lg:mt-32 relative">
 
           <motion.div
             className="absolute -top-10 -left-4 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
@@ -523,24 +483,23 @@ export default function ThreeDiamondsPage() {
             viewport={{ once: false }} transition={{ duration: 1.4 }}
           >04</motion.div>
 
-          <Reveal variants={fadeUp} className="mb-14 relative z-10">
+          <Reveal variants={fadeUp} className="mb-10 md:mb-14 relative z-10">
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-3 flex items-center gap-2">
                   <span className="w-5 h-px bg-white/12" /> Services
                 </p>
-                <h2 className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">Our Services Include</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-[-0.025em] text-white">Our Services Include</h2>
               </div>
               <p className="text-xs text-white/18 hidden md:block text-right leading-relaxed">Comprehensive<br/>technical solutions</p>
             </div>
           </Reveal>
 
-          {/* Row 1 — HVAC feature card + two services */}
-          <div className="grid grid-cols-12 gap-4 mb-4">
+          {/* Row 1 — HVAC feature card + two service cards */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
 
-            {/* Big image feature card - HVAC */}
             <motion.div
-              className="col-span-12 md:col-span-7 relative rounded-3xl overflow-hidden min-h-[320px] shadow-[0_30px_80px_rgba(0,0,0,0.65)]"
+              className="col-span-1 md:col-span-7 relative rounded-3xl overflow-hidden min-h-[260px] md:min-h-[320px] shadow-[0_30px_80px_rgba(0,0,0,0.65)]"
               initial={{ opacity: 0, y: 36 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, margin: '-60px' }}
               transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
@@ -550,27 +509,26 @@ export default function ThreeDiamondsPage() {
                 <Image src="/technical-service/technical-5.jpg" alt="HVAC Services" fill className="object-cover" />
               </Parallax>
               <div className="absolute inset-0 bg-gradient-to-t from-[#060708]/92 via-[#060708]/35 to-transparent" />
-              <motion.div className="absolute bottom-0 left-0 right-0 p-8"
+              <motion.div className="absolute bottom-0 left-0 right-0 p-6 md:p-8"
                 initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false }} transition={{ duration: 0.6, delay: 0.25 }}>
                 <motion.div
-                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center mb-4"
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center mb-3 md:mb-4"
                   initial={{ rotate: -90, scale: 0.5 }} whileInView={{ rotate: 0, scale: 1 }}
                   viewport={{ once: false }} transition={{ duration: 0.45, delay: 0.3, ease: 'backOut' }}>
                   <Wind className="w-4 h-4 text-white/80" />
                 </motion.div>
-                <h3 className="text-xl font-black text-white mb-2">Air-Conditioning & Ventilation</h3>
+                <h3 className="text-lg md:text-xl font-black text-white mb-2">Air-Conditioning & Ventilation</h3>
                 <p className="text-[12px] text-white/42 leading-relaxed max-w-sm">Installation, maintenance, and repair of AC systems, ventilations, and air filtration systems for optimal indoor air quality.</p>
               </motion.div>
             </motion.div>
 
-            {/* Two stacked service cards */}
-            <div className="col-span-12 md:col-span-5 flex flex-col gap-4">
+            <div className="col-span-1 md:col-span-5 flex flex-col gap-4">
               {services.slice(0, 2).map((service, i) => {
                 const Icon = service.icon;
                 return (
                   <motion.div key={service.label}
-                    className="flex-1 group bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-7 flex gap-5 cursor-default relative overflow-hidden"
+                    className="flex-1 group bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-5 md:p-7 flex gap-4 md:gap-5 cursor-default relative overflow-hidden"
                     initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: false, margin: '-60px' }}
                     transition={{ duration: 0.8, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
@@ -594,98 +552,95 @@ export default function ThreeDiamondsPage() {
           </div>
 
           {/* Row 2 — 4 service cards */}
-          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"
+          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}>
             {services.slice(2, 6).map((service, i) => {
               const Icon = service.icon;
               return (
                 <motion.div key={service.label} variants={si}
-                  className="group bg-[#0c0e12] border border-white/[0.05] rounded-2xl p-6 cursor-default relative overflow-hidden"
+                  className="group bg-[#0c0e12] border border-white/[0.05] rounded-2xl p-4 md:p-6 cursor-default relative overflow-hidden"
                   whileHover={{ borderColor: 'rgba(255,255,255,0.13)', y: -5, transition: { duration: 0.2 } }}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                   <motion.div
-                    className="relative z-10 w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-5"
+                    className="relative z-10 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-3 md:mb-5"
                     initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
                     whileInView={{ rotate: 0, scale: 1, opacity: 1 }}
                     viewport={{ once: false }}
                     transition={{ duration: 0.45, delay: i * 0.07, ease: 'backOut' }}>
-                    <Icon className="w-4 h-4 text-white/40" />
+                    <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/40" />
                   </motion.div>
-                  <h3 className="relative z-10 text-sm font-black text-white/60 group-hover:text-white/90 transition-colors line-clamp-2">{service.label}</h3>
+                  <h3 className="relative z-10 text-xs md:text-sm font-black text-white/60 group-hover:text-white/90 transition-colors line-clamp-2">{service.label}</h3>
                 </motion.div>
               );
             })}
           </motion.div>
 
-          {/* Row 3 — remaining services */}
-          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          {/* Row 3 — 4 more service cards */}
+          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}>
             {services.slice(6, 10).map((service, i) => {
               const Icon = service.icon;
               return (
                 <motion.div key={service.label} variants={si}
-                  className="group bg-[#0c0e12] border border-white/[0.05] rounded-2xl p-6 cursor-default relative overflow-hidden"
+                  className="group bg-[#0c0e12] border border-white/[0.05] rounded-2xl p-4 md:p-6 cursor-default relative overflow-hidden"
                   whileHover={{ borderColor: 'rgba(255,255,255,0.13)', y: -5, transition: { duration: 0.2 } }}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                   <motion.div
-                    className="relative z-10 w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-5"
+                    className="relative z-10 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-3 md:mb-5"
                     initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
                     whileInView={{ rotate: 0, scale: 1, opacity: 1 }}
                     viewport={{ once: false }}
                     transition={{ duration: 0.45, delay: i * 0.07, ease: 'backOut' }}>
-                    <Icon className="w-4 h-4 text-white/40" />
+                    <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/40" />
                   </motion.div>
-                  <h3 className="relative z-10 text-sm font-black text-white/60 group-hover:text-white/90 transition-colors line-clamp-2">{service.label}</h3>
+                  <h3 className="relative z-10 text-xs md:text-sm font-black text-white/60 group-hover:text-white/90 transition-colors line-clamp-2">{service.label}</h3>
                 </motion.div>
               );
             })}
           </motion.div>
 
-          {/* Additional services in a text card + image + stat */}
-          <motion.div className="grid grid-cols-12 gap-4 mt-4"
+          {/* Additional services — text card + image + stat */}
+          <motion.div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}>
 
-            {/* Service text card */}
             <motion.div variants={si}
-              className="col-span-12 md:col-span-5 group bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 flex gap-6 cursor-default relative overflow-hidden"
+              className="col-span-1 md:col-span-5 group bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-6 md:p-8 flex gap-5 md:gap-6 cursor-default relative overflow-hidden"
               whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.2 } }}>
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
               <motion.div
-                className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0 mt-0.5 relative z-10"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0 mt-0.5 relative z-10"
                 initial={{ rotate: -90, opacity: 0 }} whileInView={{ rotate: 0, opacity: 1 }}
                 viewport={{ once: false }} transition={{ duration: 0.42, ease: 'backOut' }}>
                 <Hammer className="w-4 h-4 text-white/40" />
               </motion.div>
               <div className="relative z-10">
-                <h3 className="text-base font-black text-white/68 group-hover:text-white/92 transition-colors mb-2">Engraving & Ornamentation Works</h3>
+                <h3 className="text-sm md:text-base font-black text-white/68 group-hover:text-white/92 transition-colors mb-2">Engraving & Ornamentation Works</h3>
                 <p className="text-[12px] text-white/30 leading-relaxed">Specialized decorative and ornamental services for unique architectural elements.</p>
               </div>
             </motion.div>
 
-            {/* Image mini card */}
             <motion.div variants={scaleIn}
-              className="col-span-12 md:col-span-4 relative rounded-3xl overflow-hidden min-h-[160px] shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+              className="col-span-1 md:col-span-4 relative rounded-3xl overflow-hidden min-h-[160px] shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
               whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}>
               <Image src="/technical-service/technical-6.jpg" alt="Service" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#060708]/80 via-[#060708]/20 to-transparent" />
-              <motion.div className="absolute bottom-5 left-6"
+              <motion.div className="absolute bottom-4 md:bottom-5 left-5 md:left-6"
                 initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false }} transition={{ duration: 0.55, delay: 0.25 }}>
-                <p className="text-white font-black text-base">Quality Workmanship</p>
+                <p className="text-white font-black text-sm md:text-base">Quality Workmanship</p>
                 <p className="text-white/35 text-xs mt-0.5">Every project, every detail</p>
               </motion.div>
             </motion.div>
 
-            {/* Stat card */}
             <motion.div variants={si}
-              className="col-span-12 md:col-span-3 bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-7 flex flex-col justify-between cursor-default"
+              className="col-span-1 md:col-span-3 bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-6 md:p-7 flex flex-row md:flex-col justify-between md:justify-between items-center md:items-start gap-4 md:gap-0 cursor-default"
               whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.2 } }}>
               <p className="text-[10px] font-black tracking-[0.22em] uppercase text-white/22">Coverage</p>
               <div>
-                <p className="text-5xl font-black text-white mb-1">24/7</p>
+                <p className="text-4xl md:text-5xl font-black text-white mb-1">24/7</p>
                 <p className="text-[11px] text-white/28">emergency service available</p>
               </div>
             </motion.div>
@@ -693,28 +648,28 @@ export default function ThreeDiamondsPage() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            WHY CHOOSE US SECTION
+            WHY CHOOSE US
         ══════════════════════════════════════════════════════ */}
-        <section className="container mx-auto px-4 md:px-6 mt-32 relative">
-          
+        <section className="container mx-auto px-4 md:px-6 mt-20 md:mt-28 lg:mt-32 relative">
+
           <motion.div
             className="absolute -top-10 -right-4 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
             viewport={{ once: false }} transition={{ duration: 1.4 }}
           >05</motion.div>
 
-          <Reveal variants={fadeUp} className="mb-16">
+          <Reveal variants={fadeUp} className="mb-10 md:mb-16">
             <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 flex items-center gap-2">
               <span className="w-5 h-px bg-white/12" /> Why Choose Us
             </p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white mt-4">The Three Diamonds Difference</h2>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-[-0.025em] text-white mt-3 md:mt-4">The Three Diamonds Difference</h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             {whyChooseUs.map((item, index) => (
               <motion.div
                 key={item.label}
-                className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-8 relative overflow-hidden group"
+                className="bg-[#0c0e12] border border-white/[0.05] rounded-3xl p-6 md:p-8 relative overflow-hidden group"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false }}
@@ -722,12 +677,12 @@ export default function ThreeDiamondsPage() {
                 whileHover={{ y: -6, borderColor: 'rgba(255,255,255,0.15)' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-6 h-6 text-white/50" />
+                <div className="flex items-start gap-4 md:gap-5">
+                  <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0">
+                    <item.icon className="w-5 h-5 md:w-6 md:h-6 text-white/50" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white/80 group-hover:text-white transition-colors mb-3">{item.label}</h3>
+                    <h3 className="text-lg md:text-xl font-black text-white/80 group-hover:text-white transition-colors mb-2 md:mb-3">{item.label}</h3>
                     <p className="text-white/40 text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
@@ -739,22 +694,22 @@ export default function ThreeDiamondsPage() {
         {/* ══════════════════════════════════════════════════════
             STATS STRIP
         ══════════════════════════════════════════════════════ */}
-        <section className="mt-32 border-t border-b border-white/[0.04] bg-[#09090c]">
+        <section className="mt-16 md:mt-24 lg:mt-32 border-t border-b border-white/[0.04] bg-[#09090c]">
           <div className="container mx-auto px-4 md:px-6">
-            <motion.div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.04]"
+            <motion.div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-white/[0.04]"
               initial="hidden" whileInView="show"
               viewport={{ once: false, margin: '-60px' }} variants={stagger}>
               {[
                 { val: '500+', label: 'Projects Completed', sub: 'residential & commercial' },
-                { val: '24/7',  label: 'Emergency Support',  sub: 'always available' },
-                { val: '10+', label: 'Years Experience',     sub: 'in technical services' },
-                { val: '100%',  label: 'Satisfaction',       sub: 'client focused' },
+                { val: '24/7', label: 'Emergency Support',  sub: 'always available'         },
+                { val: '10+',  label: 'Years Experience',   sub: 'in technical services'    },
+                { val: '100%', label: 'Satisfaction',       sub: 'client focused'           },
               ].map(({ val, label, sub }, i) => (
                 <motion.div key={label} variants={si}
-                  className="py-10 px-8 hover:bg-white/[0.02] transition-colors duration-300"
+                  className="py-8 md:py-10 px-5 md:px-8 hover:bg-white/[0.02] transition-colors duration-300"
                   whileHover={{ y: -2, transition: { duration: 0.18 } }}>
-                  <p className="text-[10px] font-black tracking-[0.22em] uppercase text-white/22 mb-3">{label}</p>
-                  <p className="text-4xl font-black text-white mb-1">{val}</p>
+                  <p className="text-[10px] font-black tracking-[0.22em] uppercase text-white/22 mb-2 md:mb-3">{label}</p>
+                  <p className="text-3xl md:text-4xl font-black text-white mb-1">{val}</p>
                   <p className="text-[11px] text-white/25">{sub}</p>
                 </motion.div>
               ))}
@@ -763,11 +718,10 @@ export default function ThreeDiamondsPage() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            CTA — immersive full-bleed with contact info
+            CTA
         ══════════════════════════════════════════════════════ */}
-        <section className="mt-32 relative overflow-hidden">
+        <section className="mt-16 md:mt-24 lg:mt-32 relative overflow-hidden">
 
-          {/* Full-bleed bg image */}
           <div className="absolute inset-0 z-0">
             <Parallax speed={0.07} className="absolute inset-0 w-full h-[115%] -top-[7%]">
               <Image src="/technical-service/technical.jpg" alt="" fill className="object-cover" />
@@ -775,7 +729,7 @@ export default function ThreeDiamondsPage() {
             <div className="absolute inset-0 bg-[#060708]/88" />
           </div>
 
-          {/* Floating image cards — left & right */}
+          {/* Floating image cards — desktop only */}
           <motion.div
             className="absolute top-8 left-8 w-[200px] h-[140px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.85)] border border-white/[0.06] hidden lg:block z-10"
             initial={{ opacity: 0, x: -40, rotate: -3 }}
@@ -800,41 +754,40 @@ export default function ThreeDiamondsPage() {
             <div className="absolute inset-0 bg-[#060708]/25" />
           </motion.div>
 
-          {/* Centred copy */}
-          <div className="relative z-10 container mx-auto px-4 md:px-6 py-28 flex flex-col items-center text-center">
+          <div className="relative z-10 container mx-auto px-4 md:px-6 py-20 md:py-28 flex flex-col items-center text-center">
             <motion.div
               initial="hidden" whileInView="show"
               viewport={{ once: false }} variants={stagger}
-              className="max-w-xl"
+              className="max-w-[90%] sm:max-w-xl"
             >
               <motion.p variants={si}
-                className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-7 flex items-center gap-2 justify-center">
+                className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-6 md:mb-7 flex items-center gap-2 justify-center">
                 <span className="w-5 h-px bg-white/12" /> Contact Us <span className="w-5 h-px bg-white/12" />
               </motion.p>
               <motion.h2 variants={si}
-                className="text-5xl md:text-[4rem] font-black leading-[0.96] tracking-[-0.03em] text-white mb-4">
+                className="text-4xl md:text-5xl lg:text-[4rem] font-black leading-[0.96] tracking-[-0.03em] text-white mb-2 md:mb-4">
                 Your Comfort,
               </motion.h2>
               <motion.h2 variants={si}
-                className="text-5xl md:text-[4rem] font-black leading-[0.96] tracking-[-0.03em] text-white/20 mb-8">
+                className="text-4xl md:text-5xl lg:text-[4rem] font-black leading-[0.96] tracking-[-0.03em] text-white/20 mb-6 md:mb-8">
                 Our Priority
               </motion.h2>
-              
+
               <motion.p variants={si}
-                className="text-[15px] text-white/60 leading-[1.9] mb-8">
+                className="text-[14px] md:text-[15px] text-white/60 leading-[1.9] mb-7 md:mb-8">
                 Get in touch with us to schedule an appointment, inquire about our services, or simply ask a question. Our friendly team is always happy to assist you.
               </motion.p>
 
-              <motion.div variants={si} className="flex flex-col items-center gap-3 mb-10">
+              <motion.div variants={si} className="flex flex-col items-center gap-2.5 md:gap-3 mb-8 md:mb-10">
                 <p className="text-white/40 text-sm">📞 Phone: [Your Phone Number]</p>
                 <p className="text-white/40 text-sm">✉️ Email: [Your Email]</p>
                 <p className="text-white/40 text-sm">🌐 Website: [Your Website]</p>
               </motion.div>
 
-              <motion.div variants={si} className="flex items-center gap-5 justify-center">
+              <motion.div variants={si} className="flex items-center gap-4 md:gap-5 justify-center flex-wrap">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                   <Link href="/contact"
-                    className="inline-flex items-center gap-2 bg-white text-black px-7 py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
+                    className="inline-flex items-center gap-2 bg-white text-black px-6 md:px-7 py-[13px] md:py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
                     Schedule Service <ArrowRight className="w-4 h-4" />
                   </Link>
                 </motion.div>

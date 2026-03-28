@@ -55,7 +55,6 @@ function Parallax({ children, speed = 0.12, className }) {
   return <motion.div ref={ref} style={{ y }} className={className}>{children}</motion.div>;
 }
 
-// Infinite marquee ticker
 function Marquee({ items }) {
   return (
     <div className="overflow-hidden whitespace-nowrap">
@@ -106,16 +105,13 @@ export default function ResearchConsultancyPage() {
       <Header />
       <main className="min-h-screen bg-[#07090b] text-white pb-32 overflow-x-hidden">
 
-        {/* ══════════════════════════════════════════════════════════
-            HERO — diagonal split: text top-left, huge image right
-            bleeding edge with a bold tilted accent band
-        ══════════════════════════════════════════════════════════ */}
+        {/* ─── HERO ─── */}
         <section className="relative min-h-screen overflow-hidden flex items-center">
 
-          {/* Tilted dark accent band behind image */}
-          <div className="absolute top-0 right-[-8%] w-[58%] h-full bg-[#0d1117] skew-x-[-4deg] origin-top-right z-0" />
+          {/* Tilted accent band — desktop only */}
+          <div className="absolute top-0 right-[-8%] w-[58%] h-full bg-[#0d1117] skew-x-[-4deg] origin-top-right z-0 hidden lg:block" />
 
-          {/* Hero image — right side, clipped inside the band */}
+          {/* Hero image — right side, desktop only */}
           <div className="absolute top-0 right-0 w-[52%] h-full z-[1] hidden lg:block overflow-hidden">
             <Parallax speed={0.1} className="absolute inset-0 w-full h-[115%] -top-[7%]">
               <Image src="/research-pics/research-4.jpg" alt="Research" fill priority className="object-cover" />
@@ -125,40 +121,44 @@ export default function ResearchConsultancyPage() {
           </div>
 
           {/* Text column */}
-          <div className="relative z-10 container mx-auto px-4 md:px-6 pt-32">
-            <ServiceNavigation />
+          <div className="relative z-10 container mx-auto px-4 md:px-6 pt-28 lg:pt-32 pb-12 lg:pb-0">
 
-            <motion.div className="mt-14 max-w-lg" initial="hidden" animate="show" variants={stagger}>
+            {/* ServiceNavigation — hidden on mobile & tablet, visible on lg+ */}
+            <div className="hidden lg:block">
+              <ServiceNavigation />
+            </div>
+
+            <motion.div className="mt-8 lg:mt-14 max-w-lg" initial="hidden" animate="show" variants={stagger}>
 
               {/* Index chip */}
               <motion.div variants={fadeUp} custom={0}
-                className="inline-flex items-center gap-2.5 mb-10">
+                className="inline-flex items-center gap-2.5 mb-8 lg:mb-10">
                 <span className="text-[10px] font-black tracking-[0.3em] uppercase text-white/20">01 —</span>
                 <span className="text-[10px] font-black tracking-[0.3em] uppercase text-white/40">Research & Consultancy</span>
               </motion.div>
 
               {/* Headline */}
               <motion.h1 variants={fadeUp} custom={0.08}
-                className="text-[clamp(3.4rem,7vw,6rem)] font-black leading-[0.95] tracking-[-0.035em] text-white mb-2">
+                className="text-[clamp(2.6rem,8vw,6rem)] font-black leading-[0.95] tracking-[-0.035em] text-white mb-2">
                 Know the
               </motion.h1>
               <motion.h1 variants={fadeUp} custom={0.16}
-                className="text-[clamp(3.4rem,7vw,6rem)] font-black leading-[0.95] tracking-[-0.035em] mb-2"
+                className="text-[clamp(2.6rem,8vw,6rem)] font-black leading-[0.95] tracking-[-0.035em] mb-2"
                 style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.18)', color: 'transparent' }}>
                 Market.
               </motion.h1>
               <motion.h1 variants={fadeUp} custom={0.24}
-                className="text-[clamp(3.4rem,7vw,6rem)] font-black leading-[0.95] tracking-[-0.035em] text-white mb-10">
+                className="text-[clamp(2.6rem,8vw,6rem)] font-black leading-[0.95] tracking-[-0.035em] text-white mb-8 lg:mb-10">
                 Win the Deal.
               </motion.h1>
 
               <motion.p variants={fadeUp} custom={0.32}
-                className="text-[13px] text-white/38 leading-[1.95] mb-11 max-w-[320px] border-l-2 border-white/8 pl-4">
+                className="text-[13px] text-white/38 leading-[1.95] mb-9 lg:mb-11 max-w-[320px] border-l-2 border-white/8 pl-4">
                 Expert market research and consultancy to help you make informed,
                 confident real estate investment decisions — backed by real data.
               </motion.p>
 
-              <motion.div variants={fadeUp} custom={0.40} className="flex items-center gap-5 mb-16">
+              <motion.div variants={fadeUp} custom={0.40} className="flex items-center gap-5 mb-10 lg:mb-16">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                   <Link href="/contact"
                     className="inline-flex items-center gap-2 bg-white text-black px-7 py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
@@ -173,24 +173,44 @@ export default function ResearchConsultancyPage() {
                 </motion.div>
               </motion.div>
 
-              {/* Horizontal stat row */}
+              {/* Mobile hero image */}
+              <motion.div
+                variants={fadeUp} custom={0.44}
+                className="block lg:hidden relative w-full h-[240px] sm:h-[300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.7)] mb-8"
+              >
+                <Image src="/research-pics/research-4.jpg" alt="Research" fill priority className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#07090b]/50 to-transparent" />
+                {/* Inline stat on mobile image */}
+                <div className="absolute bottom-4 left-4 bg-[#07090b]/70 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 flex items-center gap-2.5">
+                  <BarChart2 className="w-3.5 h-3.5 text-white/60" />
+                  <div>
+                    <p className="text-[9px] text-white/35 leading-none mb-0.5">Accuracy Rate</p>
+                    <p className="text-base font-black text-white leading-none">98% Verified</p>
+                  </div>
+                </div>
+                <div className="absolute bottom-4 right-4 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg">
+                  200+ Reports
+                </div>
+              </motion.div>
+
+              {/* Stat row */}
               <motion.div variants={fadeUp} custom={0.48}
-                className="flex items-center gap-8 pt-8 border-t border-white/[0.06]">
+                className="flex items-center gap-6 sm:gap-8 pt-7 lg:pt-8 border-t border-white/[0.06]">
                 {[
                   { n: '200+', l: 'Reports' },
                   { n: '98%',  l: 'Accuracy' },
                   { n: '12yr', l: 'Experience' },
                 ].map(({ n, l }) => (
                   <div key={l}>
-                    <p className="text-2xl font-black text-white">{n}</p>
-                    <p className="text-[10px] text-white/25 uppercase tracking-widest mt-0.5">{l}</p>
+                    <p className="text-xl sm:text-2xl font-black text-white">{n}</p>
+                    <p className="text-[9px] sm:text-[10px] text-white/25 uppercase tracking-widest mt-0.5">{l}</p>
                   </div>
                 ))}
               </motion.div>
             </motion.div>
           </div>
 
-          {/* Floating glass card — bottom-right of hero */}
+          {/* Floating glass card — desktop only */}
           <motion.div
             className="absolute bottom-14 right-8 bg-[#07090b]/70 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 z-20 hidden lg:flex items-center gap-3.5"
             initial={{ opacity: 0, y: 28, scale: 0.9 }}
@@ -207,7 +227,7 @@ export default function ResearchConsultancyPage() {
             </div>
           </motion.div>
 
-          {/* White label chip — mid image */}
+          {/* White label chip — desktop only */}
           <motion.div
             className="absolute top-[38%] right-[8%] bg-white text-black text-[11px] font-black px-4 py-2 rounded-full shadow-xl z-20 hidden lg:block"
             initial={{ opacity: 0, scale: 0.7 }}
@@ -219,20 +239,14 @@ export default function ResearchConsultancyPage() {
           </motion.div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════
-            MARQUEE TICKER — scrolling service names
-        ══════════════════════════════════════════════════════════ */}
+        {/* ─── MARQUEE ─── */}
         <div className="border-t border-b border-white/[0.05] py-4 bg-[#0a0d10]">
           <Marquee items={marqueeItems} />
         </div>
 
-        {/* ══════════════════════════════════════════════════════════
-            OVERVIEW — pinned number + floating text blocks
-            Full-width layout, text scattered at varying indents
-        ══════════════════════════════════════════════════════════ */}
-        <section className="container mx-auto px-4 md:px-6 mt-28 relative">
+        {/* ─── OVERVIEW ─── */}
+        <section className="container mx-auto px-4 md:px-6 mt-20 lg:mt-28 relative">
 
-          {/* Ghost section index */}
           <motion.div
             className="absolute -top-8 left-0 text-[22vw] font-black text-white/[0.025] leading-none select-none pointer-events-none hidden lg:block"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
@@ -241,38 +255,34 @@ export default function ResearchConsultancyPage() {
             01
           </motion.div>
 
-          {/* Top label */}
-          <Reveal variants={fadeUp} className="mb-20 relative z-10">
+          <Reveal variants={fadeUp} className="mb-14 lg:mb-20 relative z-10">
             <p className="text-[10px] font-bold tracking-[0.28em] uppercase text-white/22 flex items-center gap-2">
               <span className="w-5 h-px bg-white/15" /> Our Approach
             </p>
           </Reveal>
 
-          {/* Two-row scattered layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 lg:gap-y-12 relative z-10">
 
-            {/* Large image block — col 1-7, offset down */}
-            <Reveal variants={fadeLeft} className="lg:col-span-7 lg:mt-0">
-              <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.75)]">
+            {/* Large image block */}
+            <Reveal variants={fadeLeft} className="lg:col-span-7">
+              <div className="relative h-[280px] sm:h-[360px] lg:h-[420px] rounded-3xl overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.75)]">
                 <Parallax speed={0.09} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                   <Image src="/research-pics/research-6.jpg" alt="Market research" fill className="object-cover" />
                 </Parallax>
                 <div className="absolute inset-0 bg-gradient-to-t from-[#07090b]/60 to-transparent" />
 
-                {/* Badge pinned bottom-left */}
                 <motion.div
-                  className="absolute bottom-6 left-6 bg-[#07090b]/65 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4"
+                  className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 bg-[#07090b]/65 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3 sm:px-5 sm:py-4"
                   initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: false }} transition={{ duration: 0.65, delay: 0.3 }}
                   whileHover={{ scale: 1.06, transition: { duration: 0.2 } }}
                 >
-                  <p className="text-2xl font-black text-white">12+</p>
-                  <p className="text-[10px] text-white/35 mt-0.5 tracking-widest uppercase">Years<br/>Expertise</p>
+                  <p className="text-xl sm:text-2xl font-black text-white">12+</p>
+                  <p className="text-[9px] sm:text-[10px] text-white/35 mt-0.5 tracking-widest uppercase">Years<br/>Expertise</p>
                 </motion.div>
 
-                {/* Chip — top right */}
                 <motion.div
-                  className="absolute top-5 right-5 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full"
+                  className="absolute top-4 right-4 sm:top-5 sm:right-5 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full"
                   initial={{ opacity: 0, scale: 0.7 }} whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: false }} transition={{ duration: 0.5, delay: 0.45, ease: 'backOut' }}
                 >
@@ -281,21 +291,21 @@ export default function ResearchConsultancyPage() {
               </div>
             </Reveal>
 
-            {/* Text — col 8-12, offset top to create staggered feel */}
+            {/* Text */}
             <motion.div
               className="lg:col-span-5 lg:pl-12 lg:-mt-6 flex flex-col justify-center"
               initial="hidden" whileInView="show"
               viewport={{ once: false, margin: '-70px' }} variants={stagger}
             >
               <motion.h2 variants={item}
-                className="text-3xl md:text-[2.6rem] font-black leading-[1.06] tracking-tight text-white mb-7">
+                className="text-3xl sm:text-[2.6rem] font-black leading-[1.06] tracking-tight text-white mb-6 lg:mb-7">
                 Intelligence That Drives Strategy
               </motion.h2>
               <motion.p variants={item} className="text-[13px] text-white/38 leading-[1.95] mb-5">
                 Our research services give you the insights needed to make confident
                 real estate decisions — combining deep market knowledge with advanced analytics.
               </motion.p>
-              <motion.p variants={item} className="text-[13px] text-white/38 leading-[1.95] mb-10">
+              <motion.p variants={item} className="text-[13px] text-white/38 leading-[1.95] mb-8 lg:mb-10">
                 Whether you're considering an investment, developing a property, or planning
                 a strategic move, our team provides the research to guide your decisions.
               </motion.p>
@@ -316,16 +326,16 @@ export default function ResearchConsultancyPage() {
               </motion.ul>
             </motion.div>
 
-            {/* Second image — col 5-9, offset right and down, crossing the grid line */}
+            {/* Second image — crosses grid line on desktop */}
             <div className="lg:col-span-12 flex justify-end lg:-mt-16 relative z-10">
               <Reveal variants={fadeRight} className="w-full lg:w-[55%]">
-                <div className="relative h-[260px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
+                <div className="relative h-[200px] sm:h-[260px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
                   <Parallax speed={0.07} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                     <Image src="/research-pics/research-5.jpg" alt="Consultancy" fill className="object-cover object-center" />
                   </Parallax>
                   <div className="absolute inset-0 bg-gradient-to-r from-[#07090b]/50 to-transparent" />
                   <motion.div
-                    className="absolute bottom-5 left-6"
+                    className="absolute bottom-5 left-5 sm:bottom-5 sm:left-6"
                     initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: false }} transition={{ duration: 0.6, delay: 0.25 }}
                   >
@@ -338,10 +348,8 @@ export default function ResearchConsultancyPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════
-            SERVICES — alternating wide/narrow card rows
-        ══════════════════════════════════════════════════════════ */}
-        <section id="services" className="container mx-auto px-4 md:px-6 mt-32 relative">
+        {/* ─── SERVICES ─── */}
+        <section id="services" className="container mx-auto px-4 md:px-6 mt-24 lg:mt-32 relative">
 
           <motion.div
             className="absolute -top-8 right-0 text-[22vw] font-black text-white/[0.025] leading-none select-none pointer-events-none hidden lg:block"
@@ -351,30 +359,29 @@ export default function ResearchConsultancyPage() {
             02
           </motion.div>
 
-          <Reveal variants={fadeUp} className="mb-14 relative z-10">
-            <div className="flex items-end justify-between">
+          <Reveal variants={fadeUp} className="mb-10 lg:mb-14 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold tracking-[0.28em] uppercase text-white/22 mb-3 flex items-center gap-2">
                   <span className="w-5 h-px bg-white/12" /> Services
                 </p>
-                <h2 className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
                   Our Services Include
                 </h2>
               </div>
-              <p className="text-xs text-white/18 hidden md:block text-right leading-relaxed">
+              <p className="text-xs text-white/18 hidden sm:block text-right leading-relaxed">
                 Full-spectrum<br />intelligence
               </p>
             </div>
           </Reveal>
 
-          {/* Row 1 — 1 wide + 1 narrow */}
-          <motion.div className="grid grid-cols-12 gap-4 mb-4"
+          {/* Row 1 — wide + narrow */}
+          <motion.div className="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}
           >
-            {/* Wide card */}
             <motion.div variants={item}
-              className="col-span-12 md:col-span-7 group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-8 flex items-start gap-6 cursor-default overflow-hidden relative"
+              className="sm:col-span-12 md:col-span-7 group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-7 sm:p-8 flex items-start gap-6 cursor-default overflow-hidden relative"
               whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.22 } }}>
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
               <motion.div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0 mt-0.5 relative z-10"
@@ -388,9 +395,8 @@ export default function ResearchConsultancyPage() {
               </div>
             </motion.div>
 
-            {/* Narrow card */}
             <motion.div variants={item}
-              className="col-span-12 md:col-span-5 group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-8 cursor-default overflow-hidden relative"
+              className="sm:col-span-12 md:col-span-5 group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-7 sm:p-8 cursor-default overflow-hidden relative"
               whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.22 } }}>
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
               <motion.div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-5 relative z-10"
@@ -403,7 +409,7 @@ export default function ResearchConsultancyPage() {
           </motion.div>
 
           {/* Row 2 — 3 equal cards */}
-          <motion.div className="grid grid-cols-12 gap-4 mb-4"
+          <motion.div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}
           >
@@ -413,7 +419,7 @@ export default function ResearchConsultancyPage() {
               { label: 'Demographic Research', icon: Globe },
             ].map(({ label, icon: Icon }, i) => (
               <motion.div key={label} variants={item}
-                className="col-span-12 md:col-span-4 group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-7 cursor-default overflow-hidden relative"
+                className="group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-6 sm:p-7 cursor-default overflow-hidden relative"
                 whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.22 } }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
                 <motion.div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-5 relative z-10"
@@ -427,14 +433,13 @@ export default function ResearchConsultancyPage() {
             ))}
           </motion.div>
 
-          {/* Row 3 — image card + 2 narrow */}
-          <motion.div className="grid grid-cols-12 gap-4"
+          {/* Row 3 — image card + 2×2 grid */}
+          <motion.div className="grid grid-cols-1 sm:grid-cols-12 gap-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}
           >
-            {/* Image card */}
             <motion.div variants={scaleIn}
-              className="col-span-12 md:col-span-5 relative rounded-3xl overflow-hidden min-h-[200px] shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+              className="sm:col-span-12 md:col-span-5 relative rounded-3xl overflow-hidden min-h-[200px] shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
               whileHover={{ scale: 1.015, transition: { duration: 0.35 } }}>
               <Parallax speed={0.1} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                 <Image src="/research-pics/research-2.jpg" alt="Services" fill className="object-cover" />
@@ -448,8 +453,7 @@ export default function ResearchConsultancyPage() {
               </motion.div>
             </motion.div>
 
-            {/* Two narrow cards */}
-            <div className="col-span-12 md:col-span-7 grid grid-cols-2 gap-4">
+            <div className="sm:col-span-12 md:col-span-7 grid grid-cols-2 gap-3 sm:gap-4">
               {[
                 { label: 'Competitive Analysis', icon: Search },
                 { label: 'Risk Assessment',      icon: Zap },
@@ -457,7 +461,7 @@ export default function ResearchConsultancyPage() {
                 { label: 'Strategic Consulting', icon: Target },
               ].map(({ label, icon: Icon }, i) => (
                 <motion.div key={label} variants={item}
-                  className="group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-6 cursor-default overflow-hidden relative"
+                  className="group bg-[#0c0f13] border border-white/[0.05] rounded-3xl p-5 sm:p-6 cursor-default overflow-hidden relative"
                   whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.22 } }}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
                   <motion.div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-4 relative z-10"
@@ -473,39 +477,36 @@ export default function ResearchConsultancyPage() {
           </motion.div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════
-            CTA — full-width split panel (no container)
-        ══════════════════════════════════════════════════════════ */}
-        <section className="mt-36 grid grid-cols-1 lg:grid-cols-2 min-h-[520px]">
+        {/* ─── CTA — full-width split panel ─── */}
+        <section className="mt-24 lg:mt-36 grid grid-cols-1 lg:grid-cols-2 min-h-[520px]">
 
           {/* Left — dark text panel */}
           <motion.div
-            className="bg-[#0a0d10] flex items-center px-10 md:px-20 py-20 relative overflow-hidden"
+            className="bg-[#0a0d10] flex items-center px-6 sm:px-10 md:px-20 py-16 lg:py-20 relative overflow-hidden"
             initial="hidden" whileInView="show"
             viewport={{ once: false }} variants={stagger}
           >
-            {/* Ghost number */}
             <div className="absolute bottom-0 left-0 text-[18vw] font-black text-white/[0.03] leading-none select-none pointer-events-none">03</div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 w-full">
               <motion.p variants={item}
                 className="text-[10px] font-bold tracking-[0.28em] uppercase text-white/22 mb-6 flex items-center gap-2">
                 <span className="w-5 h-px bg-white/12" /> Get In Touch
               </motion.p>
               <motion.h2 variants={item}
-                className="text-5xl md:text-6xl font-black leading-[0.97] tracking-[-0.03em] text-white mb-2">
+                className="text-4xl sm:text-5xl md:text-6xl font-black leading-[0.97] tracking-[-0.03em] text-white mb-2">
                 Ready to Make
               </motion.h2>
               <motion.h2 variants={item}
-                className="text-5xl md:text-6xl font-black leading-[0.97] tracking-[-0.03em] text-white/18 mb-10">
+                className="text-4xl sm:text-5xl md:text-6xl font-black leading-[0.97] tracking-[-0.03em] text-white/18 mb-8 lg:mb-10">
                 Informed Decisions?
               </motion.h2>
               <motion.p variants={item}
-                className="text-[13px] text-white/35 max-w-sm leading-[1.9] mb-10 border-l-2 border-white/8 pl-4">
+                className="text-[13px] text-white/35 max-w-sm leading-[1.9] mb-8 lg:mb-10 border-l-2 border-white/8 pl-4">
                 Contact us for expert research and consultancy services that give
                 you the competitive edge in every decision.
               </motion.p>
-              <motion.div variants={item} className="flex items-center gap-5">
+              <motion.div variants={item} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                   <Link href="/contact"
                     className="inline-flex items-center gap-2 bg-white text-black px-7 py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
@@ -523,25 +524,24 @@ export default function ResearchConsultancyPage() {
           </motion.div>
 
           {/* Right — full image panel */}
-          <div className="relative min-h-[360px] lg:min-h-0 overflow-hidden">
+          <div className="relative min-h-[300px] sm:min-h-[360px] lg:min-h-0 overflow-hidden">
             <Parallax speed={0.08} className="absolute inset-0 w-full h-[115%] -top-[7%]">
               <Image src="/research-pics/research-3.jpg" alt="CTA" fill className="object-cover" />
             </Parallax>
             <div className="absolute inset-0 bg-[#07090b]/30" />
 
-            {/* Floating cards over image */}
             <motion.div
-              className="absolute top-10 right-8 bg-[#07090b]/65 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 z-10"
+              className="absolute top-8 sm:top-10 right-6 sm:right-8 bg-[#07090b]/65 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 z-10"
               initial={{ opacity: 0, y: -20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false }} transition={{ duration: 0.75, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ scale: 1.06, transition: { duration: 0.2 } }}
             >
-              <p className="text-2xl font-black text-white">200+</p>
+              <p className="text-xl sm:text-2xl font-black text-white">200+</p>
               <p className="text-[10px] text-white/35 mt-0.5 tracking-widest uppercase">Reports Done</p>
             </motion.div>
 
             <motion.div
-              className="absolute bottom-10 left-8 bg-white text-black text-[11px] font-black px-4 py-2 rounded-full shadow-xl z-10"
+              className="absolute bottom-8 sm:bottom-10 left-6 sm:left-8 bg-white text-black text-[11px] font-black px-4 py-2 rounded-full shadow-xl z-10"
               initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: false }} transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ scale: 1.07, transition: { duration: 0.18 } }}

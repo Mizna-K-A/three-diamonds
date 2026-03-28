@@ -82,14 +82,14 @@ function Ticker({ items }) {
 
 export default function LandlordAgencyPage() {
   const features = [
-    { label: 'Tenant Sourcing',     icon: Search,        desc: 'Extensive network reach to attract qualified, reliable tenants quickly.' },
-    { label: 'Lease Marketing',     icon: Megaphone,     desc: 'Professional multi-channel marketing campaigns that maximise property exposure.' },
-    { label: 'Rent Optimization',   icon: TrendingUp,    desc: 'Data-driven pricing strategies to secure the highest achievable market rent.' },
-    { label: 'Lease Administration',icon: ClipboardList, desc: 'Meticulous documentation, compliance and administration throughout the lease lifecycle.' },
-    { label: 'Market Analysis',     icon: BarChart2,     desc: 'Up-to-date comparable data benchmarking your property against the live market.' },
-    { label: 'Property Showings',   icon: Eye,           desc: 'Professionally managed viewings that showcase your property at its best.' },
-    { label: 'Tenant Screening',    icon: UserCheck,     desc: 'Thorough background, credit and reference checks to protect your investment.' },
-    { label: 'Lease Renewals',      icon: RefreshCw,     desc: 'Proactive renewal management to retain quality tenants and eliminate void periods.' },
+    { label: 'Tenant Sourcing',      icon: Search,        desc: 'Extensive network reach to attract qualified, reliable tenants quickly.' },
+    { label: 'Lease Marketing',      icon: Megaphone,     desc: 'Professional multi-channel marketing campaigns that maximise property exposure.' },
+    { label: 'Rent Optimization',    icon: TrendingUp,    desc: 'Data-driven pricing strategies to secure the highest achievable market rent.' },
+    { label: 'Lease Administration', icon: ClipboardList, desc: 'Meticulous documentation, compliance and administration throughout the lease lifecycle.' },
+    { label: 'Market Analysis',      icon: BarChart2,     desc: 'Up-to-date comparable data benchmarking your property against the live market.' },
+    { label: 'Property Showings',    icon: Eye,           desc: 'Professionally managed viewings that showcase your property at its best.' },
+    { label: 'Tenant Screening',     icon: UserCheck,     desc: 'Thorough background, credit and reference checks to protect your investment.' },
+    { label: 'Lease Renewals',       icon: RefreshCw,     desc: 'Proactive renewal management to retain quality tenants and eliminate void periods.' },
   ];
 
   const benefits = [
@@ -108,30 +108,46 @@ export default function LandlordAgencyPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#060709] text-white pb-32 overflow-x-hidden">
+      <main className="min-h-screen bg-[#060709] text-white pb-16 md:pb-24 lg:pb-32 overflow-x-hidden">
 
         {/* ══════════════════════════════════════════════════════
-            HERO — split left text / right asymmetric image stack
+            HERO
         ══════════════════════════════════════════════════════ */}
-        <section className="relative pt-32 pb-24 min-h-screen flex items-center overflow-hidden">
+        <section className="relative pt-28 md:pt-32 pb-16 md:pb-24 min-h-screen flex items-center overflow-hidden">
 
-          {/* Subtle radial glow — top left atmosphere */}
+          {/* Subtle radial glow */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full bg-white/[0.025] blur-[130px] pointer-events-none" />
 
-          <div className="container mx-auto px-4 md:px-6 w-full">
-            <ServiceNavigation />
+          {/* Mobile/tablet background image */}
+          <div className="absolute inset-0 lg:hidden">
+            <Image
+              src="/landloard-pics/landlord-6.jpg"
+              alt="Property"
+              fill
+              priority
+              className="object-cover object-center opacity-15"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#060709]/60 via-[#060709]/75 to-[#060709]" />
+          </div>
 
-            <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-0 items-center min-h-[76vh]">
+          <div className="container mx-auto px-4 md:px-6 w-full relative z-10">
+
+            {/* ServiceNavigation — desktop only */}
+            <div className="hidden lg:block">
+              <ServiceNavigation />
+            </div>
+
+            <div className="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
 
               {/* ── LEFT — text column ── */}
               <motion.div
-                className="lg:pr-12 pb-12 lg:pb-0"
+                className="lg:pr-12 pb-10 lg:pb-0"
                 initial="hidden"
                 animate="show"
                 variants={stagger}
               >
-                {/* Eyebrow — index style */}
-                <motion.div variants={fadeUp} custom={0} className="flex items-center gap-3 mb-10">
+                {/* Eyebrow */}
+                <motion.div variants={fadeUp} custom={0} className="flex items-center gap-3 mb-8 md:mb-10">
                   <span className="text-[10px] font-black tracking-[0.3em] uppercase text-white/18">—</span>
                   <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
                     <Key className="w-3 h-3 text-white/50" />
@@ -139,28 +155,28 @@ export default function LandlordAgencyPage() {
                   <span className="text-[10px] font-black tracking-[0.28em] uppercase text-white/35">Landlord Agency Leasing</span>
                 </motion.div>
 
-                {/* Headline — word-by-word with size contrast */}
-                <div className="mb-10 space-y-0">
+                {/* Headline */}
+                <div className="mb-8 md:mb-10 space-y-0">
                   <motion.div variants={fadeUp} custom={0.08} className="overflow-hidden">
-                    <h1 className="text-[clamp(1rem,2.2vw,1.8rem)] font-black leading-tight tracking-[0.08em] uppercase text-white/30 mb-1">
+                    <h1 className="text-[clamp(0.85rem,2.2vw,1.8rem)] font-black leading-tight tracking-[0.08em] uppercase text-white/30 mb-1">
                       Your Property.
                     </h1>
                   </motion.div>
                   <motion.div variants={fadeUp} custom={0.16} className="overflow-hidden">
-                    <h1 className="text-[clamp(3.6rem,7.8vw,6.8rem)] font-black leading-[0.9] tracking-[-0.04em] text-white">
+                    <h1 className="text-[clamp(3rem,9vw,6.8rem)] font-black leading-[0.9] tracking-[-0.04em] text-white">
                       Maximum
                     </h1>
                   </motion.div>
                   <motion.div variants={fadeUp} custom={0.24} className="overflow-hidden">
                     <h1
-                      className="text-[clamp(3.6rem,7.8vw,6.8rem)] font-black leading-[0.9] tracking-[-0.04em]"
+                      className="text-[clamp(3rem,9vw,6.8rem)] font-black leading-[0.9] tracking-[-0.04em]"
                       style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.22)', color: 'transparent' }}
                     >
                       Returns.
                     </h1>
                   </motion.div>
                   <motion.div variants={fadeUp} custom={0.32} className="overflow-hidden">
-                    <h1 className="text-[clamp(1rem,2.2vw,1.8rem)] font-black leading-tight tracking-[0.08em] uppercase text-white/30 mt-2">
+                    <h1 className="text-[clamp(0.85rem,2.2vw,1.8rem)] font-black leading-tight tracking-[0.08em] uppercase text-white/30 mt-2">
                       Zero Compromise.
                     </h1>
                   </motion.div>
@@ -169,17 +185,17 @@ export default function LandlordAgencyPage() {
                 {/* Description */}
                 <motion.p
                   variants={fadeUp} custom={0.40}
-                  className="text-[13px] text-white/38 max-w-[330px] leading-[1.95] mb-12 border-l-2 border-white/8 pl-5"
+                  className="text-[13px] text-white/38 max-w-[330px] leading-[1.95] mb-10 md:mb-12 border-l-2 border-white/8 pl-5"
                 >
                   Professional leasing services for landlords to maximise property value,
                   eliminate vacancy and secure quality tenants — quickly and professionally.
                 </motion.p>
 
                 {/* CTAs */}
-                <motion.div variants={fadeUp} custom={0.48} className="flex items-center gap-5 mb-14">
+                <motion.div variants={fadeUp} custom={0.48} className="flex items-center gap-4 md:gap-5 mb-10 md:mb-14 flex-wrap">
                   <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                     <Link href="/contact"
-                      className="inline-flex items-center gap-2 bg-white text-black px-7 py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
+                      className="inline-flex items-center gap-2 bg-white text-black px-6 md:px-7 py-[13px] md:py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
                       List My Property <ArrowRight className="w-4 h-4" />
                     </Link>
                   </motion.div>
@@ -194,7 +210,7 @@ export default function LandlordAgencyPage() {
                 {/* Stats row */}
                 <motion.div
                   variants={fadeUp} custom={0.56}
-                  className="flex items-center gap-8 pt-8 border-t border-white/[0.06]"
+                  className="flex items-center gap-6 md:gap-8 pt-6 md:pt-8 border-t border-white/[0.06]"
                 >
                   {[
                     { n: '98%',  l: 'Occupancy Rate' },
@@ -202,17 +218,17 @@ export default function LandlordAgencyPage() {
                     { n: '500+', l: 'Properties Let'  },
                   ].map(({ n, l }) => (
                     <div key={l}>
-                      <p className="text-2xl font-black text-white">{n}</p>
+                      <p className="text-xl md:text-2xl font-black text-white">{n}</p>
                       <p className="text-[10px] text-white/25 uppercase tracking-widest mt-0.5">{l}</p>
                     </div>
                   ))}
                 </motion.div>
               </motion.div>
 
-              {/* ── RIGHT — asymmetric image stack ── */}
+              {/* ── RIGHT — asymmetric image stack (desktop only) ── */}
               <div className="relative h-[580px] hidden lg:block">
 
-                {/* Main large image — top right */}
+                {/* Main large image */}
                 <motion.div
                   className="absolute top-0 right-0 w-[74%] h-[420px] rounded-3xl overflow-hidden shadow-[0_50px_130px_rgba(0,0,0,0.75)]"
                   initial={{ opacity: 0, y: 44, scale: 0.92 }}
@@ -226,7 +242,7 @@ export default function LandlordAgencyPage() {
                   <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#060709]/10" />
                 </motion.div>
 
-                {/* Overlapping smaller card — bottom left */}
+                {/* Overlapping smaller card */}
                 <motion.div
                   className="absolute bottom-0 left-0 w-[50%] h-[255px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.85)] border-[3px] border-[#060709] z-10"
                   initial={{ opacity: 0, x: -38, y: 20 }}
@@ -237,7 +253,7 @@ export default function LandlordAgencyPage() {
                   <div className="absolute inset-0 bg-[#060709]/20" />
                 </motion.div>
 
-                {/* Floating glass stat — top left of stack */}
+                {/* Floating glass stat */}
                 <motion.div
                   className="absolute top-6 left-2 bg-[#060709]/65 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-3.5 z-20"
                   initial={{ opacity: 0, y: -20, scale: 0.88 }}
@@ -254,7 +270,7 @@ export default function LandlordAgencyPage() {
                   </div>
                 </motion.div>
 
-                {/* White label chip — mid right edge */}
+                {/* White label chip */}
                 <motion.div
                   className="absolute bottom-[195px] right-[-6px] bg-white text-black text-[11px] font-black px-4 py-2 rounded-full shadow-xl z-10"
                   initial={{ opacity: 0, x: 22 }}
@@ -265,7 +281,7 @@ export default function LandlordAgencyPage() {
                   500+ Properties Let
                 </motion.div>
 
-                {/* Thin vertical decorative rule */}
+                {/* Thin decorative rule */}
                 <motion.div
                   className="absolute right-[-26px] top-[14%] h-[54%] w-px bg-gradient-to-b from-transparent via-white/10 to-transparent hidden xl:block"
                   initial={{ scaleY: 0 }}
@@ -286,11 +302,11 @@ export default function LandlordAgencyPage() {
         </div>
 
         {/* ══════════════════════════════════════════════════════
-            OVERVIEW — large quote-style headline + side image wall
+            OVERVIEW
         ══════════════════════════════════════════════════════ */}
-        <section className="mt-28 relative">
+        <section className="mt-16 md:mt-24 lg:mt-28 relative">
 
-          {/* Ghost number — bleeds left */}
+          {/* Ghost number — desktop only */}
           <motion.div
             className="absolute -top-8 -left-4 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
@@ -299,8 +315,7 @@ export default function LandlordAgencyPage() {
 
           <div className="container mx-auto px-4 md:px-6">
 
-            {/* Section label */}
-            <Reveal variants={fadeUp} className="mb-14">
+            <Reveal variants={fadeUp} className="mb-10 md:mb-14">
               <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 flex items-center gap-2">
                 <span className="w-5 h-px bg-white/12" /> Our Approach
               </p>
@@ -308,14 +323,14 @@ export default function LandlordAgencyPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-              {/* Left — editorial text, large */}
+              {/* Left — editorial text */}
               <motion.div
                 className="lg:col-span-5 lg:pr-6"
                 initial="hidden" whileInView="show"
                 viewport={{ once: false, margin: '-70px' }} variants={stagger}
               >
                 <motion.h2 variants={si}
-                  className="text-4xl md:text-[2.9rem] font-black leading-[1.04] tracking-[-0.028em] text-white mb-8">
+                  className="text-3xl md:text-4xl lg:text-[2.9rem] font-black leading-[1.04] tracking-[-0.028em] text-white mb-6 md:mb-8">
                   Maximise Returns. Minimise Vacancy.
                 </motion.h2>
                 <motion.p variants={si} className="text-[13px] text-white/38 leading-[1.95] mb-5">
@@ -323,16 +338,16 @@ export default function LandlordAgencyPage() {
                   through strategic leasing. We market your property effectively, screen tenants
                   thoroughly, and negotiate leases that protect your interests.
                 </motion.p>
-                <motion.p variants={si} className="text-[13px] text-white/38 leading-[1.95] mb-10">
+                <motion.p variants={si} className="text-[13px] text-white/38 leading-[1.95] mb-8 md:mb-10">
                   With our extensive network and market expertise, we minimise vacancy periods
                   and secure quality tenants who pay on time and care for your property.
                 </motion.p>
 
-                {/* Benefits list — numbered style */}
+                {/* Benefits list */}
                 <motion.ul className="space-y-0" variants={stagger}>
                   {benefits.map((b, i) => (
                     <motion.li key={i} variants={si}
-                      className="flex items-center gap-4 py-4 border-b border-white/[0.05] text-[13px] text-white/48 group cursor-default"
+                      className="flex items-center gap-4 py-3.5 md:py-4 border-b border-white/[0.05] text-[13px] text-white/48 group cursor-default"
                       whileHover={{ x: 7, color: 'rgba(255,255,255,0.88)', transition: { duration: 0.18 } }}>
                       <span className="text-[10px] font-black text-white/20 w-5 flex-shrink-0 tabular-nums">
                         0{i + 1}
@@ -344,17 +359,16 @@ export default function LandlordAgencyPage() {
                 </motion.ul>
               </motion.div>
 
-              {/* Right — stacked image trio, offset heights */}
-              <div className="lg:col-span-7 grid grid-cols-2 gap-4 relative">
+              {/* Right — image trio (hidden on mobile, shown md+) */}
+              <div className="lg:col-span-7 hidden md:grid grid-cols-2 gap-4 relative">
 
-                {/* Tall left image spanning 2 rows */}
+                {/* Tall left image */}
                 <Reveal variants={fadeRight} className="row-span-2">
-                  <div className="relative h-[480px] rounded-3xl overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.8)]">
+                  <div className="relative h-[420px] md:h-[480px] rounded-3xl overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.8)]">
                     <Parallax speed={0.09} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                       <Image src="/landloard-pics/landlord-4.jpg" alt="Property" fill className="object-cover" />
                     </Parallax>
                     <div className="absolute inset-0 bg-gradient-to-t from-[#060709]/55 to-transparent" />
-                    {/* Floating badge inside */}
                     <motion.div
                       className="absolute bottom-6 left-5 bg-[#060709]/65 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3"
                       initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
@@ -369,15 +383,15 @@ export default function LandlordAgencyPage() {
 
                 {/* Top right image */}
                 <Reveal variants={slideDown} custom={0.15}>
-                  <div className="relative h-[228px] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] border-[3px] border-[#060709]">
+                  <div className="relative h-[200px] md:h-[228px] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] border-[3px] border-[#060709]">
                     <Image src="/landloard-pics/landlord-3.jpg" alt="Lease" fill className="object-cover" />
                     <div className="absolute inset-0 bg-[#060709]/20" />
                   </div>
                 </Reveal>
 
-                {/* Bottom right image with chip */}
+                {/* Bottom right image */}
                 <Reveal variants={fadeRight} custom={0.28}>
-                  <div className="relative h-[228px] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] border-[3px] border-[#060709]">
+                  <div className="relative h-[200px] md:h-[228px] rounded-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] border-[3px] border-[#060709]">
                     <Image src="/landloard-pics/landlord-7.jpg" alt="Tenants" fill className="object-cover" />
                     <div className="absolute inset-0 bg-[#060709]/30" />
                     <motion.div
@@ -390,14 +404,25 @@ export default function LandlordAgencyPage() {
                   </div>
                 </Reveal>
               </div>
+
+              {/* Mobile-only single image */}
+              <div className="md:hidden relative w-full h-[220px] rounded-2xl overflow-hidden mt-2">
+                <Image src="/landloard-pics/landlord-4.jpg" alt="Property" fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#060709]/60 to-transparent" />
+                <div className="absolute bottom-4 left-4 bg-[#060709]/65 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-2.5">
+                  <p className="text-lg font-black text-white">21 days</p>
+                  <p className="text-[10px] text-white/35 tracking-widest uppercase">Avg. Let Time</p>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            SERVICES — magazine-editorial card grid
+            SERVICES
         ══════════════════════════════════════════════════════ */}
-        <section id="services" className="container mx-auto px-4 md:px-6 mt-32 relative">
+        <section id="services" className="container mx-auto px-4 md:px-6 mt-20 md:mt-28 lg:mt-32 relative">
 
           <motion.div
             className="absolute -top-8 right-0 text-[20vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
@@ -405,24 +430,24 @@ export default function LandlordAgencyPage() {
             viewport={{ once: false }} transition={{ duration: 1.4 }}
           >02</motion.div>
 
-          <Reveal variants={fadeUp} className="mb-14 relative z-10">
+          <Reveal variants={fadeUp} className="mb-10 md:mb-14 relative z-10">
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-3 flex items-center gap-2">
                   <span className="w-5 h-px bg-white/12" /> Services
                 </p>
-                <h2 className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">Our Services Include</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-[-0.025em] text-white">Our Services Include</h2>
               </div>
               <p className="text-xs text-white/18 hidden md:block text-right leading-relaxed">Landlord-first<br />leasing</p>
             </div>
           </Reveal>
 
-          {/* Row 1 — 3 col with a tall image spanning left */}
-          <div className="grid grid-cols-12 gap-4 mb-4">
+          {/* Row 1 — tall image card + feature cards */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
 
-            {/* Tall image — 4 cols */}
+            {/* Tall image — desktop spans 2 rows; mobile is single-height */}
             <motion.div
-              className="col-span-12 md:col-span-4 relative rounded-3xl overflow-hidden min-h-[340px] md:row-span-2 shadow-[0_40px_100px_rgba(0,0,0,0.7)]"
+              className="col-span-1 md:col-span-4 relative rounded-3xl overflow-hidden min-h-[220px] md:min-h-[340px] shadow-[0_40px_100px_rgba(0,0,0,0.7)]"
               initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false, margin: '-60px' }}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
@@ -433,69 +458,69 @@ export default function LandlordAgencyPage() {
               </Parallax>
               <div className="absolute inset-0 bg-gradient-to-t from-[#060709]/88 via-[#060709]/25 to-transparent" />
               <motion.div
-                className="absolute bottom-7 left-6 right-6"
+                className="absolute bottom-5 md:bottom-7 left-5 md:left-6 right-5 md:right-6"
                 initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false }} transition={{ duration: 0.6, delay: 0.3 }}>
-                <p className="text-white font-black text-xl leading-tight mb-1">Listed. Leased. Done.</p>
+                <p className="text-white font-black text-lg md:text-xl leading-tight mb-1">Listed. Leased. Done.</p>
                 <p className="text-white/35 text-xs tracking-wide">Professional end-to-end service.</p>
               </motion.div>
             </motion.div>
 
-            {/* Right 8 cols — 2 rows of feature cards */}
+            {/* Feature cards — 2 col grid */}
             <motion.div
-              className="col-span-12 md:col-span-8 grid grid-cols-2 gap-4"
+              className="col-span-1 md:col-span-8 grid grid-cols-2 gap-3 md:gap-4"
               initial="hidden" whileInView="show"
               viewport={{ once: false, margin: '-60px' }} variants={stagger}
             >
               {features.slice(0, 4).map(({ label, icon: Icon, desc }, i) => (
                 <motion.div key={label} variants={si}
-                  className="group bg-[#0c0e13] border border-white/[0.05] rounded-2xl p-6 cursor-default relative overflow-hidden"
+                  className="group bg-[#0c0e13] border border-white/[0.05] rounded-2xl p-4 md:p-6 cursor-default relative overflow-hidden"
                   whileHover={{ borderColor: 'rgba(255,255,255,0.13)', y: -5, transition: { duration: 0.2 } }}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                   <motion.div
-                    className="relative z-10 w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-4"
+                    className="relative z-10 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-3 md:mb-4"
                     initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
                     whileInView={{ rotate: 0, scale: 1, opacity: 1 }}
                     viewport={{ once: false }}
                     transition={{ duration: 0.45, delay: i * 0.06, ease: 'backOut' }}>
-                    <Icon className="w-4 h-4 text-white/40" />
+                    <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/40" />
                   </motion.div>
-                  <h3 className="relative z-10 text-sm font-black text-white/62 group-hover:text-white/92 transition-colors mb-1.5">{label}</h3>
-                  <p className="relative z-10 text-[11px] text-white/28 leading-relaxed">{desc}</p>
+                  <h3 className="relative z-10 text-xs md:text-sm font-black text-white/62 group-hover:text-white/92 transition-colors mb-1 md:mb-1.5">{label}</h3>
+                  <p className="relative z-10 text-[11px] text-white/28 leading-relaxed hidden md:block">{desc}</p>
                 </motion.div>
               ))}
             </motion.div>
           </div>
 
           {/* Row 2 — wide card + 3 narrow cards */}
-          <motion.div className="grid grid-cols-12 gap-4 mb-4"
+          <motion.div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 mb-4"
             initial="hidden" whileInView="show"
             viewport={{ once: false, margin: '-60px' }} variants={stagger}>
 
-            {/* Wide feature card with description */}
+            {/* Wide feature card */}
             <motion.div variants={si}
-              className="col-span-12 md:col-span-6 group bg-[#0c0e13] border border-white/[0.05] rounded-3xl p-8 flex gap-6 cursor-default relative overflow-hidden"
+              className="col-span-2 md:col-span-6 group bg-[#0c0e13] border border-white/[0.05] rounded-3xl p-5 md:p-8 flex gap-4 md:gap-6 cursor-default relative overflow-hidden"
               whileHover={{ borderColor: 'rgba(255,255,255,0.12)', y: -4, transition: { duration: 0.2 } }}>
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
               <motion.div
-                className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0 mt-0.5 relative z-10"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/[0.06] border border-white/[0.07] flex items-center justify-center flex-shrink-0 mt-0.5 relative z-10"
                 initial={{ rotate: -90, opacity: 0 }} whileInView={{ rotate: 0, opacity: 1 }}
                 viewport={{ once: false }} transition={{ duration: 0.45, ease: 'backOut' }}>
                 <BarChart2 className="w-4 h-4 text-white/40" />
               </motion.div>
               <div className="relative z-10">
-                <h3 className="text-base font-black text-white/68 group-hover:text-white/94 transition-colors mb-2">Market Analysis</h3>
-                <p className="text-[12px] text-white/30 leading-relaxed">Up-to-date comparable data benchmarking your property against the live market to ensure optimal rent positioning.</p>
+                <h3 className="text-sm md:text-base font-black text-white/68 group-hover:text-white/94 transition-colors mb-1.5 md:mb-2">Market Analysis</h3>
+                <p className="text-[11px] md:text-[12px] text-white/30 leading-relaxed">Up-to-date comparable data benchmarking your property against the live market to ensure optimal rent positioning.</p>
               </div>
             </motion.div>
 
             {features.slice(5, 8).map(({ label, icon: Icon }, i) => (
               <motion.div key={label} variants={si}
-                className="col-span-6 md:col-span-2 group bg-[#0c0e13] border border-white/[0.05] rounded-2xl p-6 cursor-default relative overflow-hidden"
+                className="col-span-1 md:col-span-2 group bg-[#0c0e13] border border-white/[0.05] rounded-2xl p-4 md:p-6 cursor-default relative overflow-hidden"
                 whileHover={{ borderColor: 'rgba(255,255,255,0.13)', y: -5, transition: { duration: 0.2 } }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                 <motion.div
-                  className="relative z-10 w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-4"
+                  className="relative z-10 w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.07] flex items-center justify-center mb-3 md:mb-4"
                   initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
                   whileInView={{ rotate: 0, scale: 1, opacity: 1 }}
                   viewport={{ once: false }}
@@ -509,11 +534,11 @@ export default function LandlordAgencyPage() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            STATS STRIP — full width divided
+            STATS STRIP
         ══════════════════════════════════════════════════════ */}
-        <section className="mt-24 border-t border-b border-white/[0.04] bg-[#09090d]">
+        <section className="mt-16 md:mt-20 lg:mt-24 border-t border-b border-white/[0.04] bg-[#09090d]">
           <div className="container mx-auto px-4 md:px-6">
-            <motion.div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.04]"
+            <motion.div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-white/[0.04]"
               initial="hidden" whileInView="show"
               viewport={{ once: false, margin: '-60px' }} variants={stagger}>
               {[
@@ -523,10 +548,10 @@ export default function LandlordAgencyPage() {
                 { val: '40%',  label: 'Rent Uplift',      sub: 'vs. self-managed average' },
               ].map(({ val, label, sub }, i) => (
                 <motion.div key={label} variants={si}
-                  className="py-10 px-8 hover:bg-white/[0.02] transition-colors duration-300"
+                  className="py-8 md:py-10 px-5 md:px-8 hover:bg-white/[0.02] transition-colors duration-300"
                   whileHover={{ y: -2, transition: { duration: 0.18 } }}>
-                  <p className="text-[10px] font-black tracking-[0.22em] uppercase text-white/22 mb-3">{label}</p>
-                  <p className="text-4xl font-black text-white mb-1">{val}</p>
+                  <p className="text-[10px] font-black tracking-[0.22em] uppercase text-white/22 mb-2 md:mb-3">{label}</p>
+                  <p className="text-3xl md:text-4xl font-black text-white mb-1">{val}</p>
                   <p className="text-[11px] text-white/25">{sub}</p>
                 </motion.div>
               ))}
@@ -535,16 +560,15 @@ export default function LandlordAgencyPage() {
         </section>
 
         {/* ══════════════════════════════════════════════════════
-            CTA — split: dark left panel + right full-image panel
-            Unique: image on the RIGHT this time (vs previous pages)
+            CTA
         ══════════════════════════════════════════════════════ */}
-        <section className="mt-32 container mx-auto px-4 md:px-6">
+        <section className="mt-16 md:mt-24 lg:mt-32 container mx-auto px-4 md:px-6">
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 rounded-3xl overflow-hidden min-h-[480px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 rounded-3xl overflow-hidden">
 
             {/* Left — dark text panel */}
             <motion.div
-              className="lg:col-span-6 bg-[#0c0e13] border border-white/[0.06] rounded-3xl p-12 md:p-14 flex flex-col justify-between relative overflow-hidden"
+              className="lg:col-span-6 bg-[#0c0e13] border border-white/[0.06] rounded-3xl p-8 md:p-12 lg:p-14 flex flex-col justify-between relative overflow-hidden min-h-[380px] md:min-h-[480px]"
               initial="hidden" whileInView="show"
               viewport={{ once: false }} variants={stagger}
             >
@@ -553,27 +577,27 @@ export default function LandlordAgencyPage() {
 
               <div className="relative z-10">
                 <motion.p variants={si}
-                  className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-7 flex items-center gap-2">
+                  className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-6 md:mb-7 flex items-center gap-2">
                   <span className="w-5 h-px bg-white/12" /> Get In Touch
                 </motion.p>
                 <motion.h2 variants={si}
-                  className="text-4xl md:text-5xl font-black leading-[0.97] tracking-[-0.03em] text-white mb-2">
+                  className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.97] tracking-[-0.03em] text-white mb-2">
                   Ready to Lease
                 </motion.h2>
                 <motion.h2 variants={si}
-                  className="text-4xl md:text-5xl font-black leading-[0.97] tracking-[-0.03em] text-white/18 mb-8">
+                  className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.97] tracking-[-0.03em] text-white/18 mb-6 md:mb-8">
                   Your Property?
                 </motion.h2>
                 <motion.p variants={si}
-                  className="text-[13px] text-white/35 leading-[1.9] max-w-sm border-l-2 border-white/8 pl-4 mb-10">
+                  className="text-[13px] text-white/35 leading-[1.9] max-w-sm border-l-2 border-white/8 pl-4 mb-8 md:mb-10">
                   Contact us today for professional landlord agency services that maximise your rental income and protect your asset.
                 </motion.p>
               </div>
 
-              <motion.div variants={si} className="flex items-center gap-5 relative z-10">
+              <motion.div variants={si} className="flex items-center gap-4 md:gap-5 relative z-10 flex-wrap">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                   <Link href="/contact"
-                    className="inline-flex items-center gap-2 bg-white text-black px-7 py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
+                    className="inline-flex items-center gap-2 bg-white text-black px-6 md:px-7 py-[13px] md:py-[14px] rounded-full font-black text-sm hover:bg-white/90 transition-colors">
                     List My Property <ArrowRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
@@ -587,33 +611,32 @@ export default function LandlordAgencyPage() {
             </motion.div>
 
             {/* Right — stacked image panels */}
-            <div className="lg:col-span-6 grid grid-rows-2 gap-5">
+            <div className="lg:col-span-6 grid grid-cols-1 md:grid-rows-2 gap-4 md:gap-5">
 
               {/* Top image */}
-              <Reveal variants={fadeRight} className="relative rounded-3xl overflow-hidden min-h-[200px]">
+              <Reveal variants={fadeRight} className="relative rounded-3xl overflow-hidden min-h-[180px] md:min-h-[200px]">
                 <Parallax speed={0.08} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                   <Image src="/landloard-pics/landlord-2.jpg" alt="" fill className="object-cover" />
                 </Parallax>
                 <div className="absolute inset-0 bg-[#060709]/30" />
-                {/* Floating chip */}
                 <motion.div
-                  className="absolute top-5 right-5 bg-[#060709]/65 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3"
+                  className="absolute top-4 md:top-5 right-4 md:right-5 bg-[#060709]/65 backdrop-blur-xl border border-white/10 rounded-xl px-3 md:px-4 py-2.5 md:py-3"
                   initial={{ opacity: 0, y: -16 }} whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: false }} transition={{ duration: 0.6, delay: 0.25 }}
                   whileHover={{ scale: 1.06, transition: { duration: 0.2 } }}>
-                  <p className="text-lg font-black text-white">98%</p>
+                  <p className="text-base md:text-lg font-black text-white">98%</p>
                   <p className="text-[9px] text-white/35 tracking-widest uppercase">Occupancy</p>
                 </motion.div>
               </Reveal>
 
               {/* Bottom image */}
-              <Reveal variants={fadeRight} custom={0.18} className="relative rounded-3xl overflow-hidden min-h-[200px]">
+              <Reveal variants={fadeRight} custom={0.18} className="relative rounded-3xl overflow-hidden min-h-[180px] md:min-h-[200px]">
                 <Parallax speed={0.08} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                   <Image src="/landloard-pics/landlord-5.jpg" alt="" fill className="object-cover" />
                 </Parallax>
                 <div className="absolute inset-0 bg-[#060709]/35" />
                 <motion.div
-                  className="absolute bottom-5 left-5 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full"
+                  className="absolute bottom-4 md:bottom-5 left-4 md:left-5 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full"
                   initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: false }} transition={{ duration: 0.6, delay: 0.35 }}
                   whileHover={{ scale: 1.07, transition: { duration: 0.18 } }}>

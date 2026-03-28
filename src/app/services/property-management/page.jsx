@@ -107,19 +107,23 @@ export default function PropertyManagementPage() {
 
         {/* ─── HERO ─── */}
         <section className="pt-32 pb-0 container mx-auto px-4 md:px-6">
-          <ServiceNavigation />
 
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-0 items-start">
+          {/* ServiceNavigation — hidden on mobile & tablet, visible on lg+ */}
+          <div className="hidden lg:block">
+            <ServiceNavigation />
+          </div>
+
+          <div className="mt-6 lg:mt-10 grid grid-cols-1 lg:grid-cols-2 gap-0 items-start">
 
             {/* Left — headline */}
             <motion.div
-              className="lg:pr-16 pb-12"
+              className="lg:pr-16 pb-8 lg:pb-12"
               initial="hidden"
               animate="show"
               variants={staggerContainer}
             >
               {/* Eyebrow */}
-              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2.5 mb-9">
+              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2.5 mb-7 lg:mb-9">
                 <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
                   <Building2 className="w-3 h-3 text-white/50" />
                 </div>
@@ -130,17 +134,17 @@ export default function PropertyManagementPage() {
 
               {/* Headline */}
               <motion.h1 variants={fadeUp} custom={0.1}
-                className="text-[clamp(3.2rem,6.5vw,5.5rem)] font-black leading-[0.96] tracking-[-0.035em] text-white mb-2">
+                className="text-[clamp(2.6rem,8vw,5.5rem)] font-black leading-[0.96] tracking-[-0.035em] text-white mb-2">
                 Your Property.
               </motion.h1>
               <motion.h1 variants={fadeUp} custom={0.2}
-                className="text-[clamp(3.2rem,6.5vw,5.5rem)] font-black leading-[0.96] tracking-[-0.035em] mb-10"
+                className="text-[clamp(2.6rem,8vw,5.5rem)] font-black leading-[0.96] tracking-[-0.035em] mb-8 lg:mb-10"
                 style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.2)', color: 'transparent' }}>
                 Our Priority.
               </motion.h1>
 
               <motion.p variants={fadeUp} custom={0.3}
-                className="text-[13px] text-white/38 max-w-[340px] leading-[1.95] mb-11 pl-4 border-l-2 border-white/8">
+                className="text-[13px] text-white/38 max-w-[340px] leading-[1.95] mb-8 lg:mb-11 pl-4 border-l-2 border-white/8">
                 Comprehensive management solutions that maximize your investment returns
                 while giving you total peace of mind.
               </motion.p>
@@ -153,7 +157,7 @@ export default function PropertyManagementPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right — floating image stack */}
+            {/* Right — floating image stack (desktop only) */}
             <div className="relative h-[480px] hidden lg:block">
 
               {/* Main large image */}
@@ -207,11 +211,34 @@ export default function PropertyManagementPage() {
                 500+ Properties
               </motion.div>
             </div>
+
+            {/* Mobile/Tablet — single hero image */}
+            <motion.div
+              className="block lg:hidden relative w-full h-[260px] sm:h-[340px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.7)] mb-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Image src="/propertymangement-pics/real-estate-4.jpg" alt="Featured property" fill priority className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#07080a]/50 to-transparent" />
+
+              {/* Inline stat pill on mobile image */}
+              <div className="absolute bottom-4 left-4 bg-[#07080a]/70 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 flex items-center gap-2.5">
+                <TrendingUp className="w-3.5 h-3.5 text-white/60" />
+                <div>
+                  <p className="text-[9px] text-white/35 leading-none mb-0.5 tracking-wide">Avg. Occupancy</p>
+                  <p className="text-base font-black text-white leading-none">98%</p>
+                </div>
+              </div>
+              <div className="absolute bottom-4 right-4 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg">
+                500+ Properties
+              </div>
+            </motion.div>
           </div>
         </section>
 
         {/* ─── STATS ROW ─── */}
-        <section className="border-t border-b border-white/[0.05] mt-12 bg-[#09090d]">
+        <section className="border-t border-b border-white/[0.05] mt-8 lg:mt-12 bg-[#09090d]">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
               className="grid grid-cols-3 divide-x divide-white/[0.05]"
@@ -224,7 +251,7 @@ export default function PropertyManagementPage() {
                 <motion.div
                   key={label}
                   variants={staggerItem}
-                  className="py-9 px-8 hover:bg-white/[0.02] transition-colors duration-300"
+                  className="py-6 px-3 sm:py-9 sm:px-8 hover:bg-white/[0.02] transition-colors duration-300"
                   whileHover={{ y: -2, transition: { duration: 0.2 } }}
                 >
                   <motion.div
@@ -233,10 +260,10 @@ export default function PropertyManagementPage() {
                     viewport={{ once: false }}
                     transition={{ duration: 0.5, ease: 'backOut' }}
                   >
-                    <Icon className="w-5 h-5 text-white/25 mb-3" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white/25 mb-2 sm:mb-3" />
                   </motion.div>
-                  <p className="text-[10px] font-black tracking-[0.22em] uppercase text-white/22 mb-2">{label}</p>
-                  <p className="text-4xl font-black text-white">{value}</p>
+                  <p className="text-[8px] sm:text-[10px] font-black tracking-[0.18em] sm:tracking-[0.22em] uppercase text-white/22 mb-1 sm:mb-2 leading-tight">{label}</p>
+                  <p className="text-2xl sm:text-4xl font-black text-white">{value}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -244,7 +271,7 @@ export default function PropertyManagementPage() {
         </section>
 
         {/* ─── OVERVIEW ─── */}
-        <section className="container mx-auto px-4 md:px-6 mt-28 relative">
+        <section className="container mx-auto px-4 md:px-6 mt-20 lg:mt-28 relative">
 
           {/* Ghost number */}
           <motion.div
@@ -253,17 +280,17 @@ export default function PropertyManagementPage() {
             viewport={{ once: false }} transition={{ duration: 1.3 }}
           >01</motion.div>
 
-          <RevealOnScroll variants={fadeUp} className="mb-16">
+          <RevealOnScroll variants={fadeUp} className="mb-12 lg:mb-16">
             <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 flex items-center gap-2">
               <span className="w-5 h-px bg-white/12" /> Our Approach
             </p>
           </RevealOnScroll>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-            {/* Overlapping image block */}
-            <div className="relative h-[460px]">
-              <RevealOnScroll variants={fadeLeft} className="absolute top-0 left-0 w-[80%] h-[340px]">
+            {/* Overlapping image block — desktop */}
+            <div className="relative h-[320px] sm:h-[400px] lg:h-[460px]">
+              <RevealOnScroll variants={fadeLeft} className="absolute top-0 left-0 w-[80%] h-[260px] sm:h-[300px] lg:h-[340px]">
                 <div className="w-full h-full rounded-3xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.75)]">
                   <ParallaxImage speed={0.1} className="absolute inset-0 w-full h-[115%] -top-[7%]">
                     <Image src="/propertymangement-pics/real-estate-3.jpg" alt="Property exterior" fill className="object-cover" />
@@ -272,19 +299,19 @@ export default function PropertyManagementPage() {
                 </div>
               </RevealOnScroll>
 
-              <RevealOnScroll variants={fadeRight} custom={0.2} className="absolute bottom-0 right-0 w-[58%] h-[240px]">
+              <RevealOnScroll variants={fadeRight} custom={0.2} className="absolute bottom-0 right-0 w-[55%] sm:w-[58%] h-[170px] sm:h-[210px] lg:h-[240px]">
                 <div className="w-full h-full rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.85)] border-4 border-[#07080a]">
                   <Image src="/propertymangement-pics/real-estate-1.jpg" alt="Property interior" fill className="object-cover object-bottom" />
                 </div>
               </RevealOnScroll>
 
-              <RevealOnScroll variants={scaleIn} custom={0.35} className="absolute top-4 right-4 z-10">
+              <RevealOnScroll variants={scaleIn} custom={0.35} className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
                 <motion.div
-                  className="bg-[#07080a]/65 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-5 text-center"
+                  className="bg-[#07080a]/65 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-3 sm:p-5 text-center"
                   whileHover={{ scale: 1.08, rotate: -2, transition: { duration: 0.25 } }}
                 >
-                  <p className="text-3xl font-black text-white">15+</p>
-                  <p className="text-[10px] text-white/35 mt-1 tracking-widest uppercase">Years<br />Experience</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white">15+</p>
+                  <p className="text-[9px] sm:text-[10px] text-white/35 mt-1 tracking-widest uppercase">Years<br />Experience</p>
                 </motion.div>
               </RevealOnScroll>
             </div>
@@ -297,7 +324,7 @@ export default function PropertyManagementPage() {
               variants={staggerContainer}
             >
               <motion.h2 variants={staggerItem}
-                className="text-4xl md:text-[2.8rem] font-black leading-[1.05] tracking-[-0.025em] text-white mb-7">
+                className="text-3xl sm:text-4xl md:text-[2.8rem] font-black leading-[1.05] tracking-[-0.025em] text-white mb-6 lg:mb-7">
                 Built Around Your Investment
               </motion.h2>
               <motion.p variants={staggerItem} className="text-[13px] text-white/38 leading-[1.95] mb-5">
@@ -305,7 +332,7 @@ export default function PropertyManagementPage() {
                 your real estate investments. We handle every aspect of property operations, from
                 tenant screening to maintenance coordination.
               </motion.p>
-              <motion.p variants={staggerItem} className="text-[13px] text-white/38 leading-[1.95] mb-10">
+              <motion.p variants={staggerItem} className="text-[13px] text-white/38 leading-[1.95] mb-8 lg:mb-10">
                 We combine local market expertise with professional management practices to
                 deliver exceptional, measurable results for every owner we serve.
               </motion.p>
@@ -334,7 +361,7 @@ export default function PropertyManagementPage() {
         </section>
 
         {/* ─── FEATURES ─── */}
-        <section className="container mx-auto px-4 md:px-6 mt-28 relative">
+        <section className="container mx-auto px-4 md:px-6 mt-20 lg:mt-28 relative">
 
           <motion.div
             className="absolute -top-10 -left-4 text-[18vw] font-black text-white/[0.022] leading-none select-none pointer-events-none hidden lg:block"
@@ -342,22 +369,22 @@ export default function PropertyManagementPage() {
             viewport={{ once: false }} transition={{ duration: 1.3 }}
           >02</motion.div>
 
-          <RevealOnScroll variants={fadeUp} className="flex items-end justify-between mb-14">
+          <RevealOnScroll variants={fadeUp} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-10 lg:mb-14">
             <div>
               <p className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-3 flex items-center gap-2">
                 <span className="w-5 h-px bg-white/12" /> Services
               </p>
-              <h2 className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
                 Our Services Include
               </h2>
             </div>
-            <p className="text-xs text-white/18 hidden md:block text-right leading-relaxed">
+            <p className="text-xs text-white/18 hidden sm:block text-right leading-relaxed">
               Full-service<br />property operations
             </p>
           </RevealOnScroll>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
             initial="hidden"
             whileInView="show"
             viewport={{ once: false, margin: '-60px' }}
@@ -365,7 +392,7 @@ export default function PropertyManagementPage() {
           >
             {/* Image anchor card */}
             <motion.div
-              className="relative rounded-3xl overflow-hidden h-48 md:col-span-2 lg:col-span-1 lg:row-span-2 lg:h-auto min-h-[260px] shadow-[0_40px_100px_rgba(0,0,0,0.7)]"
+              className="relative rounded-3xl overflow-hidden h-48 sm:col-span-2 lg:col-span-1 lg:row-span-2 lg:h-auto min-h-[220px] lg:min-h-[260px] shadow-[0_40px_100px_rgba(0,0,0,0.7)]"
               variants={scaleIn}
               whileHover={{ scale: 1.015, transition: { duration: 0.35 } }}
             >
@@ -390,7 +417,7 @@ export default function PropertyManagementPage() {
                 key={index}
                 variants={staggerItem}
                 whileHover={{ y: -5, borderColor: 'rgba(255,255,255,0.13)', transition: { duration: 0.22 } }}
-                className="group relative bg-[#0c0e12] rounded-2xl p-6 border border-white/[0.05] transition-colors duration-300 cursor-default overflow-hidden"
+                className="group relative bg-[#0c0e12] rounded-2xl p-5 sm:p-6 border border-white/[0.05] transition-colors duration-300 cursor-default overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                 <motion.div
@@ -411,9 +438,9 @@ export default function PropertyManagementPage() {
         </section>
 
         {/* ─── CTA ─── */}
-        <section className="container mx-auto px-4 md:px-6 mt-28">
+        <section className="container mx-auto px-4 md:px-6 mt-20 lg:mt-28">
           <RevealOnScroll variants={scaleIn}>
-            <div className="relative rounded-3xl overflow-hidden bg-[#0c0e12] border border-white/[0.06] p-12 md:p-16">
+            <div className="relative rounded-3xl overflow-hidden bg-[#0c0e12] border border-white/[0.06] p-8 sm:p-12 md:p-16">
 
               {/* Ghost image bleeding from right */}
               <motion.div
@@ -426,9 +453,9 @@ export default function PropertyManagementPage() {
                 <Image src="/propertymangement-pics/real-estate-6.jpg" alt="" fill className="object-cover object-left" />
               </motion.div>
 
-              {/* Floating image card — top right */}
+              {/* Floating image card — top right (md+) */}
               <motion.div
-                className="absolute top-8 right-8 w-[220px] h-[140px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/[0.08] hidden md:block"
+                className="absolute top-8 right-8 w-[180px] h-[120px] sm:w-[220px] sm:h-[140px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/[0.08] hidden md:block"
                 initial={{ opacity: 0, y: -24, rotate: 3 }}
                 whileInView={{ opacity: 1, y: 0, rotate: 0 }}
                 viewport={{ once: false }}
@@ -448,19 +475,19 @@ export default function PropertyManagementPage() {
                 variants={staggerContainer}
               >
                 <motion.p variants={staggerItem}
-                  className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-7 flex items-center gap-2">
+                  className="text-[10px] font-black tracking-[0.28em] uppercase text-white/22 mb-6 lg:mb-7 flex items-center gap-2">
                   <span className="w-5 h-px bg-white/12" /> Get In Touch
                 </motion.p>
                 <motion.h2 variants={staggerItem}
-                  className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white leading-[0.97] mb-2">
+                  className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.025em] text-white leading-[0.97] mb-2">
                   Ready to Maximize Your
                 </motion.h2>
                 <motion.h2 variants={staggerItem}
-                  className="text-4xl md:text-5xl font-black tracking-[-0.025em] text-white/20 leading-[0.97] mb-8">
+                  className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.025em] text-white/20 leading-[0.97] mb-7 lg:mb-8">
                   Property's Potential?
                 </motion.h2>
                 <motion.p variants={staggerItem}
-                  className="text-[13px] text-white/35 mb-10 max-w-sm leading-[1.9] border-l-2 border-white/8 pl-4">
+                  className="text-[13px] text-white/35 mb-8 lg:mb-10 max-w-sm leading-[1.9] border-l-2 border-white/8 pl-4">
                   Contact us today to discuss your property management needs.
                 </motion.p>
                 <motion.div variants={staggerItem} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
