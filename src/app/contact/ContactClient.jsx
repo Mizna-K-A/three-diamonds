@@ -153,18 +153,18 @@ const modalContent = {
 // Helper function to extract src from iframe HTML string
 const extractSrcFromIframe = (iframeString) => {
   if (!iframeString) return null;
-  
+
   // Try to extract src attribute from iframe HTML
   const srcMatch = iframeString.match(/src="([^"]+)"/);
   if (srcMatch && srcMatch[1]) {
     return srcMatch[1];
   }
-  
+
   // If it's already a URL, return as is
   if (typeof iframeString === 'string' && (iframeString.startsWith('http') || iframeString.startsWith('//'))) {
     return iframeString;
   }
-  
+
   return null;
 };
 
@@ -587,7 +587,7 @@ export default function ContactClient({ contactSettings }) {
           >
             <motion.h1
               variants={fadeUp}
-              className="text-5xl md:text-6xl font-bold mb-6 text-white"
+              className="text-4xl md:text-6xl font-bold mb-4 md:mb-6 text-white"
             >
               GET IN TOUCH
             </motion.h1>
@@ -597,7 +597,7 @@ export default function ContactClient({ contactSettings }) {
             />
             <motion.p
               variants={fadeUp}
-              className="text-xl text-gray-400"
+              className="text-lg md:text-xl text-gray-400"
             >
               Let's turn your Dubai dreams into a sparkling reality
             </motion.p>
@@ -613,7 +613,7 @@ export default function ContactClient({ contactSettings }) {
             initial="hidden"
             whileInView="show"
             viewport={{ once: false, margin: "-100px" }}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-32"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 -mt-24 md:-mt-32"
           >
             {/* Phone Card */}
             <motion.a
@@ -622,7 +622,7 @@ export default function ContactClient({ contactSettings }) {
               whileHover="hover"
               whileTap="tap"
               custom={1}
-              className="p-8 bg-gray-900 rounded-xl flex flex-col items-center text-center group cursor-pointer border border-gray-800 hover:border-gray-600 transition-all duration-300 shadow-xl"
+              className="p-6 md:p-8 bg-gray-900 rounded-xl flex flex-col items-center text-center group cursor-pointer border border-gray-800 hover:border-gray-600 transition-all duration-300 shadow-xl"
             >
               <motion.div
                 whileHover={{ rotate: 360 }}
@@ -704,12 +704,12 @@ export default function ContactClient({ contactSettings }) {
             className="grid lg:grid-cols-2 gap-12 mt-20"
           >
             {/* Contact Form */}
-            <motion.div variants={fadeLeft} className="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+            <motion.div variants={fadeLeft} className="bg-gray-900 rounded-2xl p-6 md:p-8 border border-gray-800">
               <motion.h2
                 variants={fadeUp}
-                className="text-3xl font-bold mb-6 text-white flex items-center gap-3"
+                className="text-2xl md:text-3xl font-bold mb-6 text-white flex items-center gap-3"
               >
-                <Send className="w-6 h-6 text-gray-400" />
+                <Send className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                 SEND US A MESSAGE
               </motion.h2>
 

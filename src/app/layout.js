@@ -21,7 +21,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 text-gray-900`}>
+      <body className={`${inter.className} bg-gray-50 text-gray-900 overflow-x-hidden`}>
         {/* <CustomCursor /> */}
         {children}
         <FloatingActions whatsappNumber={whatsappNumber} />

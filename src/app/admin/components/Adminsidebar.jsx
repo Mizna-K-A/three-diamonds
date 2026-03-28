@@ -20,21 +20,23 @@ import {
   Mail,
   ImageIcon,
   Newspaper,
+  User2,
+  Building2Icon,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: Home },
-  { name: 'Properties', href: '/admin/properties', icon: Home },
+  { name: 'Properties', href: '/admin/properties', icon: Building2 },
   { name: 'Viewing Requests', href: '/admin/viewings', icon: CalendarDays },
   { name: 'Proposal Requests', href: '/admin/proposals', icon: FileText },
   { name: 'Contact Submissions', href: '/admin/contacts', icon: Mail },
-  { name: 'Property Types', href: '/admin/property-types', icon: Building2 },
+  { name: 'Property Types', href: '/admin/property-types', icon: Building2Icon },
   { name: 'Property Statuses', href: '/admin/property-statuses', icon: Tag },
   { name: 'Property Tags', href: '/admin/tags', icon: Tags },
   { name: 'Insights', href: '/admin/insights', icon: Newspaper },
   { name: 'Home Slides', href: '/admin/hero-slides', icon: ImageIcon },
   { name: 'Team Members', href: '/admin/team', icon: Users },
-  { name: 'Agents', href: '/admin/agents', icon: Users },
+  { name: 'Agents', href: '/admin/agents', icon: User2 },
   { name: 'Testimonials', href: '/admin/testimonials', icon: FileText },
   { name: 'Contact Info', href: '/admin/contact-info', icon: Settings },
 ];
@@ -47,6 +49,11 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
 
   useEffect(() => {
     setMounted(true);
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) onMobileClose?.();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
 
@@ -87,14 +94,17 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
           <div className="flex items-center gap-3 overflow-hidden">
             {/* Icon mark */}
             <div
-              style={{
-                backgroundColor: '#2a2a2a',
-                minWidth: '36px',
-              }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-            >
-              <Layout size={18} className="text-gray-400" strokeWidth={2} />
-            </div>
+  style={{
+    minWidth: '36px',
+  }}
+  className="w-7 h-7 rounded-xl flex items-center justify-center overflow-hidden"
+>
+  <img
+    src="/threediamond.png"
+    alt="logo"
+    className="w-full h-full object-cover p-1"
+  />
+</div>
 
             {/* Wordmark */}
             <div
@@ -109,7 +119,7 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
                 style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.5px' }}
                 className="text-white font-bold text-[15px] leading-none"
               >
-                AdminPanel
+               Three Diamonds
               </p>
               <p className="text-gray-500 text-[10px] mt-0.5 font-medium tracking-widest uppercase">
                 v1.0.0
@@ -142,6 +152,7 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onMobileClose}
                 title={minimized ? item.name : undefined}
                 style={{
                   justifyContent: minimized ? 'center' : 'flex-start',
@@ -189,17 +200,18 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
           {/* User info */}
           {!minimized && (
             <div className="flex items-center gap-3 px-2 py-2">
-              <div
-                style={{
-                  background: '#2a2a2a',
-                }}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 text-xs font-bold shrink-0"
-              >
-                AD
-              </div>
+             <div
+  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+>
+  <img
+    src="/threediamond.png"
+    alt="logo"
+    className="w-full h-full object-cover p-1"
+  />
+</div>
               <div className="overflow-hidden">
                 <p className="text-gray-300 text-sm font-semibold truncate leading-none">
-                  Admin User
+                  Three Diamonds
                 </p>
                 {/* <p className="text-gray-600 text-xs mt-0.5 truncate">
                   admin@company.com

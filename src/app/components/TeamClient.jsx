@@ -163,7 +163,7 @@ export default function TeamClient({ teamMembers }) {
   if (!teamMembers || teamMembers.length === 0) return null;
 
   return (
-    <section id="team" className="section-padding bg-white p-5">
+    <section id="team" className="section-padding bg-white py-12 md:py-20 px-4 md:px-0">
       <div className="container-custom">
         <div className="text-center mb-12">
           <motion.div
@@ -184,7 +184,7 @@ export default function TeamClient({ teamMembers }) {
             initial="hidden"
             whileInView="show"
             viewport={{ once: false, amount: 0.5 }}
-            className="text-4xl md:text-5xl font-bold mb-6"
+            className="text-3xl md:text-5xl font-bold mb-4 md:mb-6"
           >
             MEET OUR LEADERS
           </motion.h2>
@@ -246,9 +246,10 @@ export default function TeamClient({ teamMembers }) {
                       initial="hidden"
                       whileInView="show"
                       viewport={{ once: false, amount: 0.5 }}
+                      className="pr-2"
                     >
-                      <h3 className="text-2xl font-bold">{member.name}</h3>
-                      <p className="text-gray-500 font-medium">{member.role}</p>
+                      <h3 className="text-xl md:text-2xl font-bold">{member.name}</h3>
+                      <p className="text-sm md:text-base text-gray-500 font-medium">{member.role}</p>
                     </motion.div>
 
                     <motion.span
@@ -256,7 +257,7 @@ export default function TeamClient({ teamMembers }) {
                       initial="hidden"
                       whileInView="show"
                       viewport={{ once: false, amount: 0.5 }}
-                      className="bg-black text-white px-3 py-1 text-sm rounded-full whitespace-nowrap"
+                      className="bg-black text-white px-3 py-1 text-[10px] md:text-xs rounded-full whitespace-nowrap shrink-0"
                     >
                       {member.experience}
                     </motion.span>

@@ -38,7 +38,7 @@ export default function HeroClient({ slides }) {
     };
 
     return (
-        <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden w-full">
             {/* Background Slideshow */}
             <div className="absolute inset-0">
                 {slides.map((slide, index) => (
@@ -73,15 +73,15 @@ export default function HeroClient({ slides }) {
                             <div className="w-20 h-0.5 bg-white/50 mx-auto mt-2"></div>
                         </div>
 
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight">
+                        <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight tracking-tight">
                             <span className="block text-white">DISCOVER DUBAI&apos;S FINEST</span>
-                            <span className="block text-white mt-2">PROPERTIES</span>
+                            <span className="block text-white mt-1 md:mt-2">PROPERTIES</span>
                         </h1>
 
-                        <div className="h-24 md:h-20 mb-8">
+                        <div className="h-12 sm:h-20 md:h-16 mb-4 md:mb-8">
                             <div className={`transition-all duration-500 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                                 }`}>
-                                <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
+                                <p className="text-sm sm:text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto px-4">
                                     {slides[currentImage].subtitle}
                                 </p>
                             </div>
@@ -89,18 +89,18 @@ export default function HeroClient({ slides }) {
                     </div>
 
                     {/* CTA Buttons */}
-                    <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                    <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-center transition-all duration-700 delay-300 px-4 sm:px-0 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                         }`}>
                         <a
                             href="#properties"
-                            className="group bg-white text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 shadow-2xl"
+                            className="group bg-white text-black px-6 py-3.5 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 shadow-2xl"
                         >
                             <span>{slides[currentImage].cta}</span>
                             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                         </a>
                         <a
                             href="#contact"
-                            className="group border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-black transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2"
+                            className="group border-2 border-white text-white px-6 py-3.5 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-white hover:text-black transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2"
                         >
                             <span>Get Free Consultation</span>
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -116,8 +116,8 @@ export default function HeroClient({ slides }) {
                             { value: '100%', label: 'Client Satisfaction' },
                             { value: '24/7', label: 'Support' },
                         ].map((stat, index) => (
-                            <div key={index} className="text-center p-4 backdrop-blur-sm bg-white/5 rounded-lg border border-white/10">
-                                <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</div>
+                            <div key={index} className="text-center p-3 md:p-4 backdrop-blur-sm bg-white/5 rounded-lg border border-white/10">
+                                <div className="text-xl md:text-3xl font-bold text-white mb-1">{stat.value}</div>
                                 <div className="text-xs text-gray-300 uppercase tracking-wider">{stat.label}</div>
                             </div>
                         ))}
@@ -165,8 +165,8 @@ export default function HeroClient({ slides }) {
                 </button>
             </div>
 
-            {/* Diamond Pattern Overlay */}
-            <div className="absolute inset-0 pointer-events-none">
+            {/* Diamond Pattern Overlay - hidden on mobile to prevent overflow */}
+            <div className="absolute inset-0 pointer-events-none hidden sm:block">
                 <div className="absolute top-20 right-20 w-32 h-32 border-2 border-white/10 rotate-45"></div>
                 <div className="absolute bottom-20 left-20 w-24 h-24 border-2 border-white/10 rotate-45"></div>
                 <div className="absolute top-1/3 left-10 w-16 h-16 border-2 border-white/10 rotate-45"></div>

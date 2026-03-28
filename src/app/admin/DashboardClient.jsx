@@ -51,7 +51,7 @@ const DashboardClient = ({ stats, allActivity }) => {
     };
 
     return (
-        <div className="space-y-8 p-10">
+        <div className="space-y-6 p-4 md:p-8">
             {/* Page Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -60,7 +60,7 @@ const DashboardClient = ({ stats, allActivity }) => {
                 className="flex items-center justify-between"
             >
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                    <h1 className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                         Dashboard Overview
                     </h1>
                     <p className="mt-2 text-sm text-gray-400">
@@ -84,7 +84,7 @@ const DashboardClient = ({ stats, allActivity }) => {
                     return (
                         <motion.div key={stat.id} variants={itemVariants}>
                             <Link href={stat.link} className="block group h-full">
-                                <div className={`relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md p-6 h-full transition-all duration-300 hover:border-white/20 hover:bg-black/60 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]`}>
+                                <div className={`relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md p-4 md:p-6 h-full transition-all duration-300 hover:border-white/20 hover:bg-black/60 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]`}>
                                     {/* Background Glow */}
                                     <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full blur-3xl opacity-20 bg-gradient-to-br ${gradient} group-hover:opacity-40 transition-opacity duration-500`} />
 
@@ -99,7 +99,7 @@ const DashboardClient = ({ stats, allActivity }) => {
                                         <dt className="text-sm font-medium text-gray-400 truncate">
                                             {stat.name}
                                         </dt>
-                                        <dd className="mt-2 text-4xl font-bold tracking-tight text-white space-x-2">
+                                        <dd className="mt-2 text-2xl md:text-4xl font-bold tracking-tight text-white space-x-2">
                                             <span className="bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-500">
                                                 {stat.value}
                                             </span>
@@ -141,7 +141,7 @@ const DashboardClient = ({ stats, allActivity }) => {
                             {allActivity.map((activity, index) => (
                                 <motion.li key={`${activity.type}-${activity.id}`} variants={itemVariants}>
                                     <Link href={activity.link} className="block group hover:bg-white/5 transition-colors">
-                                        <div className="px-6 py-5">
+                                        <div className="px-4 md:px-6 py-4 md:py-5">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-2 h-2 rounded-full 

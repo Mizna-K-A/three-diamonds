@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key, Computer, BuildingIcon } from 'lucide-react';
+import { Menu, X, Wrench, ChevronDown, Home, Building, Warehouse, Hotel, Building2, ClipboardCheck, Search, TrendingUp, Users, Key, Computer, BuildingIcon, MessageCircle } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -56,8 +56,8 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
 
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
-      // Close mobile menu on larger screens
-      if (window.innerWidth >= 768) {
+      // Close mobile menu on larger screens (lg breakpoint = 1024px)
+      if (window.innerWidth >= 1024) {
         setIsMenuOpen(false);
         setIsMobileServicesOpen(false);
         setIsMobilePropertiesOpen(false);
@@ -100,7 +100,7 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target) &&
         !event.target.closest('button') &&
-        windowWidth < 768) {
+        windowWidth < 1024) {
         setIsMenuOpen(false);
       }
     };
@@ -123,7 +123,7 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    if (isMenuOpen && windowWidth < 768) {
+    if (isMenuOpen && windowWidth < 1024) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -205,22 +205,21 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
     <header
       ref={headerRef}
       className={`fixed w-full z-50 transition-all duration-300 ${isScrolled
-          ? 'bg-black/95 backdrop-blur-md shadow-lg py-2 md:py-3'
-          : 'bg-transparent py-3 md:py-4'
+        ? 'bg-black/95 backdrop-blur-md shadow-lg py-2 md:py-3'
+        : 'bg-transparent py-3 md:py-4'
         } ${isMenuOpen ? 'bg-black' : ''}`}
     >
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo with sliding animation */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="flex items-center shrink-0 overflow-hidden"
             ref={logoRef}
           >
-            <div 
-              className={`transform transition-transform duration-700 ease-out ${
-                isLogoVisible ? 'translate-x-0' : '-translate-x-full'
-              }`}
+            <div
+              className={`transform transition-transform duration-700 ease-out ${isLogoVisible ? 'translate-x-0' : '-translate-x-full'
+                }`}
             >
               {isScrolled ? (
                 <Image
@@ -244,8 +243,8 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
             </div>
           </Link>
 
-          {/* Desktop Navigation (tablet and up) */}
-          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+          {/* Desktop Navigation (large tablet and up) */}
+          <div className="hidden lg:flex items-center space-x-6">
             {navItems.map((item) => (
               <div
                 key={item.label}
@@ -290,7 +289,7 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
                       <ChevronDown
                         size={windowWidth < 1024 ? 14 : 16}
                         className={`transition-transform duration-300 ${(item.label === 'Services' && isServicesDropdownOpen) ||
-                            (item.label === 'Properties' && isPropertiesDropdownOpen) ? 'rotate-180' : ''
+                          (item.label === 'Properties' && isPropertiesDropdownOpen) ? 'rotate-180' : ''
                           }`}
                       />
                     </button>
@@ -344,22 +343,22 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
             ))}
           </div>
 
-          {/* Mobile Menu Button (mobile only) */}
+          {/* Mobile Menu Button (mobile & tablet) */}
           <button
-            className="md:hidden text-white transition-colors duration-300 p-2 focus:outline-none focus:ring-2 focus:ring-white/50 rounded-lg z-50"
+            className="lg:hidden text-white transition-all duration-300 p-2.5 bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/50 rounded-xl z-50 shadow-lg"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
 
-        {/* Mobile Navigation (mobile only) - FIXED POSITIONING */}
+        {/* Mobile Navigation - FIXED POSITIONING */}
         {isMenuOpen && (
           <div
             ref={mobileMenuRef}
-            className={`md:hidden fixed left-0 w-full bg-black/98 backdrop-blur-sm transition-all duration-300 overflow-y-auto ${isScrolled ? 'top-[57px]' : 'top-[60px]'
+            className={`lg:hidden fixed left-0 w-full bg-black/98 backdrop-blur-sm transition-all duration-300 overflow-y-auto ${isScrolled ? 'top-[57px]' : 'top-[60px]'
               }`}
             style={{
               height: `calc(100vh - ${getHeaderHeight()})`,
@@ -392,7 +391,7 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
                           <ChevronDown
                             size={18}
                             className={`transition-transform duration-300 ${(item.label === 'Services' && isMobileServicesOpen) ||
-                                (item.label === 'Properties' && isMobilePropertiesOpen) ? 'rotate-180' : ''
+                              (item.label === 'Properties' && isMobilePropertiesOpen) ? 'rotate-180' : ''
                               }`}
                           />
                         </button>
@@ -433,6 +432,19 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
                     )}
                   </div>
                 ))}
+
+                {/* WhatsApp Support in Mobile Menu */}
+                <div className="pt-6 mt-6 border-t border-gray-800">
+                  <a
+                    href="https://wa.me/971529398258"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-4 px-6 bg-[#25D366] text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95"
+                  >
+                    <MessageCircle size={20} />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -442,7 +454,7 @@ export default function Header({ propertyTypes: initialPropertyTypes = [] }) {
       {/* Overlay for when mobile menu is open */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm lg:hidden"
           style={{ zIndex: 30, top: getHeaderHeight() }}
           onClick={() => setIsMenuOpen(false)}
         />

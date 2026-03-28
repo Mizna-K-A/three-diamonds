@@ -40,7 +40,7 @@ export default function AboutPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
             {/* Hero Section */}
-            <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+            <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black opacity-90"></div>
                     <div className="absolute inset-0" style={{
@@ -51,13 +51,13 @@ export default function AboutPage() {
 
                 <div className={`relative z-10 text-center max-w-4xl mx-auto px-4 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
                     }`}>
-                    <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gray-300 to-white bg-clip-text text-transparent">
+                    <h1 className="text-4xl md:text-7xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-gray-300 to-white bg-clip-text text-transparent">
                         About Three Diamonds
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-300 mb-8">
+                    <p className="text-lg md:text-2xl text-gray-300 mb-6 md:mb-8">
                         Transforming Dubai's Real Estate Landscape Since 2021
                     </p>
-                    <div className="w-24 h-1 bg-gradient-to-r from-gray-600 to-white mx-auto"></div>
+                    <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-gray-600 to-white mx-auto"></div>
                 </div>
             </section>
 

@@ -195,7 +195,7 @@ export default function FeaturedProperties({
   };
 
   return (
-    <section id="properties" className="section-padding bg-white py-20 px-10" ref={sectionRef}>
+    <section id="properties" className="section-padding bg-white py-12 md:py-20 px-4 sm:px-10" ref={sectionRef}>
       <div className="container-custom">
 
         {/* ── HEADER ── */}
@@ -224,7 +224,7 @@ export default function FeaturedProperties({
             </motion.div>
 
             <motion.h2
-              className="text-4xl md:text-5xl font-bold mb-5 tracking-tight"
+              className="text-3xl md:text-5xl font-bold mb-4 md:mb-5 tracking-tight px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -327,8 +327,8 @@ export default function FeaturedProperties({
                     <div
                       key={property.id ?? property._id}
                       className={`group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all duration-300 ${property.isFadeProperty
-                          ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
-                          : "hover:shadow-xl hover:-translate-y-2 cursor-pointer"
+                        ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
+                        : "hover:shadow-xl hover:-translate-y-2 cursor-pointer"
                         }`}
                     >
                       {/* IMAGE */}
@@ -354,11 +354,9 @@ export default function FeaturedProperties({
                             {property.tags[0]?.name}
                           </span>
                         </div>
-                        {property.propertyType?.name != null && (
-                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm">
-                            {property.status?.name ?? "Property"}
-                          </div>
-                        )}
+                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 text-[11px] font-bold rounded-full shadow-sm z-10 transition-all">
+                          {property.status?.name ?? "Property"}
+                        </div>
                       </div>
 
                       {/* DETAILS */}

@@ -42,7 +42,7 @@ function SoftDropdown({ label, options, value, onChange, getLabel, getKey, dotMa
       </label>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${open
+        className={`w-full flex items-center justify-between gap-2 px-4 py-3 md:py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${open
           ? "bg-white/15 text-white"
           : "bg-white/8 text-gray-300 hover:bg-white/12 hover:text-white"
           }`}
@@ -204,7 +204,7 @@ export default function PropertiesContent({
   };
 
   return (
-    <section className="bg-[#0c0c0c] min-h-screen py-20 px-5">
+    <section className="bg-[#0c0c0c] min-h-screen py-12 md:py-20 px-4 md:px-5">
       <div className="">
 
         {/* HEADER */}
@@ -215,7 +215,7 @@ export default function PropertiesContent({
             </span>
             <div className="h-px bg-white mt-2 mx-auto w-16" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-tight text-white">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-5 tracking-tight text-white">
             ALL PROPERTIES
           </h1>
           <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
@@ -223,11 +223,9 @@ export default function PropertiesContent({
           </p>
         </div>
 
-        {/* FILTER BAR */}
-        <div id="filter-bar" className="flex justify-center mb-10">
-          <div className="p-6 w-full max-w-4xl">
-            <div className="flex flex-wrap items-end gap-4">
-
+        <div id="filter-bar" className="flex justify-center mb-8 md:mb-10">
+          <div className="p-4 md:p-6 w-full max-w-4xl bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
               {/* Property Type */}
               <SoftDropdown
                 label="Property Type"
@@ -250,38 +248,7 @@ export default function PropertiesContent({
                   dotMap={statusDotMap}
                 />
               )}
-
-              {/* Clear — only when filters active */}
-              {/* {hasFilters && (
-                <div className="pb-[2px]">
-                  <button
-                    onClick={clearFilters}
-                    className="px-4 py-2.5 text-xs font-medium text-gray-400 hover:text-white transition-colors border border-white/10 rounded-xl hover:border-white/30 whitespace-nowrap"
-                  >
-                    Clear
-                  </button>
-                </div>
-              )} */}
             </div>
-
-            {/* Active Filters Summary */}
-            {/* {hasFilters && (
-              <div className="mt-4 pt-4 border-t border-white/8 flex items-center gap-2">
-                <span className="text-xs text-gray-600">Active filters:</span>
-                <div className="flex flex-wrap gap-2">
-                  {selectedType !== "all" && (
-                    <span className="bg-white/10 text-gray-300 text-xs px-2 py-1 rounded-full border border-white/10">
-                      Type: {categories.find((c) => c.value === selectedType)?.label}
-                    </span>
-                  )}
-                  {selectedStatus !== "all" && (
-                    <span className="bg-white/10 text-gray-300 text-xs px-2 py-1 rounded-full border border-white/10">
-                      Status: {statuses.find((s) => s._id === selectedStatus)?.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )} */}
           </div>
         </div>
 
@@ -309,8 +276,8 @@ export default function PropertiesContent({
                 <div
                   key={property._id}
                   className={`group bg-[#161616] rounded-2xl overflow-hidden border border-white/6 transition-all duration-300 ${property.isFadeProperty
-                      ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
-                      : "hover:border-white/15 hover:shadow-2xl hover:shadow-black/60 cursor-pointer hover:-translate-y-1"
+                    ? "opacity-50 grayscale-[0.8] cursor-default pointer-events-none"
+                    : "hover:border-white/15 hover:shadow-2xl hover:shadow-black/60 cursor-pointer hover:-translate-y-1"
                     }`}
                   onClick={() => router.push(`/properties/${property.slug || property._id}`)}
                 >
@@ -434,71 +401,74 @@ export default function PropertiesContent({
               </button>
             )}
           </div>
-        )}
+        )
+        }
 
         {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-12 w-fit mx-auto">
-            <button
-              onClick={() => {
-                setCurrentPage(p => Math.max(1, p - 1));
-                document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              disabled={currentPage === 1}
-              className="px-4 py-2.5 bg-black hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
-            >
-              Previous
-            </button>
+        {
+          totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12 w-fit mx-auto">
+              <button
+                onClick={() => {
+                  setCurrentPage(p => Math.max(1, p - 1));
+                  document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                disabled={currentPage === 1}
+                className="px-4 py-2.5 bg-black hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
+              >
+                Previous
+              </button>
 
-            <div className="flex gap-1.5 items-center">
-              {Array.from({ length: totalPages }).map((_, idx) => {
-                const pageNumber = idx + 1;
-                const isActive = pageNumber === currentPage;
+              <div className="flex gap-1.5 items-center">
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNumber = idx + 1;
+                  const isActive = pageNumber === currentPage;
 
-                if (
-                  pageNumber === 1 ||
-                  pageNumber === totalPages ||
-                  (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
-                ) {
-                  return (
-                    <button
-                      key={pageNumber}
-                      onClick={() => {
-                        setCurrentPage(pageNumber);
-                        document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                      }}
-                      className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200 text-sm font-semibold ${isActive
-                        ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]'
-                        : 'bg-black border-white/10 text-gray-400 hover:bg-white/10 hover:text-white hover:border-white/30'
-                        }`}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                } else if (
-                  pageNumber === currentPage - 3 ||
-                  pageNumber === currentPage + 3
-                ) {
-                  return <span key={pageNumber} className="text-gray-600 flex items-end px-1 pb-1">...</span>;
-                }
-                return null;
-              })}
+                  if (
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+                  ) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => {
+                          setCurrentPage(pageNumber);
+                          document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200 text-sm font-semibold ${isActive
+                          ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+                          : 'bg-black border-white/10 text-gray-400 hover:bg-white/10 hover:text-white hover:border-white/30'
+                          }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (
+                    pageNumber === currentPage - 3 ||
+                    pageNumber === currentPage + 3
+                  ) {
+                    return <span key={pageNumber} className="text-gray-600 flex items-end px-1 pb-1">...</span>;
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() => {
+                  setCurrentPage(p => Math.min(totalPages, p + 1));
+                  document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2.5 bg-black hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
+              >
+                Next
+              </button>
             </div>
+          )
+        }
 
-            <button
-              onClick={() => {
-                setCurrentPage(p => Math.min(totalPages, p + 1));
-                document.getElementById("filter-bar")?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2.5 bg-black hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium"
-            >
-              Next
-            </button>
-          </div>
-        )}
-
-      </div>
-    </section>
+      </div >
+    </section >
   );
 }

@@ -49,7 +49,7 @@ export default function FloatingActions({ whatsappNumber = '971529398258' }) {
     }
 
     return (
-        <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
+        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] flex flex-col gap-2 md:gap-3">
             {/* WhatsApp Button */}
             <motion.button
                 whileHover={{ scale: 1.1, translateY: -2 }}
@@ -73,7 +73,7 @@ export default function FloatingActions({ whatsappNumber = '971529398258' }) {
                     whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
                     whileTap={{ scale: 0.9 }}
                     onClick={showUpArrow ? scrollToTop : scrollToBottom}
-                    className="bg-black/60 backdrop-blur-md border border-white/20 text-white p-3 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center"
+                    className="bg-black/60 backdrop-blur-md border border-white/20 text-white p-2.5 md:p-3 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center"
                     aria-label={showUpArrow ? "Scroll to top" : "Scroll to bottom"}
                 >
                     {showUpArrow ? (

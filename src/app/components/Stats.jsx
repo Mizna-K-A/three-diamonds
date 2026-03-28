@@ -12,12 +12,12 @@ export default function Stats() {
       <div className="container-custom">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
-            <div 
-              key={stat.label} 
+            <div
+              key={stat.label}
               className="text-center fade-in"
               style={{ animationDelay: `${index * 0.2}s` }}
             >
-              <div className="text-4xl md:text-5xl font-bold mb-2">{stat.number}</div>
+              <div className="text-3xl md:text-5xl font-bold mb-2">{stat.number}</div>
               <div className="text-gray-300 text-sm md:text-base uppercase tracking-wider">{stat.label}</div>
             </div>
           ))}

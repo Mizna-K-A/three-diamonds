@@ -117,7 +117,7 @@ export default function TestimonialsAdminClient({ initialTestimonials }) {
         company: 'Company Name',
         content: 'Write testimonial here...',
         rating: 5,
-        avatar: '👨‍💼',
+        avatar: '👤',
         order: maxOrder,
         active: true,
       });

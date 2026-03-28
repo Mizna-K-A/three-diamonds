@@ -60,14 +60,9 @@ export default async function Home() {
     getCachedTags(),
     getCachedSettings()
   ]);
-  console.log("Properties:", properties);
-  console.log("Types:", propertyTypes);
-  console.log("Statuses:", statuses);
-  console.log("Tags:", tags);
-  console.log("Settings:", serializedSettings);
   return (
     <Loader>
-      <main className="min-h-screen">
+      <main className="min-h-screen overflow-x-hidden">
         <HeaderWithPropertyTypes />
         <Hero />
         <Team />

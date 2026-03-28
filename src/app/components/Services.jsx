@@ -189,7 +189,7 @@ export default function Services() {
     <section
       id="services"
       ref={sectionRef}
-      className="py-20 bg-black text-white relative overflow-hidden"
+      className="py-12 md:py-20 bg-black text-white relative overflow-hidden"
     >
       {/* Parallax Background Image */}
       <motion.div
@@ -234,7 +234,7 @@ export default function Services() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: false }}
-            className="text-4xl md:text-5xl font-bold mb-6 text-white"
+            className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-white"
           >
             OUR SERVICES
           </motion.h2>
@@ -244,7 +244,7 @@ export default function Services() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: false }}
-            className="text-gray-400 text-center max-w-2xl mx-auto text-lg"
+            className="text-gray-400 text-center max-w-2xl mx-auto text-sm md:text-lg"
           >
             Comprehensive real estate solutions tailored to your specific needs in Dubai's dynamic market
           </motion.p>
@@ -272,7 +272,7 @@ export default function Services() {
               style={{
                 transformStyle: "preserve-3d",
               }}
-              className={`relative border-2 border-gray-800 rounded-2xl p-8 bg-gradient-to-br from-gray-800/90 to-black/90 backdrop-blur-sm overflow-hidden group ${service.hoverColor}`}
+              className={`relative border-2 border-gray-800 rounded-2xl p-5 md:p-8 bg-gradient-to-br from-gray-800/90 to-black/90 backdrop-blur-sm overflow-hidden group ${service.hoverColor}`}
             >
               {/* Background Glow - now white */}
               <motion.div
@@ -371,7 +371,7 @@ export default function Services() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-20 bg-gradient-to-r from-gray-900/90 to-black/90 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-800"
+          className="mt-12 md:mt-20 bg-gradient-to-r from-gray-900/90 to-black/90 backdrop-blur-sm rounded-2xl p-5 md:p-8 text-center border border-gray-800"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -388,7 +388,7 @@ export default function Services() {
                 transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 + index * 0.1 }}
                 className="text-center"
               >
-                <div className={`text-3xl md:text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
+                <div className={`text-2xl md:text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
                 <div className="text-gray-400 text-sm">{stat.label}</div>
               </motion.div>
             ))}

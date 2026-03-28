@@ -51,9 +51,9 @@ export default function Portfolio() {
   };
 
   const itemVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 30 
+    hidden: {
+      opacity: 0,
+      y: 30
     },
     visible: {
       opacity: 1,
@@ -143,13 +143,13 @@ export default function Portfolio() {
   };
 
   return (
-    <section 
-      id="portfolio" 
+    <section
+      id="portfolio"
       ref={sectionRef}
-      className="section-padding bg-black text-white p-6 relative overflow-hidden"
+      className="py-12 md:py-20 lg:py-24 bg-black text-white px-4 md:px-6 relative overflow-hidden"
     >
       {/* Parallax Background Image */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 z-0"
         style={{
           y,
@@ -157,7 +157,7 @@ export default function Portfolio() {
           scale
         }}
       >
-        <div 
+        <div
           className="w-full h-full bg-cover bg-center"
           style={{
             backgroundImage: 'url(/d1.webp)',
@@ -172,14 +172,14 @@ export default function Portfolio() {
       </motion.div>
 
       <div className="container-custom relative z-10">
-        <motion.div 
+        <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="inline-block mb-4">
-            <motion.span 
+            <motion.span
               className="text-sm font-semibold text-gray-400 uppercase tracking-wider"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -187,38 +187,38 @@ export default function Portfolio() {
             >
               Our Portfolio
             </motion.span>
-            <motion.div 
+            <motion.div
               className="w-16 h-0.5 bg-gray-600 mt-2 mx-auto"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             />
           </div>
-          
+
           {/* Vehicle Indicator Style Blinking Title */}
           <div className="mb-6">
-            <motion.h2 
-              className="text-4xl md:text-5xl font-bold mb-6 text-gray-100"
+            <motion.h2
+              className="text-3xl md:text-5xl font-bold mb-6 text-gray-100"
               variants={simpleBlink}
               animate="blink"
             >
               WHY THREE DIAMONDS?
             </motion.h2>
           </div>
-          
-          <motion.p 
+
+          <motion.p
             className="text-gray-400 max-w-3xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            We believe in the power of transformation. Your dream property is not just a building, 
+            We believe in the power of transformation. Your dream property is not just a building,
             but a springboard to a fulfilling life in Dubai.
           </motion.p>
         </motion.div>
 
-        <motion.div 
-          className="grid lg:grid-cols-3 gap-8 mb-12"
+        <motion.div
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -233,20 +233,20 @@ export default function Portfolio() {
               custom={index}
               style={{ originY: 0 }}
             >
-              <motion.div 
+              <motion.div
                 variants={cardHover}
                 whileHover="hover"
                 className="h-full"
               >
                 <div className="mb-4">
-                  <motion.span 
+                  <motion.span
                     className="text-sm font-semibold text-gray-900"
                     variants={textGlow}
                     whileHover="hover"
                   >
                     {item.category}
                   </motion.span>
-                  <motion.h3 
+                  <motion.h3
                     className="text-2xl font-bold mt-2 text-gray-900"
                     whileHover={{ color: "#fff", scale: 1.02 }}
                     transition={{ duration: 0.3 }}
@@ -254,7 +254,7 @@ export default function Portfolio() {
                     {item.title}
                   </motion.h3>
                 </div>
-                <motion.p 
+                <motion.p
                   className="text-gray-900 mb-6"
                   initial={{ opacity: 0.8 }}
                   whileHover={{ opacity: 1 }}
@@ -264,23 +264,23 @@ export default function Portfolio() {
                 </motion.p>
                 <ul className="space-y-2">
                   {item.highlights.map((highlight, idx) => (
-                    <motion.li 
-                      key={idx} 
+                    <motion.li
+                      key={idx}
                       className="flex items-center text-gray-900"
                       variants={highlightItem}
                       initial="hidden"
                       whileInView="visible"
                       viewport={{ once: true }}
                       custom={idx}
-                      whileHover={{ 
-                        x: 5, 
+                      whileHover={{
+                        x: 5,
                         color: "#fff",
                         transition: { duration: 0.2 }
                       }}
                     >
-                      <motion.svg 
-                        className="w-4 h-4 mr-3 text-gray-900" 
-                        fill="currentColor" 
+                      <motion.svg
+                        className="w-4 h-4 mr-3 text-gray-900"
+                        fill="currentColor"
                         viewBox="0 0 20 20"
                         whileHover={{ scale: 1.2, rotate: 5, color: "#fff" }}
                         transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -296,7 +296,7 @@ export default function Portfolio() {
           ))}
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="bg-gradient-to-r from-gray-400/90 to-black/90 backdrop-blur-sm rounded-2xl p-8 md:p-12 text-center border border-gray-800"
           variants={quoteVariants}
           initial="hidden"
@@ -304,8 +304,8 @@ export default function Portfolio() {
           viewport={{ once: true, amount: 0.3 }}
         >
           <div className="max-w-3xl mx-auto">
-            <motion.h3 
-              className="text-3xl md:text-4xl font-bold mb-6 text-gray-100"
+            <motion.h3
+              className="text-2xl md:text-4xl font-bold mb-6 text-gray-100 leading-tight"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -313,14 +313,14 @@ export default function Portfolio() {
             >
               "SUCCESS FINDS THOSE WHO ARE TOO DRIVEN BY THEIR PASSION TO SEEK IT OUT"
             </motion.h3>
-            <motion.p 
+            <motion.p
               className="text-gray-400 text-lg mb-8"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              Whether you're a young entrepreneur seeking your first commercial space, or an established business owner 
+              Whether you're a young entrepreneur seeking your first commercial space, or an established business owner
               looking to expand, we're here to guide you every step of the way.
             </motion.p>
             <motion.div
@@ -329,7 +329,7 @@ export default function Portfolio() {
               viewport={{ once: true }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              <motion.a 
+              <motion.a
                 href="/contact"
                 className="btn-primary text-white inline-flex items-center gap-2"
                 variants={buttonVariants}
@@ -337,10 +337,10 @@ export default function Portfolio() {
                 whileTap="tap"
               >
                 Start Your Journey Today
-                <motion.svg 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5, delay: 0.5 }}

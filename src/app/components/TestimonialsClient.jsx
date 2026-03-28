@@ -80,32 +80,32 @@ export default function TestimonialsClient({ testimonials }) {
 
   return (
     <section
-      className="section-padding bg-gradient-to-b from-black to-gray-950 text-white relative overflow-hidden p-5"
+      className="py-12 md:py-20 section-padding bg-gradient-to-b from-black to-gray-950 text-white relative overflow-hidden px-4 md:px-6"
       ref={sectionRef}
     >
       <div
         className="absolute top-20 right-20 w-96 h-96 bg-gray-700/5 rounded-full blur-3xl"
-        // animate={{
-        //   scale: [1, 1.2, 1],
-        //   opacity: [0.05, 0.1, 0.05],
-        // }}
-        // transition={{
-        //   duration: 20,
-        //   repeat: Infinity,
-        //   ease: 'linear',
-        // }}
+      // animate={{
+      //   scale: [1, 1.2, 1],
+      //   opacity: [0.05, 0.1, 0.05],
+      // }}
+      // transition={{
+      //   duration: 20,
+      //   repeat: Infinity,
+      //   ease: 'linear',
+      // }}
       />
       <div
         className="absolute bottom-20 left-20 w-96 h-96 bg-gray-600/5 rounded-full blur-3xl"
-        // animate={{
-        //   scale: [1, 1.3, 1],
-        //   opacity: [0.03, 0.08, 0.03],
-        // }}
-        // transition={{
-        //   duration: 25,
-        //   repeat: Infinity,
-        //   ease: 'linear',
-        // }}
+      // animate={{
+      //   scale: [1, 1.3, 1],
+      //   opacity: [0.03, 0.08, 0.03],
+      // }}
+      // transition={{
+      //   duration: 25,
+      //   repeat: Infinity,
+      //   ease: 'linear',
+      // }}
       />
 
       <div
@@ -115,15 +115,15 @@ export default function TestimonialsClient({ testimonials }) {
       <div className="container-custom relative z-10">
         <div
           className="text-center mb-16"
-          // initial={{ opacity: 0, y: 30 }}
-          // animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          // transition={{ duration: 0.6 }}
+        // initial={{ opacity: 0, y: 30 }}
+        // animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+        // transition={{ duration: 0.6 }}
         >
           <div
             className="inline-block mb-4"
-            // initial={{ opacity: 0, scale: 0.8 }}
-            // animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-            // transition={{ duration: 0.5, delay: 0.2 }}
+          // initial={{ opacity: 0, scale: 0.8 }}
+          // animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+          // transition={{ duration: 0.5, delay: 0.2 }}
           >
             <span className="text-sm font-semibold text-gray-300 uppercase tracking-wider bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-700">
               Client Testimonials
@@ -131,19 +131,19 @@ export default function TestimonialsClient({ testimonials }) {
           </div>
 
           <h2
-            className="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400"
-            // initial={{ opacity: 0, y: 20 }}
-            // animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            // transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-2xl md:text-5xl font-bold mb-4 md:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400"
+          // initial={{ opacity: 0, y: 20 }}
+          // animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          // transition={{ duration: 0.6, delay: 0.3 }}
           >
             WHAT OUR CLIENTS SAY
           </h2>
 
           <p
             className="text-gray-400 max-w-2xl mx-auto"
-            // initial={{ opacity: 0 }}
-            // animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            // transition={{ duration: 0.6, delay: 0.5 }}
+          // initial={{ opacity: 0 }}
+          // animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          // transition={{ duration: 0.6, delay: 0.5 }}
           >
             Hear from business owners and investors who have trusted us with their real
             estate needs.
@@ -152,21 +152,21 @@ export default function TestimonialsClient({ testimonials }) {
 
         <div className="max-w-5xl mx-auto">
           <div
-            className="bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl p-8 md:p-12 mb-8 relative overflow-hidden border border-gray-800"
-            // initial={{ opacity: 0, y: 50 }}
-            // animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-            // transition={{ duration: 0.6, delay: 0.4 }}
-            // whileHover={{
-            //   boxShadow:
-            //     '0 30px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1)',
-            //   y: -5,
-            // }}
+            className="bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl p-5 md:p-12 mb-8 relative overflow-hidden border border-gray-800"
+          // initial={{ opacity: 0, y: 50 }}
+          // animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          // transition={{ duration: 0.6, delay: 0.4 }}
+          // whileHover={{
+          //   boxShadow:
+          //     '0 30px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1)',
+          //   y: -5,
+          // }}
           >
             <div
               className="absolute top-8 left-8 text-8xl text-gray-700/30"
-              // initial={{ scale: 0, rotate: -180 }}
-              // animate={{ scale: 1, rotate: 0 }}
-              // transition={{ duration: 0.5 }}
+            // initial={{ scale: 0, rotate: -180 }}
+            // animate={{ scale: 1, rotate: 0 }}
+            // transition={{ duration: 0.5 }}
             >
               "
             </div>
@@ -189,7 +189,7 @@ export default function TestimonialsClient({ testimonials }) {
                     {renderStars(testimonials[activeTestimonial].rating)}
                   </div>
 
-                  <p className="text-xl md:text-2xl text-gray-300 italic mb-10 leading-relaxed pl-6 border-l-4 border-gray-600">
+                  <p className="text-base md:text-2xl text-gray-300 italic mb-6 md:mb-10 leading-relaxed pl-4 md:pl-6 border-l-4 border-gray-600">
                     "{testimonials[activeTestimonial].content}"
                   </p>
 
@@ -203,7 +203,7 @@ export default function TestimonialsClient({ testimonials }) {
                         {testimonials[activeTestimonial].avatar}
                       </motion.div>
                       <div>
-                        <h4 className="font-bold text-xl text-white">
+                        <h4 className="font-bold text-base md:text-xl text-white">
                           {testimonials[activeTestimonial].name}
                         </h4>
                         <p className="text-gray-500">
@@ -255,11 +255,10 @@ export default function TestimonialsClient({ testimonials }) {
                   setIsAutoPlaying(false);
                   setTimeout(() => setIsAutoPlaying(true), 10000);
                 }}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  activeTestimonial === index
+                className={`h-2 rounded-full transition-all duration-300 ${activeTestimonial === index
                     ? 'bg-gray-300 w-8'
                     : 'bg-gray-700 w-2 hover:bg-gray-500'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label={`View testimonial ${index + 1}`}
@@ -300,7 +299,7 @@ export default function TestimonialsClient({ testimonials }) {
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
-                className="bg-gradient-to-br from-gray-900 to-black rounded-xl p-6 text-center relative overflow-hidden group border border-gray-800"
+                className="bg-gradient-to-br from-gray-900 to-black rounded-xl p-4 md:p-6 text-center relative overflow-hidden group border border-gray-800"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
@@ -322,7 +321,7 @@ export default function TestimonialsClient({ testimonials }) {
                 >
                   {stat.icon}
                 </motion.div>
-                <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
+                <div className="text-2xl md:text-3xl font-bold text-white mb-2">{stat.value}</div>
                 <div className="text-gray-300 font-medium mb-2">{stat.label}</div>
                 <div className="text-gray-500 text-sm">{stat.description}</div>
               </motion.div>
@@ -361,7 +360,7 @@ export default function TestimonialsClient({ testimonials }) {
               </div>
               <motion.a
                 href="#contact"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white px-8 py-4 rounded-xl font-bold border border-gray-700 hover:border-gray-500 transition-colors duration-300"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white px-5 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base border border-gray-700 hover:border-gray-500 transition-colors duration-300"
                 whileHover={{
                   scale: 1.05,
                   boxShadow: '0 10px 30px rgba(255,255,255,0.1)',
