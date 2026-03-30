@@ -118,7 +118,7 @@ export default function AgentsAdminClient({ initialAgents }) {
                 name: 'New Agent',
                 phone: '+1 000 000 0000',
                 email: 'agent@example.com',
-                image: '/d11.webp', // Default image
+                image: '/avatar.jpg', // Default image
             });
             setAgents((prev) => [{ ...newAgent, _dirty: false }, ...prev]);
 

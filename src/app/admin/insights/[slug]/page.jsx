@@ -103,11 +103,12 @@ export default async function AdminInsightPreviewPage({ params }) {
                     </div>
 
                     {insight.image && (
-                        <div className="mb-16 rounded-[2rem] overflow-hidden border border-gray-800 shadow-2xl">
+                        <div className="mb-16 rounded-[2rem] overflow-hidden shadow-2xl">
                             <img
                                 src={insight.image}
                                 alt={insight.title}
                                 className="w-full h-auto object-cover opacity-90"
+                                style={{ width: '40%', marginLeft: '30%' }}
                             />
                         </div>
                     )}

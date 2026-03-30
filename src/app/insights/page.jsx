@@ -2,28 +2,14 @@ import connectDB from '../../../lib/mongodb';
 import Insight from '../../../lib/models/Insight';
 import InsightsPublicClient from './InsightsPublicClient';
 
-// Use dynamic rendering since we are using searchParams for filtering
+// Use dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default async function InsightsPage({ searchParams }) {
+export default async function InsightsPage() {
     await connectDB();
 
-    const { category, q } = searchParams;
-
-    // Build the query
+    // Fetch all active insights from DB
     const query = { active: true };
-    if (category && category !== 'all') {
-        query.category = category;
-    }
-    if (q) {
-        query.$or = [
-            { title: { $regex: q, $options: 'i' } },
-            { excerpt: { $regex: q, $options: 'i' } },
-            { tags: { $in: [new RegExp(q, 'i')] } }
-        ];
-    }
-
-    // Fetch insights from DB
     const insights = await Insight.find(query).sort({ date: -1 }).lean();
 
     const serializedInsights = insights.map(i => {
@@ -50,11 +36,9 @@ export default async function InsightsPage({ searchParams }) {
         };
     });
 
-    // For featured and trending sections, we fetch them separately or filter from all
-    // To keep it efficient and "pure SSR", we'll pass the filtered list
+    // Pass all insights to the client component
+    // Filtering will be handled client-side if needed
     return <InsightsPublicClient
         initialInsights={serializedInsights}
-        currentCategory={category || 'all'}
-        currentSearch={q || ''}
     />;
 }

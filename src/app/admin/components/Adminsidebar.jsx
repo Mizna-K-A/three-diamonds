@@ -94,17 +94,17 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
           <div className="flex items-center gap-3 overflow-hidden">
             {/* Icon mark */}
             <div
-  style={{
-    minWidth: '36px',
-  }}
-  className="w-7 h-7 rounded-xl flex items-center justify-center overflow-hidden"
->
-  <img
-    src="/threediamond.png"
-    alt="logo"
-    className="w-full h-full object-cover p-1"
-  />
-</div>
+              style={{
+                minWidth: '36px',
+              }}
+              className="w-7 h-7 rounded-xl flex items-center justify-center overflow-hidden"
+            >
+              <img
+                src="/threediamond.png"
+                alt="logo"
+                className="w-full h-full object-cover p-1"
+              />
+            </div>
 
             {/* Wordmark */}
             <div
@@ -119,7 +119,7 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
                 style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.5px' }}
                 className="text-white font-bold text-[15px] leading-none"
               >
-               Three Diamonds
+                Three Diamonds
               </p>
               <p className="text-gray-500 text-[10px] mt-0.5 font-medium tracking-widest uppercase">
                 v1.0.0
@@ -200,15 +200,15 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
           {/* User info */}
           {!minimized && (
             <div className="flex items-center gap-3 px-2 py-2">
-             <div
-  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
->
-  <img
-    src="/threediamond.png"
-    alt="logo"
-    className="w-full h-full object-cover p-1"
-  />
-</div>
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+              >
+                <img
+                  src="/threediamond.png"
+                  alt="logo"
+                  className="w-full h-full object-cover p-1"
+                />
+              </div>
               <div className="overflow-hidden">
                 <p className="text-gray-300 text-sm font-semibold truncate leading-none">
                   Three Diamonds

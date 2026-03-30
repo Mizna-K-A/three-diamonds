@@ -130,7 +130,7 @@ export default function HeroSlidesAdminClient({ initialSlides }) {
                 title: 'New Slide',
                 subtitle: 'Add subtitle here',
                 cta: 'Learn More',
-                image: '/d11.webp',
+                image: '/default-home-img1.webp',
                 order: maxOrder,
                 active: true,
             });

@@ -91,7 +91,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                             </p>
 
                             {/* Search Bar */}
-                            <div className="relative max-w-xl">
+                            {/* <div className="relative max-w-xl">
                                 <input
                                     type="text"
                                     placeholder="Search insights... (Press Enter)"
@@ -101,7 +101,7 @@ export default function InsightsPublicClient({ initialInsights, currentCategory,
                                     className="w-full px-6 py-4 pr-12 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 border border-gray-300 shadow-xl"
                                 />
                                 <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </section>

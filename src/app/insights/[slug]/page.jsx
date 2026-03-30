@@ -120,13 +120,13 @@ export default async function InsightDetailPage({ params }) {
                                             </p>
                                         </div>
                                         <div className="w-px h-10 bg-gray-800 hidden sm:block"></div>
-                                        <div className="flex items-center gap-3">
+                                        {/* <div className="flex items-center gap-3">
                                             {[Facebook, Twitter, Linkedin].map((Icon, i) => (
                                                 <button key={i} className="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-300">
                                                     <Icon size={18} />
                                                 </button>
                                             ))}
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
@@ -173,7 +173,7 @@ export default async function InsightDetailPage({ params }) {
                             </div>
 
                             {/* Main Body */}
-                            <div className="lg:w-2/4">
+                            <div className="lg:w-3/4">
                                 <div className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-amber-400 hover:prose-a:text-amber-300 prose-blockquote:border-amber-500/30 prose-blockquote:bg-amber-500/[0.03] prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-img:rounded-3xl prose-p:text-gray-300 prose-p:leading-[1.8] prose-p:text-[1.125rem]">
                                     {insight.content ? (
                                         <div dangerouslySetInnerHTML={{ __html: insight.content.replace(/\n/g, '<br/>') }} />
@@ -222,7 +222,7 @@ export default async function InsightDetailPage({ params }) {
                             </div>
 
                             {/* Sidebar Right - Related or Actions */}
-                            <div className="lg:w-1/4">
+                            {/* <div className="lg:w-1/4">
                                 <div className="sticky top-32 space-y-12">
                                     <div className="p-8 bg-amber-500 rounded-[2rem] text-black shadow-[0_20px_50px_rgba(245,158,11,0.2)]">
                                         <h4 className="text-2xl font-black mb-4 leading-tight">Insightful?</h4>
@@ -250,7 +250,7 @@ export default async function InsightDetailPage({ params }) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </article>
 

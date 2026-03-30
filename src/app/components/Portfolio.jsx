@@ -160,7 +160,7 @@ export default function Portfolio() {
         <div
           className="w-full h-full bg-cover bg-center"
           style={{
-            backgroundImage: 'url(/d1.webp)',
+            backgroundImage: 'url(/portifolio-img.webp)',
             backgroundAttachment: 'fixed',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',

@@ -6,7 +6,7 @@ const DEFAULT_SLIDES = [
     {
         title: 'Premium Commercial Spaces',
         subtitle: 'Warehouses • Showrooms • Offices',
-        image: '/d11.webp',
+        image: '/default-home-img1.webp',
         cta: 'Explore Commercial Properties',
         order: 0,
         active: true,
@@ -14,7 +14,7 @@ const DEFAULT_SLIDES = [
     {
         title: 'Luxury Residential Properties',
         subtitle: 'Villas • Apartments • Townhouses',
-        image: '/d2.jpg',
+        image: '/default-home-img2.webp',
         cta: 'View Residential Listings',
         order: 1,
         active: true,
@@ -22,7 +22,7 @@ const DEFAULT_SLIDES = [
     {
         title: 'Expert Property Management',
         subtitle: 'Relax While We Handle Everything',
-        image: '/d3.webp',
+        image: '/default-home-img3.webp',
         cta: 'Learn About Our Services',
         order: 2,
         active: true,

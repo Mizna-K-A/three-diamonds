@@ -87,7 +87,7 @@ export async function POST(request) {
                     // Load logo as base64 for watermark
                     let logoBase64 = null;
                     try {
-                        const logoPath = path.join(process.cwd(), 'public', 'logoooo.png');
+                        const logoPath = path.join(process.cwd(), 'public', 'pdf-logo.png');
                         const logoBuf = await fs.readFile(logoPath);
                         logoBase64 = logoBuf.toString('base64');
                     } catch { /* watermark is cosmetic — skip if missing */ }

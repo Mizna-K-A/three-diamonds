@@ -45,7 +45,7 @@ export default function ProposalRequestsClient({ initialProposals }) {
             // Load logo as base64 for watermark
             let logoBase64 = null;
             try {
-                const res = await fetch('/logoooo.png');
+                const res = await fetch('/pdf-logo.png');
                 const buf = await res.arrayBuffer();
                 logoBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
             } catch { /* watermark is cosmetic — skip if missing */ }
