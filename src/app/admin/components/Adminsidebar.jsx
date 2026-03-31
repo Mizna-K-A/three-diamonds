@@ -230,7 +230,6 @@ export const Sidebar = ({ mobileOpen, onMobileClose }) => {
               {minimized ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
               {!minimized && <span>Collapse</span>}
             </div>
-            {!minimized && <span className="text-xs text-gray-600">⌘ B</span>}
           </button>
 
           {/* Logout */}
