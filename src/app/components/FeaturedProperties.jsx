@@ -319,7 +319,7 @@ export default function FeaturedProperties({
                   const specs = [
                     property.price != null ? `${formatPrice(property.price).toLocaleString()}` : null,
                     property.area != null ? `${Number(property.area).toLocaleString()} sqft` : null,
-                    property.NoOFCheck != null ? `${property.NoOFCheck} Checks` : null,
+                    property.NoOFCheck != '' ? `${property.NoOFCheck} Checks` : null,
                     property.RentalPeriod ? property.RentalPeriod : null,
                   ].filter(Boolean);
 

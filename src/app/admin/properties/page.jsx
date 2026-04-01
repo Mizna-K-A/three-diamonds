@@ -24,33 +24,33 @@ export async function getProperties(onlyPublished = false) {
       ...property,
       _id: property._id.toString(),
       id: property._id.toString(),
-      statusId: property.statusId?._id?.toString() || null,
+      statusId: (property.statusId?._id || property.statusId)?.toString() || null,
       status: property.statusId ? {
-        ...property.statusId,
-        _id: property.statusId._id.toString(),
+        ...(typeof property.statusId === 'object' ? property.statusId : {}),
+        _id: (property.statusId._id || property.statusId).toString(),
         slug: property.statusId.slug, // Include slug
       } : null,
-      propertyTypeId: property.propertyTypeId?._id?.toString() || null,
+      propertyTypeId: (property.propertyTypeId?._id || property.propertyTypeId)?.toString() || null,
       propertyType: property.propertyTypeId ? {
-        ...property.propertyTypeId,
-        _id: property.propertyTypeId._id.toString(),
+        ...(typeof property.propertyTypeId === 'object' ? property.propertyTypeId : {}),
+        _id: (property.propertyTypeId._id || property.propertyTypeId).toString(),
         slug: property.propertyTypeId.slug, // Include slug
       } : null,
-      tagIds: property.tagIds?.map(t => t._id.toString()) || [],
+      tagIds: property.tagIds?.map(t => (t._id || t).toString()) || [],
       tags: property.tagIds?.map(tag => ({
-        ...tag,
-        _id: tag._id.toString(),
-        slug: tag.slug, // Include slug
+        ...(typeof tag === 'object' ? tag : {}),
+        _id: (tag._id || tag).toString(),
+        slug: tag?.slug, // Include slug
       })) || [],
-      purposeTagId: property.purposeTagId?._id?.toString() || null,
+      purposeTagId: (property.purposeTagId?._id || property.purposeTagId)?.toString() || null,
       purposeTag: property.purposeTagId ? {
-        ...property.purposeTagId,
-        _id: property.purposeTagId._id.toString(),
+        ...(typeof property.purposeTagId === 'object' ? property.purposeTagId : {}),
+        _id: (property.purposeTagId._id || property.purposeTagId).toString(),
         slug: property.purposeTagId.slug, // Include slug
       } : null,
       agentId: property.agentId ? {
-        ...property.agentId,
-        _id: property.agentId._id.toString(),
+        ...(typeof property.agentId === 'object' ? property.agentId : {}),
+        _id: (property.agentId._id || property.agentId).toString(),
       } : null,
       userId: property.userId?.toString() || null,
       // Fix: Properly serialize the images array with the simplified schema

@@ -487,8 +487,7 @@ export default async function PropertyDetailPage({ params }) {
                     <span className="text-sm font-normal text-gray-500 ml-1">ft²</span>
                   </div>
                 </div>
-                {console.log(property, 'ttt')
-                }
+   
                 <div>
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <List size={16} />

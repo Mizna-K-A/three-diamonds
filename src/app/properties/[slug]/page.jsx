@@ -38,6 +38,7 @@ import Property from '../../../../lib/models/Property';
 import PropertyStatus from '../../../../lib/models/PropertyStatus';
 import PropertyType from '../../../../lib/models/PropertyType';
 import TagModel from '../../../../lib/models/Tag';
+import Agent from '../../../../lib/models/Agent';
 import Header from '../../components/Header';
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
@@ -88,16 +89,22 @@ async function getProperty(slugOrId) {
       ...property,
       _id: property._id.toString(),
       id: property._id.toString(),
-      NoOFCheck: property.NoOFCheck || property.NoOFCheck || '0', // Map NoOFCheck to NoOFCheck
+      NoOFCheck: property.NoOFCheck || '0',
       status: property.statusId
-        ? { ...property.statusId, _id: property.statusId._id.toString() }
+        ? { ...property.statusId, _id: (property.statusId._id || property.statusId).toString() }
         : null,
       propertyType: property.propertyTypeId
-        ? { ...property.propertyTypeId, _id: property.propertyTypeId._id.toString() }
+        ? { ...property.propertyTypeId, _id: (property.propertyTypeId._id || property.propertyTypeId).toString() }
         : null,
-      tags: property.tagIds?.map((tag) => ({ ...tag, _id: tag._id.toString() })) || [],
+      tags: property.tagIds?.map((tag) => {
+        if (!tag) return null;
+        return {
+          ...(typeof tag === 'object' ? tag : {}),
+          _id: (tag._id || tag).toString()
+        };
+      }).filter(Boolean) || [],
       purposeTag: property.purposeTagId
-        ? { ...property.purposeTagId, _id: property.purposeTagId._id.toString() }
+        ? { ...property.purposeTagId, _id: (property.purposeTagId._id || property.purposeTagId).toString() }
         : null,
       images: (property.images || []).map((image, index) => {
         const imageUrl = getImageUrl(image);
@@ -120,7 +127,7 @@ async function getProperty(slugOrId) {
       }),
       amenities: property.amenities || [],
       nearby: property.nearby || [],
-      agent: property.agentId ? {
+      agent: property.agentId && typeof property.agentId === 'object' ? {
         name: property.agentId.name || property.agentName || 'Property Agent',
         phone: property.agentId.phone || property.agentPhone || '+971 50 123 4567',
         email: property.agentId.email || property.agentEmail || 'agent@example.com',
