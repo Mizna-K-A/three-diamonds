@@ -8,7 +8,8 @@ import Agent from '../../../../../../lib/models/Agent';
 import PropertyForm from '../../PropertyForm';
 import { writeFile, mkdir, unlink } from 'fs/promises';
 import path from 'path';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+
 import sharp from 'sharp';
 
 // Helper function to generate slug
@@ -330,9 +331,11 @@ async function updateProperty(id, formData) {
       return { error: 'Property not found' };
     }
 
+    revalidateTag('properties');
     revalidatePath('/admin/properties');
     revalidatePath(`/admin/properties/${id}`);
     revalidatePath('/properties');
+
 
     return {
       success: true,

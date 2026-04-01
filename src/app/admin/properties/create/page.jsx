@@ -7,7 +7,8 @@ import Property from '../../../../../lib/models/Property';
 import Agent from '../../../../../lib/models/Agent';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+
 import sharp from 'sharp';
 
 // Helper function to generate slug
@@ -190,9 +191,11 @@ async function createProperty(formData) {
       expiresAt: formData.get('expiresAt') || null,
     });
 
-    // Revalidate paths
+    // Revalidate paths and tags
+    revalidateTag('properties');
     revalidatePath('/admin/properties');
     revalidatePath('/properties');
+
 
     // Return success with redirect URL
     return {
