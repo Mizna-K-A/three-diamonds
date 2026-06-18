@@ -1,133 +1,96 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import sharp from 'sharp';
+import { uploadToS3 } from '@lib/s3';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
-    try {
-        const formData = await request.formData();
-        const file = formData.get('file');
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file');
+    const folder = formData.get('folder') || 'uploads';
 
-        if (!file) {
-            return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-        }
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
-        }
-
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // Ensure uploads directory exists
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        await mkdir(uploadDir, { recursive: true });
-
-        // Get original filename without extension and clean it
-        const originalName = path.parse(file.name).name;
-        const cleanName = originalName
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '-')  // Replace special chars with hyphen
-            .replace(/-+/g, '-')          // Replace multiple hyphens with single
-            .replace(/^-|-$/g, '');       // Remove leading/trailing hyphens
-
-        // Create unique filename with .webp extension
-        const timestamp = Date.now();
-        const filename = `${cleanName || 'hero'}-${timestamp}.webp`;
-        const filePath = path.join(uploadDir, filename);
-
-        // Get image metadata
-        const metadata = await sharp(buffer).metadata();
-
-        // Initialize sharp instance
-        let sharpInstance = sharp(buffer);
-
-        // Auto-orient based on EXIF data
-        sharpInstance = sharpInstance.rotate();
-
-        // Resize if image is too large (optimal for hero slides)
-        const MAX_WIDTH = 1920;
-        const MAX_HEIGHT = 1080;
-
-        if (metadata.width > MAX_WIDTH || metadata.height > MAX_HEIGHT) {
-            sharpInstance = sharpInstance.resize(MAX_WIDTH, MAX_HEIGHT, {
-                withoutEnlargement: true,
-                fit: 'inside',
-                background: { r: 0, g: 0, b: 0, alpha: 0 }
-            });
-        }
-
-        // WebP conversion options
-        const webpOptions = {
-            quality: 85,              // 0-100, 85 is good balance
-            alphaQuality: 100,         // Quality of alpha layer
-            lossless: false,           // Use lossy compression (smaller files)
-            nearLossless: false,
-            smartSubsample: true,       // Use smart subsampling
-            effort: 2,                  // CPU effort (0-9) - Faster processing
-        };
-
-        // For images with transparency (PNG/GIF), use lossless compression
-        if (metadata.hasAlpha) {
-            webpOptions.lossless = true;
-            webpOptions.quality = 100;
-            webpOptions.effort = 2;     // Max allowed effort (0-6) - Faster processing
-        }
-
-        // For very large images, reduce quality
-        if (metadata.size > 5 * 1024 * 1024) { // If original > 5MB
-            webpOptions.quality = 75;
-        }
-
-        // Convert to WebP and save
-        const webpBuffer = await sharpInstance
-            .webp(webpOptions)
-            .toBuffer();
-
-        // Save the WebP buffer to file system
-        await writeFile(filePath, webpBuffer);
-
-        // Optional: Log conversion stats for debugging
-        const originalSize = file.size;
-        const webpSize = webpBuffer.length;
-        console.log(`✅ Image converted: ${file.name} → ${filename}`);
-        console.log(`📦 Original size: ${(originalSize / 1024).toFixed(2)}KB`);
-        console.log(`🎯 WebP size: ${(webpSize / 1024).toFixed(2)}KB`);
-        console.log(`💾 Savings: ${((1 - webpSize / originalSize) * 100).toFixed(1)}%`);
-
-        return NextResponse.json({
-            url: `/uploads/${filename}`,
-            filename: filename,
-            originalSize: originalSize,
-            webpSize: webpSize
-        });
-
-    } catch (error) {
-        console.error('❌ Upload error details:', error);
-
-        // Provide user-friendly error messages
-        let errorMessage = error.message || 'Internal server error during upload';
-
-        if (typeof error === 'string') {
-            errorMessage = error;
-        } else if (error.message) {
-            if (error.message.includes('unsupported image format')) {
-                errorMessage = 'Unsupported image format. Please upload JPEG, PNG, or GIF.';
-            } else if (error.message.includes('Insufficient memory')) {
-                errorMessage = 'Image is too large. Please upload a smaller image (max 10MB).';
-            } else if (error.message.includes('Input buffer')) {
-                errorMessage = 'Invalid image file. Please try again with a different image.';
-            }
-        }
-
-        return NextResponse.json({
-            error: errorMessage,
-            details: error instanceof Error ? error.stack : String(error)
-        }, { status: 500 });
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
-}
+    if (!file.type.startsWith('image/')) {
+      return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
+    }
 
-// Next.js App Router doesn't use the 'api' config; body parsing is handled differently.
-// However, we can export constants for route config if needed.
-export const dynamic = 'force-dynamic';
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // --- Clean filename ---
+    const originalName = file.name.replace(/\.[^/.]+$/, '');
+    const cleanName = originalName
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    const filename = `${cleanName || 'image'}-${Date.now()}.webp`;
+    const s3Key = `${folder}/${filename}`;
+
+    // --- Sharp: convert to WebP ---
+    const metadata = await sharp(buffer).metadata();
+    let sharpInstance = sharp(buffer).rotate();   // auto-orient via EXIF
+
+    if (metadata.width > 1920 || metadata.height > 1080) {
+      sharpInstance = sharpInstance.resize(1920, 1080, {
+        withoutEnlargement: true,
+        fit: 'inside',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      });
+    }
+
+    const webpBuffer = await sharpInstance.webp({
+      quality: metadata.hasAlpha ? 100 : ((metadata.size ?? 0) > 5 * 1024 * 1024 ? 75 : 85),
+      lossless: metadata.hasAlpha,
+      alphaQuality: 100,
+      smartSubsample: true,
+      effort: 2,
+    }).toBuffer();
+
+    // --- Upload to S3 → served via CloudFront ---
+    const { url } = await uploadToS3({
+      buffer: webpBuffer,
+      key: s3Key,
+      contentType: 'image/webp',
+    });
+
+    console.log(`✅ S3 upload: ${s3Key} (${(webpBuffer.length / 1024).toFixed(1)} KB)`);
+
+    return NextResponse.json({
+      url,
+      key: s3Key,
+      filename,
+      originalSize: file.size,
+      webpSize: webpBuffer.length,
+    });
+
+  } catch (error) {
+    console.error('❌ Upload error:', error);
+
+    // User-friendly error messages
+    const msg = error.message ?? '';
+    let errorMessage =
+      msg.includes('AWS_BUCKET_NAME') || msg.includes('AWS_ACCESS_KEY_ID')
+        ? error.message   // our own clear messages
+        : msg.includes('unsupported image format')
+        ? 'Unsupported image format. Please upload JPEG, PNG, or GIF.'
+        : msg.includes('Insufficient memory')
+        ? 'Image is too large. Please upload a smaller image (max 10MB).'
+        : msg.includes('InvalidAccessKeyId') || error.name === 'InvalidAccessKeyId'
+        ? 'Invalid AWS credentials. Check AWS_ACCESS_KEY_ID in your .env file.'
+        : msg.includes('NoSuchBucket') || error.name === 'NoSuchBucket'
+        ? 'S3 bucket not found. Check AWS_BUCKET_NAME in your .env file.'
+        : msg.includes('AccessDenied') || error.name === 'AccessDenied'
+        ? 'S3 access denied. Make sure your IAM user has s3:PutObject permission.'
+        : msg || 'Upload failed. Check server logs for details.';
+
+    return NextResponse.json(
+      { error: errorMessage, code: error.name },
+      { status: 500 }
+    );
+  }
+}

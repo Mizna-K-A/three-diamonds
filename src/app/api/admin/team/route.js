@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import connectDB from '../../../../../lib/mongodb';
 import TeamMember from '../../../../../lib/models/TeamMember';
+import { deleteFromS3, keyFromUrl } from '../../../../../lib/s3';
 
 const DEFAULT_TEAM = [
     {
@@ -81,7 +82,15 @@ export async function DELETE(request) {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
         if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-        await TeamMember.findByIdAndDelete(id);
+
+        const member = await TeamMember.findByIdAndDelete(id);
+
+        // Clean up S3 image
+        if (member?.image) {
+            const key = keyFromUrl(member.image);
+            if (key) await deleteFromS3(key).catch(console.error);
+        }
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Admin team DELETE error:', error);

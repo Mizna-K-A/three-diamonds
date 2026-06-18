@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '../../../../../lib/mongodb';
 import Agent from '../../../../../lib/models/Agent';
+import { deleteFromS3, keyFromUrl } from '../../../../../lib/s3';
 
 // GET - list all agents
 export async function GET() {
@@ -51,7 +52,7 @@ export async function PUT(request) {
     }
 }
 
-// DELETE - remove agent
+// DELETE - remove agent + its S3 image
 export async function DELETE(request) {
     try {
         await connectDB();
@@ -59,7 +60,14 @@ export async function DELETE(request) {
         const id = searchParams.get('id');
         if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-        await Agent.findByIdAndDelete(id);
+        const agent = await Agent.findByIdAndDelete(id);
+
+        // Clean up S3 image
+        if (agent?.image) {
+            const key = keyFromUrl(agent.image);
+            if (key) await deleteFromS3(key).catch(console.error);
+        }
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Agents DELETE error:', error);
