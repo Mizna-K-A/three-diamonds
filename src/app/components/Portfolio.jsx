@@ -7,10 +7,10 @@ import { useRef } from 'react';
 export default function Portfolio() {
   const portfolioItems = [
     {
-      category: 'COMMERCIAL',
+      category: 'CREATIVE INDUSTRIAL COMPLEX',
       title: 'GOSHI WAREHOUSES CITY',
-      description: 'A distinguished commercial destination in Al Quoz Industrial Area 3, offering premium warehouse spaces for various ventures.',
-      highlights: ['Health & Wellness Centers', 'High-end Boutiques', 'Art Galleries', 'Photography Studios', 'Luxury Showrooms']
+      description: 'A distinguished creative industrial complex destination in Al Quoz Industrial Area 3, offering premium warehouse spaces for various ventures.',
+      highlights: ['Health & Wellness Centers', 'High-end Boutiques', 'Art Galleries', 'Photography Studios']
     },
     {
       category: 'INDUSTRIAL',

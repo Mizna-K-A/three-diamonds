@@ -7,25 +7,25 @@ import { motion, useInView } from 'framer-motion';
 
 const GoshiCityPage = () => {
   const images = {
-    heroBg: "/g3.webp",
-    passionImg: "/g8.webp",
-    logoGoshi: "/g1.webp",
-    logoEst1974: "/g2.webp",
-    cafeMonkeyHub: "/g4.webp",
-    contactCard: "/g5.webp",
-    pawStreetArt: "/g9.webp",
+    heroBg: "/goshi-city/goshi-city3.webp",
+    passionImg: "/goshi-city/goshi-city8.webp",
+    logoGoshi: "/goshi-city/goshi-city1.webp",
+    logoEst1974: "/goshi-city/goshi-city2.webp",
+    cafeMonkeyHub: "/goshi-city/goshi-city4.webp",
+    contactCard: "/goshi-city/goshi-city5.webp",
+    pawStreetArt: "/goshi-city/goshi-city9.webp",
   };
 
   // Grid images array - replace with your actual image paths
   const gridImages = [
-    { src: "/g6.webp", alt: "Gallery Image 1" },
-    { src: "/g10.webp", alt: "Gallery Image 2" },
-    { src: "/g4.webp", alt: "Gallery Image 3" },
-    { src: "/g8.webp", alt: "Gallery Image 4" },
-    { src: "/g9.webp", alt: "Gallery Image 5" },
-    { src: "/g3.webp", alt: "Gallery Image 6" },
-    { src: "/g5.webp", alt: "Gallery Image 7" },
-    { src: "/g7.webp", alt: "Gallery Image 8" },
+    { src: "/goshi-city/goshi-city6.webp", alt: "Gallery Image 1" },
+    { src: "/goshi-city/goshi-city10.webp", alt: "Gallery Image 2" },
+    { src: "/goshi-city/goshi-city7.webp", alt: "Gallery Image 3" },
+    { src: "/goshi-city/goshi-city.webp", alt: "Gallery Image 4" },
+    { src: "/goshi-city/goshi-city9.webp", alt: "Gallery Image 5" },
+    { src: "/goshi-city/goshi-city3.webp", alt: "Gallery Image 6" },
+    { src: "/goshi-city/goshi-city5.webp", alt: "Gallery Image 7" },
+    { src: "/goshi-city/goshi-city8.webp", alt: "Gallery Image 8" },
   ];
 
   // Animation variants
